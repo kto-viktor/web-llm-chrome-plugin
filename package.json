@@ -1,0 +1,16 @@
+{
+  "name": "offline-gpt",
+  "version": "1.0.0",
+  "description": "Chrome extension for chatting with local LLMs",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "node build.js --watch"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.80"
+  }
+}

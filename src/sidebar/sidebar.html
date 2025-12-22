@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline GPT</title>
+  <link rel="stylesheet" href="sidebar.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="title">Offline GPT</h1>
+      <div class="model-status" id="model-status">
+        <span class="status-indicator" id="status-indicator"></span>
+        <span class="status-text" id="status-text">Initializing...</span>
+      </div>
+    </header>
+
+    <!-- Download Progress -->
+    <div class="download-section hidden" id="download-section">
+      <div class="download-info" id="download-info">Downloading model...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="download-note">This is a one-time download.</div>
+    </div>
+
+    <!-- Error Display -->
+    <div class="error-section hidden" id="error-section">
+      <div class="error-message" id="error-message"></div>
+    </div>
+
+    <!-- Chat Messages -->
+    <div class="messages-container" id="messages-container">
+      <div class="messages" id="messages">
+        <!-- Messages will be inserted here -->
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="input-area">
+      <div class="quick-actions">
+        <button class="action-btn" id="summary-btn" title="Get page summary">
+          Page Summary
+        </button>
+        <button class="action-btn secondary" id="clear-btn" title="Clear chat history">
+          Clear
+        </button>
+      </div>
+      <div class="input-row">
+        <textarea
+          id="message-input"
+          class="message-input"
+          placeholder="Ask about this page..."
+          rows="1"
+        ></textarea>
+        <button class="send-btn" id="send-btn" title="Send message">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../../dist/sidebar.bundle.js"></script>
+</body>
+</html>
