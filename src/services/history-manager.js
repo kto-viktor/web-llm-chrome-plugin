@@ -61,10 +61,14 @@ export class HistoryManager {
    * @returns {Promise<void>}
    */
   async load() {
+    console.log('[History] Loading from storage...');
     return new Promise((resolve) => {
       chrome.storage.local.get([STORAGE_KEY], (result) => {
         if (result[STORAGE_KEY]) {
           this.messages = result[STORAGE_KEY];
+          console.log(`[History] Loaded ${this.messages.length} messages (${this.getTotalWordCount()} words)`);
+        } else {
+          console.log('[History] No saved history found');
         }
         this.loaded = true;
         this.notifyListeners();
@@ -78,8 +82,12 @@ export class HistoryManager {
    * @returns {Promise<void>}
    */
   async save() {
+    console.log(`[History] Saving ${this.messages.length} messages to storage...`);
     return new Promise((resolve) => {
-      chrome.storage.local.set({ [STORAGE_KEY]: this.messages }, resolve);
+      chrome.storage.local.set({ [STORAGE_KEY]: this.messages }, () => {
+        console.log('[History] Saved to storage');
+        resolve();
+      });
     });
   }
 
@@ -90,11 +98,16 @@ export class HistoryManager {
    * @returns {Promise<void>}
    */
   async addMessage(role, content) {
+    const wordCount = countWords(content);
+    console.log(`[History] Adding ${role} message (${wordCount} words)`);
+
     this.messages.push({
       role,
       content,
       timestamp: Date.now()
     });
+
+    console.log(`[History] Total: ${this.messages.length} messages, ${this.getTotalWordCount()} words`);
     await this.save();
     this.notifyListeners();
   }
@@ -134,7 +147,10 @@ export class HistoryManager {
    * @returns {boolean} Whether compaction is needed
    */
   needsCompaction() {
-    return this.getTotalWordCount() > COMPACTION_THRESHOLD;
+    const totalWords = this.getTotalWordCount();
+    const needsIt = totalWords > COMPACTION_THRESHOLD;
+    console.log(`[History] Compaction check: ${totalWords} words (threshold: ${COMPACTION_THRESHOLD}) → ${needsIt ? 'NEEDS COMPACTION' : 'OK'}`);
+    return needsIt;
   }
 
   /**
@@ -143,7 +159,10 @@ export class HistoryManager {
    * @returns {Promise<void>}
    */
   async compact(summarize) {
+    console.log(`[History] Starting compaction (${this.messages.length} messages, ${this.getTotalWordCount()} words)`);
+
     if (this.messages.length <= 2) {
+      console.log('[History] Too few messages to compact, skipping');
       return;
     }
 
@@ -153,7 +172,9 @@ export class HistoryManager {
 
 ${historyText}`;
 
+    console.log('[History] Summarizing history...');
     const summary = await summarize(prompt);
+    console.log(`[History] Summary generated (${countWords(summary)} words)`);
 
     this.messages = [{
       role: 'assistant',
@@ -163,6 +184,7 @@ ${historyText}`;
 
     await this.save();
     this.notifyListeners();
+    console.log('[History] Compaction complete');
   }
 
   /**
@@ -170,9 +192,11 @@ ${historyText}`;
    * @returns {Promise<void>}
    */
   async clear() {
+    console.log(`[History] Clearing ${this.messages.length} messages...`);
     this.messages = [];
     await this.save();
     this.notifyListeners();
+    console.log('[History] Cleared');
   }
 
   /**

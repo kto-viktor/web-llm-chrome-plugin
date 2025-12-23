@@ -1,9 +1,8 @@
 /**
  * Gemini Nano adapter for Chrome's built-in AI.
+ * Uses the Prompt API (LanguageModel) for text generation.
  * @module core/gemini-nano
  */
-
-import { checkGeminiNano } from './model-detector.js';
 
 /**
  * Adapter for Chrome's built-in Gemini Nano model.
@@ -46,15 +45,39 @@ export class GeminiNanoAdapter {
 
     console.log('[Gemini Nano] Starting initialization...');
 
-    if (!(await checkGeminiNano()).available) {
-      throw new Error('Gemini Nano not available in this browser'); // TODO: show info message to user instead of error
+    // Check if LanguageModel API is available
+    if (typeof LanguageModel === 'undefined') {
+      throw new Error('LanguageModel API not available in this browser');
     }
 
     try {
+      // Check availability first
+      const availability = await LanguageModel.availability();
+      console.log(`[Gemini Nano] LanguageModel availability: ${availability}`);
+
+      if (availability === 'unavailable') {
+        throw new Error('Gemini Nano is not available on this device');
+      }
+
       console.log('[Gemini Nano] Creating language model session...');
-      this.session = await self.ai.languageModel.create({
+
+      // Create session with optional download progress monitoring
+      const createOptions = {
         systemPrompt: 'You are a helpful AI assistant. Be concise and helpful.'
-      });
+      };
+
+      if (onProgress) {
+        createOptions.monitor = (m) => {
+          m.addEventListener('downloadprogress', (e) => {
+            onProgress({
+              progress: e.loaded,
+              text: `Downloading Gemini Nano... ${Math.round(e.loaded * 100)}%`
+            });
+          });
+        };
+      }
+
+      this.session = await LanguageModel.create(createOptions);
       this.initialized = true;
       console.log('[Gemini Nano] Initialization complete');
     } catch (error) {
@@ -108,7 +131,7 @@ export class GeminiNanoAdapter {
       for await (const chunk of stream) {
         const newContent = chunk.slice(previousLength);
         previousLength = chunk.length;
-        fullResponse = chunk;
+        fullResponse += chunk;
 
         if (newContent && onToken) {
           onToken(newContent);
@@ -119,6 +142,18 @@ export class GeminiNanoAdapter {
     } catch (error) {
       throw new Error(`Streaming generation failed: ${error.message}`);
     }
+  }
+
+  /**
+   * Summarizes text using the prompt API (fallback when Summarizer unavailable).
+   * @param {string} text - The text to summarize
+   * @param {Object} [options] - Summarization options
+   * @param {Function} [options.onToken] - Callback for streaming tokens
+   * @returns {Promise<string>} The summary
+   */
+  async summarize(text, options = {}) {
+    const prompt = `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}`;
+    return this.generate(prompt, options);
   }
 
   /**

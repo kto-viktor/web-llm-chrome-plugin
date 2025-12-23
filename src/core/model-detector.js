@@ -14,28 +14,22 @@
  * Detection result for all models.
  * @typedef {Object} DetectionResult
  * @property {boolean} geminiNanoAvailable - Whether Gemini Nano is available
+ * @property {boolean} summarizerAvailable - Whether Summarizer API is available
  * @property {boolean} webLLMSupported - Whether WebLLM can be used
  * @property {string} recommendedModel - The recommended model to use
  * @property {string} [geminiNanoReason] - Reason if Gemini Nano is not available
  */
 
 /**
- * Checks if Gemini Nano (Chrome's built-in AI) is available:
- 1. checks for Prompt API availability:
- const availability = await LanguageModel.availability();
- 2. checks for Summarizer API availability:
- if ('Summarizer' in self) {
-   // The Summarizer API is supported.
- }
- 3. logging all checks
- 4. if 1 and 2 check passed, then choses gemini nano as default model.
+ * Checks if Gemini Nano (Chrome's built-in AI) Prompt API is available.
+ * Uses the global LanguageModel class.
  * @returns {Promise<ModelStatus>} The availability status
  */
 export async function checkGeminiNano() {
   const checks = {
     browserContext: false,
+    languageModelExists: false,
     promptApiAvailable: false,
-    summarizerApiAvailable: false,
     promptApiStatus: null
   };
 
@@ -47,8 +41,15 @@ export async function checkGeminiNano() {
   checks.browserContext = true;
   console.log('[Gemini Nano] Browser context: OK');
 
+  // Check 2: LanguageModel class exists
+  if (typeof LanguageModel === 'undefined') {
+    console.log('[Gemini Nano] LanguageModel class not found');
+    return { available: false, reason: 'LanguageModel API not available', checks };
+  }
+  checks.languageModelExists = true;
+  console.log('[Gemini Nano] LanguageModel class: OK');
 
-  // Check 2: Prompt API (LanguageModel) availability
+  // Check 3: Prompt API availability status
   try {
     const availability = await LanguageModel.availability();
     checks.promptApiStatus = availability;
@@ -57,25 +58,72 @@ export async function checkGeminiNano() {
   } catch (error) {
     console.log(`[Gemini Nano] Prompt API check error: ${error.message}`);
     checks.promptApiStatus = `error: ${error.message}`;
+    return { available: false, reason: `Prompt API error: ${error.message}`, checks };
   }
-
-  // Check 3: Summarizer API availability
-  checks.summarizerApiAvailable = 'Summarizer' in self;
-  console.log(`[Gemini Nano] Summarizer API exists: ${checks.summarizerApiAvailable}`);
 
   // Log summary
   console.log('[Gemini Nano] Detection summary:', checks);
 
-  // Check 4: Determine if Gemini Nano is available
-  // Require Prompt API to be available; Summarizer is optional but logged
+  // Determine availability
   if (!checks.promptApiAvailable) {
     const reason = checks.promptApiStatus === 'after-download'
-      ? 'Gemini Nano requires download first (enable in chrome://flags)'
+      ? 'Gemini Nano requires download (will download on first use)'
       : `Prompt API status: ${checks.promptApiStatus}`;
+    // Still return available for 'after-download' - it will download when needed
+    if (checks.promptApiStatus === 'after-download') {
+      console.log('[Gemini Nano] Model will download on first use');
+      return { available: true, needsDownload: true, checks };
+    }
     return { available: false, reason, checks };
   }
 
-  console.log('[Gemini Nano] All checks passed - Gemini Nano is available');
+  console.log('[Gemini Nano] Prompt API is available');
+  return { available: true, checks };
+}
+
+/**
+ * Checks if the Summarizer API is available.
+ * @returns {Promise<ModelStatus>} The availability status
+ */
+export async function checkSummarizer() {
+  const checks = {
+    summarizerExists: false,
+    summarizerAvailable: false,
+    summarizerStatus: null
+  };
+
+  // Check 1: Summarizer class exists
+  if (typeof Summarizer === 'undefined') {
+    console.log('[Summarizer] Summarizer class not found');
+    return { available: false, reason: 'Summarizer API not available', checks };
+  }
+  checks.summarizerExists = true;
+  console.log('[Summarizer] Summarizer class: OK');
+
+  // Check 2: Summarizer availability status
+  try {
+    const availability = await Summarizer.availability();
+    checks.summarizerStatus = availability;
+    checks.summarizerAvailable = availability === 'available' || availability === 'readily';
+    console.log(`[Summarizer] Availability: ${availability}`);
+  } catch (error) {
+    console.log(`[Summarizer] Availability check error: ${error.message}`);
+    checks.summarizerStatus = `error: ${error.message}`;
+    return { available: false, reason: `Summarizer error: ${error.message}`, checks };
+  }
+
+  // Log summary
+  console.log('[Summarizer] Detection summary:', checks);
+
+  if (!checks.summarizerAvailable) {
+    if (checks.summarizerStatus === 'after-download') {
+      console.log('[Summarizer] Model will download on first use');
+      return { available: true, needsDownload: true, checks };
+    }
+    return { available: false, reason: `Summarizer status: ${checks.summarizerStatus}`, checks };
+  }
+
+  console.log('[Summarizer] Summarizer API is available');
   return { available: true, checks };
 }
 
@@ -109,8 +157,11 @@ export async function checkWebLLMSupport() {
  * @returns {Promise<DetectionResult>} The detection result
  */
 export async function detectModels() {
-  const [geminiStatus, webLLMStatus] = await Promise.all([
+  console.log('[Model Detector] Starting model detection...');
+
+  const [geminiStatus, summarizerStatus, webLLMStatus] = await Promise.all([
     checkGeminiNano(),
+    checkSummarizer(),
     checkWebLLMSupport()
   ]);
 
@@ -122,10 +173,17 @@ export async function detectModels() {
     recommendedModel = 'webllm';
   }
 
-  return {
+  const result = {
     geminiNanoAvailable: geminiStatus.available,
+    geminiNanoNeedsDownload: geminiStatus.needsDownload || false,
+    summarizerAvailable: summarizerStatus.available,
+    summarizerNeedsDownload: summarizerStatus.needsDownload || false,
     webLLMSupported: webLLMStatus.available,
     recommendedModel,
-    geminiNanoReason: geminiStatus.reason
+    geminiNanoReason: geminiStatus.reason,
+    summarizerReason: summarizerStatus.reason
   };
+
+  console.log('[Model Detector] Detection result:', result);
+  return result;
 }

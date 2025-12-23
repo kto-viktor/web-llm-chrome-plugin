@@ -7,6 +7,7 @@
 import { detectModels } from './model-detector.js';
 import { GeminiNanoAdapter } from './gemini-nano.js';
 import { WebLLMAdapter } from './webllm-adapter.js';
+import { SummarizerAdapter } from './summarizer.js';
 
 /**
  * LLM state.
@@ -17,6 +18,7 @@ import { WebLLMAdapter } from './webllm-adapter.js';
  * @property {string|null} error
  * @property {number} downloadProgress - 0 to 1
  * @property {string} downloadText
+ * @property {boolean} summarizerAvailable - Whether native Summarizer is available
  */
 
 /**
@@ -27,6 +29,9 @@ export class LLMInterface {
     /** @type {GeminiNanoAdapter|WebLLMAdapter|null} */
     this.adapter = null;
 
+    /** @type {SummarizerAdapter|null} */
+    this.summarizer = null;
+
     /** @type {LLMState} */
     this.state = {
       status: 'idle',
@@ -34,7 +39,8 @@ export class LLMInterface {
       displayName: null,
       error: null,
       downloadProgress: 0,
-      downloadText: ''
+      downloadText: '',
+      summarizerAvailable: false
     };
 
     /** @type {Set<Function>} */
@@ -74,6 +80,7 @@ export class LLMInterface {
 
       console.log('[LLM Interface] Detection result:', detection);
       console.log(`[LLM Interface] Gemini Nano available: ${detection.geminiNanoAvailable}`);
+      console.log(`[LLM Interface] Summarizer available: ${detection.summarizerAvailable}`);
       console.log(`[LLM Interface] WebLLM supported: ${detection.webLLMSupported}`);
       console.log(`[LLM Interface] Recommended model: ${detection.recommendedModel}`);
 
@@ -94,7 +101,29 @@ export class LLMInterface {
           displayName: this.adapter.getDisplayName()
         });
 
-        await this.adapter.initialize();
+        // Initialize Gemini Nano with download progress callback
+        await this.adapter.initialize((progress) => {
+          this.updateState({
+            status: 'downloading',
+            downloadProgress: progress.progress,
+            downloadText: progress.text
+          });
+        });
+
+        // Initialize Summarizer if available
+        if (detection.summarizerAvailable) {
+          console.log('[LLM Interface] Initializing Summarizer...');
+          try {
+            this.summarizer = new SummarizerAdapter();
+            await this.summarizer.initialize();
+            this.updateState({ summarizerAvailable: true });
+            console.log('[LLM Interface] Summarizer ready');
+          } catch (error) {
+            console.warn('[LLM Interface] Summarizer init failed, will use fallback:', error.message);
+            this.summarizer = null;
+          }
+        }
+
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
       } else if (detection.recommendedModel === 'webllm') {
@@ -143,6 +172,41 @@ export class LLMInterface {
   }
 
   /**
+   * Summarizes text using the best available method.
+   * Uses native Summarizer API if available, falls back to prompt-based.
+   * @param {string} text - The text to summarize
+   * @param {Object} [options] - Summarization options
+   * @param {Function} [options.onToken] - Callback for streaming tokens
+   * @returns {Promise<string>} The summary
+   */
+  async summarize(text, options = {}) {
+    if (!this.adapter || this.state.status !== 'ready') {
+      throw new Error('LLM not ready. Call initialize() first.');
+    }
+
+    // Use native Summarizer if available (Gemini only)
+    if (this.summarizer && this.summarizer.isReady()) {
+      console.log('[LLM Interface] Using native Summarizer API');
+      if (options.onToken) {
+        return this.summarizer.summarizeStreaming(text, options.onToken, options);
+      }
+      return this.summarizer.summarize(text, options);
+    }
+
+    // Fallback to adapter's summarize method (prompt-based)
+    console.log('[LLM Interface] Using prompt-based summarization');
+    return this.adapter.summarize(text, options);
+  }
+
+  /**
+   * Checks if native Summarizer API is available.
+   * @returns {boolean} Whether native Summarizer is ready
+   */
+  isSummarizerAvailable() {
+    return this.state.summarizerAvailable && this.summarizer?.isReady();
+  }
+
+  /**
    * Checks if the LLM is ready to use.
    * @returns {boolean} Whether the LLM is ready
    */
@@ -162,6 +226,10 @@ export class LLMInterface {
    * Destroys the adapter and cleans up resources.
    */
   async destroy() {
+    if (this.summarizer) {
+      await this.summarizer.destroy();
+      this.summarizer = null;
+    }
     if (this.adapter) {
       await this.adapter.destroy();
       this.adapter = null;
@@ -172,7 +240,8 @@ export class LLMInterface {
       displayName: null,
       error: null,
       downloadProgress: 0,
-      downloadText: ''
+      downloadText: '',
+      summarizerAvailable: false
     });
   }
 }

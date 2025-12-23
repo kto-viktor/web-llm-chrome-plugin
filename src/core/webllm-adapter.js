@@ -145,6 +145,19 @@ export class WebLLMAdapter {
   }
 
   /**
+   * Summarizes text using prompt-based approach.
+   * WebLLM doesn't have a native Summarizer, so we use the chat API.
+   * @param {string} text - The text to summarize
+   * @param {Object} [options] - Summarization options
+   * @param {Function} [options.onToken] - Callback for streaming tokens
+   * @returns {Promise<string>} The summary
+   */
+  async summarize(text, options = {}) {
+    const prompt = `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}`;
+    return this.generate(prompt, options);
+  }
+
+  /**
    * Checks if the model is ready to use.
    * @returns {boolean} Whether the model is initialized
    */

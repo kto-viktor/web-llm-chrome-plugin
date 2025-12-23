@@ -58,7 +58,9 @@ export class ChatService {
    * @returns {Promise<void>}
    */
   async initialize() {
+    console.log('[Chat Service] Initializing...');
     await historyManager.load();
+    console.log('[Chat Service] Initialized');
   }
 
   /**
@@ -66,10 +68,13 @@ export class ChatService {
    * @returns {Promise<void>}
    */
   async loadPageContent() {
+    console.log('[Chat Service] Loading page content...');
     try {
       const content = await getCurrentPageContent();
       this.updateState({ pageContent: content, error: null });
+      console.log(`[Chat Service] Page loaded: "${content.title}" (${content.wordCount} words, truncated: ${content.truncated})`);
     } catch (error) {
+      console.error('[Chat Service] Failed to load page:', error.message);
       this.updateState({
         pageContent: null,
         error: `Could not load page: ${error.message}`
@@ -112,21 +117,29 @@ export class ChatService {
   async sendMessage(message, options = {}) {
     const { includePageContext = true, onToken } = options;
 
+    console.log(`[Chat Service] Sending message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`);
+    console.log(`[Chat Service] Options: includePageContext=${includePageContext}`);
+
     if (this.state.isGenerating) {
+      console.warn('[Chat Service] Already generating, rejecting new message');
       throw new Error('Already generating a response');
     }
 
     this.updateState({ isGenerating: true, currentResponse: '', error: null });
 
     try {
+      console.log('[Chat Service] Adding user message to history...');
       await historyManager.addMessage('user', message);
 
       if (historyManager.needsCompaction()) {
+        console.log('[Chat Service] History needs compaction, compacting...');
         await this.compactHistory();
       }
 
       const prompt = this.buildPrompt(message, includePageContext);
+      console.log(`[Chat Service] Built prompt (${prompt.length} chars)`);
 
+      console.log('[Chat Service] Generating response...');
       const response = await llm.generate(prompt, {
         onToken: (token) => {
           this.updateState({
@@ -136,12 +149,16 @@ export class ChatService {
         }
       });
 
+      console.log(`[Chat Service] Response received (${response.length} chars)`);
+      console.log('[Chat Service] Adding assistant message to history...');
       await historyManager.addMessage('assistant', response);
 
       this.updateState({ isGenerating: false, currentResponse: null });
+      console.log('[Chat Service] Message exchange complete');
 
       return response;
     } catch (error) {
+      console.error('[Chat Service] Message failed:', error.message);
       this.updateState({
         isGenerating: false,
         currentResponse: null,
@@ -153,10 +170,45 @@ export class ChatService {
 
   /**
    * Sends a page summary request.
+   * Uses native Summarizer API if available, otherwise uses chat.
    * @param {Function} [onToken] - Streaming token callback
    * @returns {Promise<string>} The summary
    */
   async requestPageSummary(onToken) {
+    // If we have page content and Summarizer is available, use it directly
+    if (this.state.pageContent?.content && llm.isSummarizerAvailable()) {
+      console.log('[Chat Service] Using Summarizer API for page summary');
+
+      this.updateState({ isGenerating: true, currentResponse: '', error: null });
+
+      try {
+        // Add user message to history
+        await historyManager.addMessage('user', 'Give a summary of this page.');
+
+        // Use Summarizer API
+        const summary = await llm.summarize(this.state.pageContent.content, {
+          onToken: (token) => {
+            this.updateState({
+              currentResponse: (this.state.currentResponse || '') + token
+            });
+            if (onToken) onToken(token);
+          }
+        });
+
+        // Add assistant response to history
+        await historyManager.addMessage('assistant', summary);
+
+        this.updateState({ isGenerating: false, currentResponse: null });
+        return summary;
+      } catch (error) {
+        console.warn('[Chat Service] Summarizer failed, falling back to chat:', error.message);
+        this.updateState({ isGenerating: false, currentResponse: null });
+        // Fall through to chat-based summary
+      }
+    }
+
+    // Fallback to chat-based summary
+    console.log('[Chat Service] Using chat for page summary');
     return this.sendMessage('Give a summary of this page.', {
       includePageContext: true,
       onToken
@@ -165,12 +217,32 @@ export class ChatService {
 
   /**
    * Compacts conversation history.
+   * Uses Summarizer API if available, otherwise uses prompt-based.
    * @returns {Promise<void>}
    */
   async compactHistory() {
-    await historyManager.compact(async (prompt) => {
-      return llm.generate(prompt);
-    });
+    const historyText = historyManager.formatForPrompt();
+
+    if (!historyText) {
+      return;
+    }
+
+    console.log('[Chat Service] Compacting history...');
+
+    // Use the unified summarize method (automatically uses Summarizer or prompt)
+    const summary = await llm.summarize(historyText);
+
+    // Update history with compacted summary
+    historyManager.messages = [{
+      role: 'assistant',
+      content: `[Previous conversation summary: ${summary}]`,
+      timestamp: Date.now()
+    }];
+
+    await historyManager.save();
+    historyManager.notifyListeners();
+
+    console.log('[Chat Service] History compacted');
   }
 
   /**
@@ -178,7 +250,9 @@ export class ChatService {
    * @returns {Promise<void>}
    */
   async clearHistory() {
+    console.log('[Chat Service] Clearing history...');
     await historyManager.clear();
+    console.log('[Chat Service] History cleared');
   }
 
   /**
