@@ -38,19 +38,25 @@ export class GeminiNanoAdapter {
    */
   async initialize(onProgress) {
     if (this.initialized && this.session) {
+      console.log('[Gemini Nano] Already initialized');
       return;
     }
 
-    if (!('ai' in window) || !('languageModel' in window.ai)) {
+    console.log('[Gemini Nano] Starting initialization...');
+
+    if (!('ai' in self) || !('languageModel' in self.ai)) {
       throw new Error('Gemini Nano not available in this browser');
     }
 
     try {
-      this.session = await window.ai.languageModel.create({
+      console.log('[Gemini Nano] Creating language model session...');
+      this.session = await self.ai.languageModel.create({
         systemPrompt: 'You are a helpful AI assistant. Be concise and helpful.'
       });
       this.initialized = true;
+      console.log('[Gemini Nano] Initialization complete');
     } catch (error) {
+      console.error('[Gemini Nano] Initialization failed:', error);
       throw new Error(`Failed to create Gemini Nano session: ${error.message}`);
     }
   }

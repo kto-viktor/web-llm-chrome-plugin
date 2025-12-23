@@ -66,16 +66,28 @@ export class LLMInterface {
    * @returns {Promise<void>}
    */
   async initialize() {
+    console.log('[LLM Interface] Starting model detection...');
     this.updateState({ status: 'detecting' });
 
     try {
       const detection = await detectModels();
 
+      console.log('[LLM Interface] Detection result:', detection);
+      console.log(`[LLM Interface] Gemini Nano available: ${detection.geminiNanoAvailable}`);
+      console.log(`[LLM Interface] WebLLM supported: ${detection.webLLMSupported}`);
+      console.log(`[LLM Interface] Recommended model: ${detection.recommendedModel}`);
+
+      if (detection.geminiNanoReason) {
+        console.log(`[LLM Interface] Gemini Nano reason: ${detection.geminiNanoReason}`);
+      }
+
       if (detection.recommendedModel === 'none') {
         throw new Error('No AI model available. WebGPU required for WebLLM.');
       }
 
+      // Gemini Nano is preferred when available
       if (detection.recommendedModel === 'gemini-nano') {
+        console.log('[LLM Interface] Using Gemini Nano (Chrome built-in)');
         this.adapter = new GeminiNanoAdapter();
         this.updateState({
           modelName: this.adapter.getName(),
@@ -84,7 +96,9 @@ export class LLMInterface {
 
         await this.adapter.initialize();
         this.updateState({ status: 'ready' });
+        console.log('[LLM Interface] Gemini Nano ready');
       } else if (detection.recommendedModel === 'webllm') {
+        console.log('[LLM Interface] Using WebLLM (DeepSeek-R1)');
         this.adapter = new WebLLMAdapter();
         this.updateState({
           status: 'downloading',
@@ -101,8 +115,10 @@ export class LLMInterface {
         });
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
+        console.log('[LLM Interface] WebLLM ready');
       }
     } catch (error) {
+      console.error('[LLM Interface] Initialization failed:', error);
       this.updateState({
         status: 'error',
         error: error.message

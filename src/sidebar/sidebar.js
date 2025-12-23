@@ -4,9 +4,13 @@
  * @module sidebar/sidebar
  */
 
+console.log('=== Offline GPT Sidebar Loading ===');
+
 import { llm } from '../core/llm-interface.js';
 import { chatService } from '../services/chat-service.js';
 import { historyManager } from '../services/history-manager.js';
+
+console.log('[Sidebar] Modules imported successfully');
 
 /**
  * DOM element references.
@@ -245,20 +249,28 @@ function setupEventListeners() {
  * Initializes the sidebar.
  */
 async function initialize() {
+  console.log('[Sidebar] Starting initialization...');
   setInputEnabled(false);
   setupEventListeners();
 
   llm.subscribe(updateStatusDisplay);
-
   historyManager.subscribe(renderMessages);
 
   try {
+    console.log('[Sidebar] Initializing chat service...');
     await chatService.initialize();
+
+    console.log('[Sidebar] Loading page content...');
     await chatService.loadPageContent();
+
+    console.log('[Sidebar] Initializing LLM (detecting models)...');
     await llm.initialize();
+
+    console.log('[Sidebar] Initialization complete!');
   } catch (error) {
-    console.error('Initialization error:', error);
+    console.error('[Sidebar] Initialization error:', error);
   }
 }
 
+console.log('[Sidebar] Calling initialize()...');
 initialize();
