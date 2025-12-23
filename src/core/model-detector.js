@@ -34,10 +34,9 @@
 export async function checkGeminiNano() {
   const checks = {
     browserContext: false,
-    promptApiExists: false,
     promptApiAvailable: false,
-    promptApiStatus: null,
-    summarizerApiExists: false
+    summarizerApiAvailable: false,
+    promptApiStatus: null
   };
 
   // Check 1: Browser context
@@ -48,13 +47,10 @@ export async function checkGeminiNano() {
   checks.browserContext = true;
   console.log('[Gemini Nano] Browser context: OK');
 
-  // Check 2: Prompt API (LanguageModel) availability
-  const hasLanguageModel = 'ai' in self && 'languageModel' in self.ai;
-  checks.promptApiExists = hasLanguageModel;
-  console.log(`[Gemini Nano] Prompt API exists: ${hasLanguageModel}`);
 
+  // Check 2: Prompt API (LanguageModel) availability
   try {
-    const availability = await self.ai.languageModel.availability();
+    const availability = await LanguageModel.availability();
     checks.promptApiStatus = availability;
     checks.promptApiAvailable = availability === 'available' || availability === 'readily';
     console.log(`[Gemini Nano] Prompt API availability: ${availability}`);
@@ -64,18 +60,14 @@ export async function checkGeminiNano() {
   }
 
   // Check 3: Summarizer API availability
-  checks.summarizerApiExists = 'ai' in self && 'summarizer' in self.ai;
-  console.log(`[Gemini Nano] Summarizer API exists: ${checks.summarizerApiExists}`);
+  checks.summarizerApiAvailable = 'Summarizer' in self;
+  console.log(`[Gemini Nano] Summarizer API exists: ${checks.summarizerApiAvailable}`);
 
   // Log summary
   console.log('[Gemini Nano] Detection summary:', checks);
 
   // Check 4: Determine if Gemini Nano is available
   // Require Prompt API to be available; Summarizer is optional but logged
-  if (!checks.promptApiExists) {
-    return { available: false, reason: 'Prompt API (LanguageModel) not available', checks };
-  }
-
   if (!checks.promptApiAvailable) {
     const reason = checks.promptApiStatus === 'after-download'
       ? 'Gemini Nano requires download first (enable in chrome://flags)'

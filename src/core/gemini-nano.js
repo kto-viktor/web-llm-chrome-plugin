@@ -3,6 +3,8 @@
  * @module core/gemini-nano
  */
 
+import { checkGeminiNano } from './model-detector.js';
+
 /**
  * Adapter for Chrome's built-in Gemini Nano model.
  */
@@ -44,8 +46,8 @@ export class GeminiNanoAdapter {
 
     console.log('[Gemini Nano] Starting initialization...');
 
-    if (!('ai' in self) || !('languageModel' in self.ai)) {
-      throw new Error('Gemini Nano not available in this browser');
+    if (!(await checkGeminiNano()).available) {
+      throw new Error('Gemini Nano not available in this browser'); // TODO: show info message to user instead of error
     }
 
     try {
