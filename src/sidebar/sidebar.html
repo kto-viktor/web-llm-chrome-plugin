@@ -10,7 +10,13 @@
   <div class="container">
     <!-- Header -->
     <header class="header">
-      <h1 class="title">Offline GPT</h1>
+      <div class="header-row">
+        <h1 class="title">Offline GPT</h1>
+        <select class="model-selector" id="model-selector">
+          <option value="gemini-nano">Gemini Nano</option>
+          <option value="webllm">WebLLM</option>
+        </select>
+      </div>
       <div class="model-status" id="model-status">
         <span class="status-indicator" id="status-indicator"></span>
         <span class="status-text" id="status-text">Initializing...</span>

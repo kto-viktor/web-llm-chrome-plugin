@@ -18,6 +18,7 @@ console.log('[Sidebar] Modules imported successfully');
 const elements = {
   statusIndicator: document.getElementById('status-indicator'),
   statusText: document.getElementById('status-text'),
+  modelSelector: document.getElementById('model-selector'),
   downloadSection: document.getElementById('download-section'),
   downloadInfo: document.getElementById('download-info'),
   progressFill: document.getElementById('progress-fill'),
@@ -83,6 +84,7 @@ function setInputEnabled(enabled) {
   elements.sendBtn.disabled = !enabled;
   elements.summaryBtn.disabled = !enabled;
   elements.clearBtn.disabled = !enabled;
+  elements.modelSelector.disabled = !enabled;
 }
 
 /**
@@ -217,6 +219,22 @@ async function handleClearHistory() {
 }
 
 /**
+ * Handles model selection change.
+ */
+async function handleModelChange() {
+  const selectedModel = elements.modelSelector.value;
+  console.log(`[Sidebar] User selected model: ${selectedModel}`);
+
+  setInputEnabled(false);
+
+  try {
+    await llm.switchModel(selectedModel);
+  } catch (error) {
+    console.error('[Sidebar] Model switch failed:', error);
+  }
+}
+
+/**
  * Auto-resizes the textarea based on content.
  */
 function autoResizeTextarea() {
@@ -243,6 +261,8 @@ function setupEventListeners() {
   elements.summaryBtn.addEventListener('click', handlePageSummary);
 
   elements.clearBtn.addEventListener('click', handleClearHistory);
+
+  elements.modelSelector.addEventListener('change', handleModelChange);
 }
 
 /**

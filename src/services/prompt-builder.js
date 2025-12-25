@@ -44,8 +44,8 @@ function formatPageContent(pageContent) {
   }
 
   return {
-    page_title: pageContent.title || 'Untitled',
-    page_url: pageContent.url || '',
+    page_title: pageContent.title || 'Not available',
+    page_url: pageContent.url || 'Not available',
     page_content: content
   };
 }

@@ -223,6 +223,80 @@ export class LLMInterface {
   }
 
   /**
+   * Switches to a different model.
+   * @param {'gemini-nano'|'webllm'} modelName - The model to switch to
+   * @returns {Promise<void>}
+   */
+  async switchModel(modelName) {
+    console.log(`[LLM Interface] Switching to model: ${modelName}`);
+
+    // Clean up current adapter
+    await this.destroy();
+
+    this.updateState({ status: 'detecting' });
+
+    try {
+      if (modelName === 'gemini-nano') {
+        console.log('[LLM Interface] Loading Gemini Nano...');
+        this.adapter = new GeminiNanoAdapter();
+        this.updateState({
+          modelName: this.adapter.getName(),
+          displayName: this.adapter.getDisplayName()
+        });
+
+        await this.adapter.initialize((progress) => {
+          this.updateState({
+            status: 'downloading',
+            downloadProgress: progress.progress,
+            downloadText: progress.text
+          });
+        });
+
+        // Try to initialize Summarizer
+        try {
+          this.summarizer = new SummarizerAdapter();
+          await this.summarizer.initialize();
+          this.updateState({ summarizerAvailable: true });
+        } catch {
+          this.summarizer = null;
+        }
+
+        this.updateState({ status: 'ready' });
+        console.log('[LLM Interface] Gemini Nano ready');
+
+      } else if (modelName === 'webllm') {
+        console.log('[LLM Interface] Loading WebLLM...');
+        this.adapter = new WebLLMAdapter();
+        this.updateState({
+          status: 'downloading',
+          modelName: this.adapter.getName(),
+          displayName: this.adapter.getDisplayName(),
+          downloadText: 'Starting model download (one-time)...'
+        });
+
+        await this.adapter.initialize((progress) => {
+          this.updateState({
+            downloadProgress: progress.progress,
+            downloadText: progress.text
+          });
+        });
+
+        this.updateState({ status: 'ready', downloadProgress: 1 });
+        console.log('[LLM Interface] WebLLM ready');
+      } else {
+        throw new Error(`Unknown model: ${modelName}`);
+      }
+    } catch (error) {
+      console.error('[LLM Interface] Switch failed:', error);
+      this.updateState({
+        status: 'error',
+        error: error.message
+      });
+      throw error;
+    }
+  }
+
+  /**
    * Destroys the adapter and cleans up resources.
    */
   async destroy() {
