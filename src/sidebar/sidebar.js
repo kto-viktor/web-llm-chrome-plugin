@@ -164,8 +164,8 @@ async function handleSendMessage() {
 
     assistantMsgEl.classList.remove('generating');
   } catch (error) {
-    assistantMsgEl.textContent = `Error: ${error.message}`;
-    assistantMsgEl.classList.remove('generating');
+    const errorMsg = error?.message || String(error) || 'Unknown error';
+    await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
   } finally {
     setInputEnabled(true);
     elements.messageInput.focus();
@@ -198,8 +198,8 @@ async function handlePageSummary() {
 
     assistantMsgEl.classList.remove('generating');
   } catch (error) {
-    assistantMsgEl.textContent = `Error: ${error.message}`;
-    assistantMsgEl.classList.remove('generating');
+    const errorMsg = error?.message || String(error) || 'Unknown error';
+    await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
   } finally {
     setInputEnabled(true);
     elements.messageInput.focus();
@@ -259,9 +259,6 @@ async function initialize() {
   try {
     console.log('[Sidebar] Initializing chat service...');
     await chatService.initialize();
-
-    console.log('[Sidebar] Loading page content...');
-    await chatService.loadPageContent();
 
     console.log('[Sidebar] Initializing LLM (detecting models)...');
     await llm.initialize();

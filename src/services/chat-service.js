@@ -13,7 +13,6 @@ import { buildChatPrompt } from './prompt-builder.js';
  * @typedef {Object} ChatState
  * @property {boolean} isGenerating
  * @property {string|null} currentResponse
- * @property {Object|null} pageContent
  * @property {string|null} error
  */
 
@@ -26,7 +25,6 @@ export class ChatService {
     this.state = {
       isGenerating: false,
       currentResponse: null,
-      pageContent: null,
       error: null
     };
 
@@ -65,34 +63,13 @@ export class ChatService {
   }
 
   /**
-   * Loads current page content.
-   * @returns {Promise<void>}
-   */
-  async loadPageContent() {
-    console.log('[Chat Service] Loading page content...');
-    try {
-      const content = await getCurrentPageContent();
-      this.updateState({ pageContent: content, error: null });
-      console.log(`[Chat Service] Page loaded: "${content.title}" (${content.wordCount} words, truncated: ${content.truncated})`);
-    } catch (error) {
-      console.error('[Chat Service] Failed to load page:', error.message);
-      this.updateState({
-        pageContent: null,
-        error: `Could not load page: ${error.message}`
-      });
-    }
-  }
-
-  /**
    * Builds the full prompt with context using the template.
    * @param {string} userMessage - The user's message
-   * @param {boolean} includePageContext - Whether to include page context
+   * @param {Object|null} pageContent - The page content
    * @returns {string} The complete prompt
    */
-  buildPrompt(userMessage, includePageContext = true) {
-    const pageContent = includePageContext ? this.state.pageContent : null;
+  buildPrompt(userMessage, pageContent) {
     const messages = historyManager.getMessages();
-
     return buildChatPrompt(userMessage, pageContent, messages);
   }
 
@@ -100,15 +77,13 @@ export class ChatService {
    * Sends a message and gets a response.
    * @param {string} message - The user's message
    * @param {Object} [options] - Options
-   * @param {boolean} [options.includePageContext=true] - Include page context
    * @param {Function} [options.onToken] - Streaming token callback
    * @returns {Promise<string>} The assistant's response
    */
   async sendMessage(message, options = {}) {
-    const { includePageContext = true, onToken } = options;
+    const { onToken } = options;
 
     console.log(`[Chat Service] Sending message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`);
-    console.log(`[Chat Service] Options: includePageContext=${includePageContext}`);
 
     if (this.state.isGenerating) {
       console.warn('[Chat Service] Already generating, rejecting new message');
@@ -126,7 +101,12 @@ export class ChatService {
         await this.compactHistory();
       }
 
-      const prompt = this.buildPrompt(message, includePageContext);
+      // Get fresh page content
+      console.log('[Chat Service] Loading page content...');
+      const pageContent = await getCurrentPageContent();
+      console.log(`[Chat Service] Page loaded: "${pageContent.title}" (${pageContent.wordCount} words)`);
+
+      const prompt = this.buildPrompt(message, pageContent);
       console.log(`[Chat Service] Built prompt (${prompt.length} chars)`);
 
       console.log('[Chat Service] Generating response...');
@@ -165,8 +145,11 @@ export class ChatService {
    * @returns {Promise<string>} The summary
    */
   async requestPageSummary(onToken) {
+    // Get fresh page content
+    const pageContent = await getCurrentPageContent();
+
     // If we have page content and Summarizer is available, use it directly
-    if (this.state.pageContent?.content && llm.isSummarizerAvailable()) {
+    if (pageContent?.content && llm.isSummarizerAvailable()) {
       console.log('[Chat Service] Using Summarizer API for page summary');
 
       this.updateState({ isGenerating: true, currentResponse: '', error: null });
@@ -176,7 +159,7 @@ export class ChatService {
         await historyManager.addMessage('user', 'Give a summary of this page.');
 
         // Use Summarizer API
-        const summary = await llm.summarize(this.state.pageContent.content, {
+        const summary = await llm.summarize(pageContent.content, {
           onToken: (token) => {
             this.updateState({
               currentResponse: (this.state.currentResponse || '') + token
@@ -199,10 +182,7 @@ export class ChatService {
 
     // Fallback to chat-based summary
     console.log('[Chat Service] Using chat for page summary');
-    return this.sendMessage('Give a summary of this page.', {
-      includePageContext: true,
-      onToken
-    });
+    return this.sendMessage('Give a summary of this page.', { onToken });
   }
 
   /**

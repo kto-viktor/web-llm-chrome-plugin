@@ -180,6 +180,11 @@ body {
   background: var(--bg-secondary);
 }
 
+.message.error {
+  background: #fce8e6;
+  color: var(--error-color);
+}
+
 .message.generating::after {
   content: '▋';
   animation: blink 1s infinite;
