@@ -5,7 +5,6 @@
 
 import { llm } from '../core/llm-interface.js';
 import { historyManager } from './history-manager.js';
-import { getCurrentPageContent } from './page-extractor.js';
 import { buildChatPrompt } from './prompt-builder.js';
 
 /**
@@ -77,13 +76,17 @@ export class ChatService {
    * Sends a message and gets a response.
    * @param {string} message - The user's message
    * @param {Object} [options] - Options
+   * @param {Object} [options.attachment] - Page attachment
    * @param {Function} [options.onToken] - Streaming token callback
    * @returns {Promise<string>} The assistant's response
    */
   async sendMessage(message, options = {}) {
-    const { onToken } = options;
+    const { attachment, onToken } = options;
 
     console.log(`[Chat Service] Sending message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`);
+    if (attachment) {
+      console.log(`[Chat Service] With attachment: "${attachment.title}"`);
+    }
 
     if (this.state.isGenerating) {
       console.warn('[Chat Service] Already generating, rejecting new message');
@@ -94,19 +97,14 @@ export class ChatService {
 
     try {
       console.log('[Chat Service] Adding user message to history...');
-      await historyManager.addMessage('user', message);
+      await historyManager.addMessage('user', message, attachment);
 
       if (historyManager.needsCompaction()) {
         console.log('[Chat Service] History needs compaction, compacting...');
         await this.compactHistory();
       }
 
-      // Get fresh page content
-      console.log('[Chat Service] Loading page content...');
-      const pageContent = await getCurrentPageContent();
-      console.log(`[Chat Service] Page loaded: "${pageContent.title}" (${pageContent.wordCount} words)`);
-
-      const prompt = this.buildPrompt(message, pageContent);
+      const prompt = this.buildPrompt(message, attachment);
       console.log(`[Chat Service] Built prompt (${prompt.length} chars)`);
 
       console.log('[Chat Service] Generating response...');
@@ -141,25 +139,23 @@ export class ChatService {
   /**
    * Sends a page summary request.
    * Uses native Summarizer API if available, otherwise uses chat.
+   * @param {Object} [attachment] - Page attachment
    * @param {Function} [onToken] - Streaming token callback
    * @returns {Promise<string>} The summary
    */
-  async requestPageSummary(onToken) {
-    // Get fresh page content
-    const pageContent = await getCurrentPageContent();
-
-    // If we have page content and Summarizer is available, use it directly
-    if (pageContent?.content && llm.isSummarizerAvailable()) {
+  async requestPageSummary(attachment, onToken) {
+    // If we have attachment content and Summarizer is available, use it directly
+    if (attachment?.content && llm.isSummarizerAvailable()) {
       console.log('[Chat Service] Using Summarizer API for page summary');
 
       this.updateState({ isGenerating: true, currentResponse: '', error: null });
 
       try {
-        // Add user message to history
-        await historyManager.addMessage('user', 'Give a summary of this page.');
+        // Add user message to history with attachment
+        await historyManager.addMessage('user', 'Give a summary of this page.', attachment);
 
         // Use Summarizer API
-        const summary = await llm.summarize(pageContent.content, {
+        const summary = await llm.summarize(attachment.content, {
           onToken: (token) => {
             this.updateState({
               currentResponse: (this.state.currentResponse || '') + token
@@ -182,7 +178,7 @@ export class ChatService {
 
     // Fallback to chat-based summary
     console.log('[Chat Service] Using chat for page summary');
-    return this.sendMessage('Give a summary of this page.', { onToken });
+    return this.sendMessage('Give a summary of this page.', { attachment, onToken });
   }
 
   /**

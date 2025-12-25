@@ -9,6 +9,7 @@ console.log('=== Offline GPT Sidebar Loading ===');
 import { llm } from '../core/llm-interface.js';
 import { chatService } from '../services/chat-service.js';
 import { historyManager } from '../services/history-manager.js';
+import { getPageContent } from '../services/page-extractor.js';
 
 console.log('[Sidebar] Modules imported successfully');
 
@@ -24,6 +25,9 @@ const elements = {
   progressFill: document.getElementById('progress-fill'),
   errorSection: document.getElementById('error-section'),
   errorMessage: document.getElementById('error-message'),
+  attachmentSection: document.getElementById('attachment-section'),
+  attachmentTitle: document.getElementById('attachment-title'),
+  attachmentRemove: document.getElementById('attachment-remove'),
   messagesContainer: document.getElementById('messages-container'),
   messages: document.getElementById('messages'),
   messageInput: document.getElementById('message-input'),
@@ -31,6 +35,12 @@ const elements = {
   summaryBtn: document.getElementById('summary-btn'),
   clearBtn: document.getElementById('clear-btn')
 };
+
+/**
+ * Current page attachment state.
+ * @type {Object|null}
+ */
+let currentAttachment = null;
 
 /**
  * Updates the model status display.
@@ -88,6 +98,45 @@ function setInputEnabled(enabled) {
 }
 
 /**
+ * Loads page content and displays as attachment.
+ */
+async function loadPageAttachment() {
+  try {
+    const pageContent = await getPageContent();
+    console.log('[Sidebar] Page content received:', pageContent);
+
+    // Check if we have valid page content (not the fallback message)
+    const hasValidContent = pageContent &&
+      pageContent.content &&
+      !pageContent.content.includes('not available');
+
+    if (hasValidContent) {
+      currentAttachment = pageContent;
+      elements.attachmentTitle.textContent = pageContent.title || 'Current Page';
+      elements.attachmentSection.classList.remove('hidden');
+      console.log('[Sidebar] Page attachment loaded:', pageContent.title);
+    } else {
+      currentAttachment = null;
+      elements.attachmentSection.classList.add('hidden');
+      console.log('[Sidebar] No valid page content for attachment');
+    }
+  } catch (error) {
+    console.warn('[Sidebar] Failed to load page attachment:', error);
+    currentAttachment = null;
+    elements.attachmentSection.classList.add('hidden');
+  }
+}
+
+/**
+ * Removes the current page attachment.
+ */
+function removeAttachment() {
+  currentAttachment = null;
+  elements.attachmentSection.classList.add('hidden');
+  console.log('[Sidebar] Attachment removed');
+}
+
+/**
  * Renders a message in the chat.
  * @param {Object} message - The message object
  * @param {boolean} [isGenerating=false] - Whether this is a generating message
@@ -96,7 +145,22 @@ function setInputEnabled(enabled) {
 function renderMessage(message, isGenerating = false) {
   const div = document.createElement('div');
   div.className = `message ${message.role}${isGenerating ? ' generating' : ''}`;
-  div.textContent = message.content;
+
+  // Show attachment if present
+  if (message.attachment) {
+    const attachmentDiv = document.createElement('div');
+    attachmentDiv.className = 'message-attachment';
+    attachmentDiv.innerHTML = `
+      <span class="message-attachment-icon">📄</span>
+      <span class="message-attachment-title">${message.attachment.title || 'Page'}</span>
+    `;
+    div.appendChild(attachmentDiv);
+  }
+
+  const contentSpan = document.createElement('span');
+  contentSpan.textContent = message.content;
+  div.appendChild(contentSpan);
+
   return div;
 }
 
@@ -146,7 +210,10 @@ async function handleSendMessage() {
   elements.messageInput.value = '';
   autoResizeTextarea();
 
-  const userMsgEl = renderMessage({ role: 'user', content: message });
+  // Capture attachment before clearing
+  const attachment = currentAttachment;
+
+  const userMsgEl = renderMessage({ role: 'user', content: message, attachment });
   elements.messages.appendChild(userMsgEl);
 
   const assistantMsgEl = document.createElement('div');
@@ -156,8 +223,13 @@ async function handleSendMessage() {
 
   setInputEnabled(false);
 
+  // Clear attachment after capturing
+  currentAttachment = null;
+  elements.attachmentSection.classList.add('hidden');
+
   try {
     await chatService.sendMessage(message, {
+      attachment,
       onToken: (token) => {
         assistantMsgEl.textContent += token;
         scrollToBottom();
@@ -171,6 +243,8 @@ async function handleSendMessage() {
   } finally {
     setInputEnabled(true);
     elements.messageInput.focus();
+    // Reload attachment for next message
+    loadPageAttachment();
   }
 }
 
@@ -182,7 +256,10 @@ async function handlePageSummary() {
     return;
   }
 
-  const userMsgEl = renderMessage({ role: 'user', content: 'Give a summary of this page.' });
+  // Capture attachment before clearing
+  const attachment = currentAttachment;
+
+  const userMsgEl = renderMessage({ role: 'user', content: 'Give a summary of this page.', attachment });
   elements.messages.appendChild(userMsgEl);
 
   const assistantMsgEl = document.createElement('div');
@@ -192,8 +269,12 @@ async function handlePageSummary() {
 
   setInputEnabled(false);
 
+  // Clear attachment after capturing
+  currentAttachment = null;
+  elements.attachmentSection.classList.add('hidden');
+
   try {
-    await chatService.requestPageSummary((token) => {
+    await chatService.requestPageSummary(attachment, (token) => {
       assistantMsgEl.textContent += token;
       scrollToBottom();
     });
@@ -205,6 +286,8 @@ async function handlePageSummary() {
   } finally {
     setInputEnabled(true);
     elements.messageInput.focus();
+    // Reload attachment for next message
+    loadPageAttachment();
   }
 }
 
@@ -263,6 +346,22 @@ function setupEventListeners() {
   elements.clearBtn.addEventListener('click', handleClearHistory);
 
   elements.modelSelector.addEventListener('change', handleModelChange);
+
+  elements.attachmentRemove.addEventListener('click', removeAttachment);
+
+  // Listen for tab changes to refresh attachment
+  chrome.tabs.onActivated.addListener(() => {
+    console.log('[Sidebar] Tab changed, reloading attachment...');
+    loadPageAttachment();
+  });
+
+  // Listen for tab URL changes (navigation within same tab)
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.active) {
+      console.log('[Sidebar] Tab updated, reloading attachment...');
+      loadPageAttachment();
+    }
+  });
 }
 
 /**
@@ -279,6 +378,9 @@ async function initialize() {
   try {
     console.log('[Sidebar] Initializing chat service...');
     await chatService.initialize();
+
+    console.log('[Sidebar] Loading page attachment...');
+    await loadPageAttachment();
 
     console.log('[Sidebar] Initializing LLM (detecting models)...');
     await llm.initialize();

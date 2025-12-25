@@ -51,8 +51,27 @@ function formatPageContent(pageContent) {
 }
 
 /**
+ * Formats a message attachment for display in history.
+ * @param {Object} attachment - The page attachment
+ * @returns {string} Formatted attachment string
+ */
+function formatAttachment(attachment) {
+  if (!attachment) return '';
+
+  const parts = [`[Attached: ${attachment.title || 'Page'}]`];
+  if (attachment.url) {
+    parts.push(`URL: ${attachment.url}`);
+  }
+  if (attachment.content) {
+    parts.push(`Content: ${attachment.content}`);
+  }
+  return parts.join('\n');
+}
+
+/**
  * Formats conversation history for the template.
- * @param {Array} messages - Array of message objects with role and content
+ * Includes attachments inline with messages.
+ * @param {Array} messages - Array of message objects with role, content, and optional attachment
  * @returns {string} Formatted history string
  */
 function formatHistory(messages) {
@@ -61,7 +80,17 @@ function formatHistory(messages) {
   }
 
   return messages
-    .map(msg => `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}`)
+    .map(msg => {
+      const role = msg.role === 'user' ? 'User' : 'Assistant';
+      let text = `${role}: ${msg.content}`;
+
+      // Include attachment content for context
+      if (msg.attachment) {
+        text = `${role}:\n${formatAttachment(msg.attachment)}\n${msg.content}`;
+      }
+
+      return text;
+    })
     .join('\n\n');
 }
 

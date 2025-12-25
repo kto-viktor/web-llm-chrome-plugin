@@ -16,11 +16,20 @@ const COMPACTION_THRESHOLD = 800;
 const STORAGE_KEY = 'chat_history';
 
 /**
+ * Page attachment for a message.
+ * @typedef {Object} PageAttachment
+ * @property {string} title - The page title
+ * @property {string} url - The page URL
+ * @property {string} content - The page content
+ */
+
+/**
  * Chat message.
  * @typedef {Object} ChatMessage
  * @property {'user'|'assistant'} role
  * @property {string} content
  * @property {number} timestamp
+ * @property {PageAttachment} [attachment] - Optional page attachment
  */
 
 /**
@@ -95,17 +104,28 @@ export class HistoryManager {
    * Adds a message to the history.
    * @param {'user'|'assistant'} role - The message role
    * @param {string} content - The message content
+   * @param {PageAttachment} [attachment] - Optional page attachment
    * @returns {Promise<void>}
    */
-  async addMessage(role, content) {
+  async addMessage(role, content, attachment = null) {
     const wordCount = countWords(content);
-    console.log(`[History] Adding ${role} message (${wordCount} words)`);
+    console.log(`[History] Adding ${role} message (${wordCount} words)${attachment ? ' with attachment' : ''}`);
 
-    this.messages.push({
+    const message = {
       role,
       content,
       timestamp: Date.now()
-    });
+    };
+
+    if (attachment) {
+      message.attachment = {
+        title: attachment.title,
+        url: attachment.url,
+        content: attachment.content
+      };
+    }
+
+    this.messages.push(message);
 
     console.log(`[History] Total: ${this.messages.length} messages, ${this.getTotalWordCount()} words`);
     await this.save();
