@@ -3,3 +3,4 @@
 
 ## Todo
 - add host permission to hugging face and load model from it (in case if Gemini is unavailable)
+- replace deprecated MediaQueryList.addListener() with addEventListener("change", callback)

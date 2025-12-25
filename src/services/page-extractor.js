@@ -1,5 +1,5 @@
 /**
- * Service for extracting and cleaning page content.
+ * Service for extracting page content from the active tab.
  * @module services/page-extractor
  */
 
@@ -12,6 +12,11 @@ import { truncateToWords, countWords } from '../utils/text-utils.js';
 const MAX_PAGE_WORDS = 3000;
 
 /**
+ * Fallback message when page content is unavailable.
+ */
+const UNAVAILABLE_MESSAGE = 'Page content is not available. If you need it, ask user to refresh the page';
+
+/**
  * Extracted page content.
  * @typedef {Object} PageContent
  * @property {string} title - The page title
@@ -22,26 +27,50 @@ const MAX_PAGE_WORDS = 3000;
  */
 
 /**
- * Requests page content from the content script.
- * @param {number} tabId - The tab ID to extract from
- * @returns {Promise<PageContent>} The extracted page content
+ * Gets page content from the active tab.
+ * Logs errors to console and returns fallback message instead of throwing.
+ * @returns {Promise<PageContent>} The page content or fallback
  */
-export async function extractPageContent(tabId) {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.sendMessage(tabId, { type: 'EXTRACT_PAGE_CONTENT' }, (response) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
+export async function getPageContent() {
+  return new Promise((resolve) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs[0]?.id) {
+        console.warn('[Page Extractor] No active tab found');
+        resolve(createFallbackContent());
         return;
       }
 
-      if (!response || response.error) {
-        reject(new Error(response?.error || 'Failed to extract page content'));
-        return;
-      }
+      chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_PAGE_CONTENT' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn('[Page Extractor] Error getting page content:', chrome.runtime.lastError.message);
+          resolve(createFallbackContent());
+          return;
+        }
 
-      resolve(processPageContent(response));
+        if (!response || response.error) {
+          console.warn('[Page Extractor] Invalid response:', response?.error);
+          resolve(createFallbackContent());
+          return;
+        }
+
+        resolve(processPageContent(response));
+      });
     });
   });
+}
+
+/**
+ * Creates fallback content when page extraction fails.
+ * @returns {PageContent} Fallback page content
+ */
+function createFallbackContent() {
+  return {
+    title: '',
+    url: '',
+    content: UNAVAILABLE_MESSAGE,
+    wordCount: 0,
+    truncated: false
+  };
 }
 
 /**
@@ -49,7 +78,7 @@ export async function extractPageContent(tabId) {
  * @param {Object} raw - Raw content from content script
  * @returns {PageContent} Processed page content
  */
-export function processPageContent(raw) {
+function processPageContent(raw) {
   const { title = '', url = '', html = '' } = raw;
 
   let content = extractReadableText(html);
@@ -80,6 +109,11 @@ export function formatPageContext(pageContent) {
     return '';
   }
 
+  // Return as-is if it's the fallback message
+  if (pageContent.content === UNAVAILABLE_MESSAGE) {
+    return UNAVAILABLE_MESSAGE;
+  }
+
   const parts = [];
 
   if (pageContent.title) {
@@ -99,24 +133,5 @@ export function formatPageContext(pageContent) {
   return parts.join('\n');
 }
 
-/**
- * Gets the current active tab's page content.
- * @returns {Promise<PageContent>} The page content
- */
-export async function getCurrentPageContent() {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-      if (!tabs || tabs.length === 0) {
-        reject(new Error('No active tab found'));
-        return;
-      }
-
-      try {
-        const content = await extractPageContent(tabs[0].id);
-        resolve(content);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  });
-}
+// Legacy export for backwards compatibility
+export const getCurrentPageContent = getPageContent;

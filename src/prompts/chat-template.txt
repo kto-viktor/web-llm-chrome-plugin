@@ -1,14 +1,23 @@
 {{system_prompt}}
 
 This is current active page content in user's browser:
-<page_context title="{{page_title}}" url="{{page_url}}">
+<page_content>
+     <title>{{page_title}}"</title>
+     <url>{{page_url}}"</url>
 {{page_content}}
-</page_context>
+</page_content>
 
 This is conversation history:
 <conversation_history>
 {{history}}
 </conversation_history>
+
+Guidelines:
+- Be concise and helpful in your responses
+- Reference specific parts of the <page_content> when relevant
+- If the answer isn't found in the <page_content>, say so clearly
+- Keep responses focused and to the point
+- When summarizing, highlight the most important information first
 
 This is user's question:
 <user_question>

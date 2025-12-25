@@ -59,7 +59,7 @@
    * Handles messages from the sidebar.
    */
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'EXTRACT_PAGE_CONTENT') {
+    if (message.type === 'GET_PAGE_CONTENT') {
       try {
         const metadata = getPageMetadata();
         const content = extractTextContent();
