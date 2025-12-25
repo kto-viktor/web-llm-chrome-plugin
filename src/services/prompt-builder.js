@@ -51,26 +51,19 @@ function formatPageContent(pageContent) {
 }
 
 /**
- * Formats a message attachment for display in history.
- * @param {Object} attachment - The page attachment
- * @returns {string} Formatted attachment string
+ * Formats a message attachment reference for display in history.
+ * Only shows title, not content (content is in current page context).
+ * @param {Object} attachment - The page attachment (title, url only)
+ * @returns {string} Formatted attachment reference
  */
-function formatAttachment(attachment) {
+function formatAttachmentRef(attachment) {
   if (!attachment) return '';
-
-  const parts = [`[Attached: ${attachment.title || 'Page'}]`];
-  if (attachment.url) {
-    parts.push(`URL: ${attachment.url}`);
-  }
-  if (attachment.content) {
-    parts.push(`Content: ${attachment.content}`);
-  }
-  return parts.join('\n');
+  return `[Attached: ${attachment.title || 'Page'}]`;
 }
 
 /**
  * Formats conversation history for the template.
- * Includes attachments inline with messages.
+ * Shows attachment references (title only) - actual content is in page context.
  * @param {Array} messages - Array of message objects with role, content, and optional attachment
  * @returns {string} Formatted history string
  */
@@ -84,9 +77,10 @@ function formatHistory(messages) {
       const role = msg.role === 'user' ? 'User' : 'Assistant';
       let text = `${role}: ${msg.content}`;
 
-      // Include attachment content for context
+      // Show attachment reference (title only, not content)
       if (msg.attachment) {
-        text = `${role}:\n${formatAttachment(msg.attachment)}\n${msg.content}`;
+        const ref = formatAttachmentRef(msg.attachment);
+        text = `${role}: ${ref} ${msg.content}`;
       }
 
       return text;

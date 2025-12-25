@@ -118,10 +118,10 @@ export class HistoryManager {
     };
 
     if (attachment) {
+      // Only store title and url, not content (to avoid bloating history)
       message.attachment = {
         title: attachment.title,
-        url: attachment.url,
-        content: attachment.content
+        url: attachment.url
       };
     }
 
