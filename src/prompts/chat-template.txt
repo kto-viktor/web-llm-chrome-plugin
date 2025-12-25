@@ -1,0 +1,16 @@
+{{system_prompt}}
+
+This is current active page content in user's browser:
+<page_context title="{{page_title}}" url="{{page_url}}">
+{{page_content}}
+</page_context>
+
+This is conversation history:
+<conversation_history>
+{{history}}
+</conversation_history>
+
+This is user's question:
+<user_question>
+{{user_message}}
+</user_question>

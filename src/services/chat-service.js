@@ -5,7 +5,8 @@
 
 import { llm } from '../core/llm-interface.js';
 import { historyManager } from './history-manager.js';
-import { getCurrentPageContent, formatPageContext } from './page-extractor.js';
+import { getCurrentPageContent } from './page-extractor.js';
+import { buildChatPrompt } from './prompt-builder.js';
 
 /**
  * Chat state.
@@ -83,27 +84,16 @@ export class ChatService {
   }
 
   /**
-   * Builds the full prompt with context.
+   * Builds the full prompt with context using the template.
    * @param {string} userMessage - The user's message
    * @param {boolean} includePageContext - Whether to include page context
    * @returns {string} The complete prompt
    */
   buildPrompt(userMessage, includePageContext = true) {
-    const parts = [];
+    const pageContent = includePageContext ? this.state.pageContent : null;
+    const messages = historyManager.getMessages();
 
-    if (includePageContext && this.state.pageContent) {
-      const pageContext = formatPageContext(this.state.pageContent);
-      parts.push(`[Current Page Context]\n${pageContext}\n[End Page Context]\n`);
-    }
-
-    const historyText = historyManager.formatForPrompt();
-    if (historyText) {
-      parts.push(`[Conversation History]\n${historyText}\n[End History]\n`);
-    }
-
-    parts.push(`User: ${userMessage}`);
-
-    return parts.join('\n');
+    return buildChatPrompt(userMessage, pageContent, messages);
   }
 
   /**

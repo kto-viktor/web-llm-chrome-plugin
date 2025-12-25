@@ -17,6 +17,9 @@ const buildOptions = {
   sourcemap: true,
   minify: !isWatch,
   logLevel: 'info',
+  loader: {
+    '.txt': 'text',  // Inline .txt files as strings
+  },
 };
 
 async function build() {
