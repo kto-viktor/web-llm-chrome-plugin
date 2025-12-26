@@ -93,15 +93,23 @@ export class ChatService {
       throw new Error('Already generating a response');
     }
 
+    // Validate user message length
+    const validation = historyManager.validateMessageLength(message);
+    if (!validation.valid) {
+      console.warn(`[Chat Service] Message too long: ${validation.tokenCount} tokens (max: ${validation.maxTokens})`);
+      throw new Error(`Message too long (${validation.tokenCount} tokens). Please keep it under ${validation.maxTokens} tokens.`);
+    }
+
     this.updateState({ isGenerating: true, currentResponse: '', error: null });
 
     try {
       console.log('[Chat Service] Adding user message to history...');
       await historyManager.addMessage('user', message, attachment);
 
-      if (historyManager.needsCompaction()) {
-        console.log('[Chat Service] History needs compaction, compacting...');
-        await this.compactHistory();
+      // Trim history if needed (sliding window)
+      if (historyManager.needsTrimming()) {
+        console.log('[Chat Service] History needs trimming...');
+        await historyManager.trimToLimit();
       }
 
       const prompt = this.buildPrompt(message, attachment);
@@ -181,35 +189,6 @@ export class ChatService {
     return this.sendMessage('Give a summary of this page.', { attachment, onToken });
   }
 
-  /**
-   * Compacts conversation history.
-   * Uses Summarizer API if available, otherwise uses prompt-based.
-   * @returns {Promise<void>}
-   */
-  async compactHistory() {
-    const historyText = historyManager.formatForPrompt();
-
-    if (!historyText) {
-      return;
-    }
-
-    console.log('[Chat Service] Compacting history...');
-
-    // Use the unified summarize method (automatically uses Summarizer or prompt)
-    const summary = await llm.summarize(historyText);
-
-    // Update history with compacted summary
-    historyManager.messages = [{
-      role: 'assistant',
-      content: `[Previous conversation summary: ${summary}]`,
-      timestamp: Date.now()
-    }];
-
-    await historyManager.save();
-    historyManager.notifyListeners();
-
-    console.log('[Chat Service] History compacted');
-  }
 
   /**
    * Clears conversation history.

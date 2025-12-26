@@ -320,10 +320,8 @@ async function handlePageSummary() {
  * Handles clearing the chat history.
  */
 async function handleClearHistory() {
-  if (confirm('Clear all chat history?')) {
-    await chatService.clearHistory();
-    renderMessages();
-  }
+  await chatService.clearHistory();
+  renderMessages();
 }
 
 /**

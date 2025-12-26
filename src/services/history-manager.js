@@ -3,12 +3,17 @@
  * @module services/history-manager
  */
 
-import { countWords } from '../utils/text-utils.js';
+import { countTokens } from '../utils/token-utils.js';
 
 /**
- * Maximum words before triggering compaction.
+ * Maximum tokens allowed in history before trimming oldest messages.
  */
-const COMPACTION_THRESHOLD = 800;
+const MAX_HISTORY_TOKENS = 800;
+
+/**
+ * Maximum tokens allowed for a single user message.
+ */
+const MAX_USER_MESSAGE_TOKENS = 400;
 
 /**
  * Storage key for persisted history.
@@ -75,7 +80,7 @@ export class HistoryManager {
       chrome.storage.local.get([STORAGE_KEY], (result) => {
         if (result[STORAGE_KEY]) {
           this.messages = result[STORAGE_KEY];
-          console.log(`[History] Loaded ${this.messages.length} messages (${this.getTotalWordCount()} words)`);
+          console.log(`[History] Loaded ${this.messages.length} messages (${this.getTotalTokenCount()} tokens)`);
         } else {
           console.log('[History] No saved history found');
         }
@@ -101,6 +106,20 @@ export class HistoryManager {
   }
 
   /**
+   * Validates user message length.
+   * @param {string} content - The message content
+   * @returns {{valid: boolean, tokenCount: number, maxTokens: number}}
+   */
+  validateMessageLength(content) {
+    const tokenCount = countTokens(content);
+    return {
+      valid: tokenCount <= MAX_USER_MESSAGE_TOKENS,
+      tokenCount,
+      maxTokens: MAX_USER_MESSAGE_TOKENS
+    };
+  }
+
+  /**
    * Adds a message to the history.
    * @param {'user'|'assistant'} role - The message role
    * @param {string} content - The message content
@@ -108,8 +127,8 @@ export class HistoryManager {
    * @returns {Promise<void>}
    */
   async addMessage(role, content, attachment = null) {
-    const wordCount = countWords(content);
-    console.log(`[History] Adding ${role} message (${wordCount} words)${attachment ? ' with attachment' : ''}`);
+    const tokenCount = countTokens(content);
+    console.log(`[History] Adding ${role} message (${tokenCount} tokens)${attachment ? ' with attachment' : ''}`);
 
     const message = {
       role,
@@ -127,7 +146,7 @@ export class HistoryManager {
 
     this.messages.push(message);
 
-    console.log(`[History] Total: ${this.messages.length} messages, ${this.getTotalWordCount()} words`);
+    console.log(`[History] Total: ${this.messages.length} messages, ${this.getTotalTokenCount()} tokens`);
     await this.save();
     this.notifyListeners();
   }
@@ -155,56 +174,46 @@ export class HistoryManager {
   }
 
   /**
-   * Counts total words in history.
-   * @returns {number} Total word count
+   * Counts total tokens in history.
+   * @returns {number} Total token count
    */
-  getTotalWordCount() {
-    return this.messages.reduce((total, msg) => total + countWords(msg.content), 0);
+  getTotalTokenCount() {
+    return this.messages.reduce((total, msg) => total + countTokens(msg.content), 0);
   }
 
   /**
-   * Checks if history needs compaction.
-   * @returns {boolean} Whether compaction is needed
+   * Checks if history needs trimming.
+   * @returns {boolean} Whether trimming is needed
    */
-  needsCompaction() {
-    const totalWords = this.getTotalWordCount();
-    const needsIt = totalWords > COMPACTION_THRESHOLD;
-    console.log(`[History] Compaction check: ${totalWords} words (threshold: ${COMPACTION_THRESHOLD}) → ${needsIt ? 'NEEDS COMPACTION' : 'OK'}`);
+  needsTrimming() {
+    const totalTokens = this.getTotalTokenCount();
+    const needsIt = totalTokens > MAX_HISTORY_TOKENS;
+    console.log(`[History] Trim check: ${totalTokens} tokens (max: ${MAX_HISTORY_TOKENS}) → ${needsIt ? 'NEEDS TRIM' : 'OK'}`);
     return needsIt;
   }
 
   /**
-   * Compacts history using the provided summarization function.
-   * @param {Function} summarize - Function that takes history text and returns summary
+   * Trims history by removing oldest messages until under token limit.
+   * Uses sliding window approach - no LLM summarization needed.
    * @returns {Promise<void>}
    */
-  async compact(summarize) {
-    console.log(`[History] Starting compaction (${this.messages.length} messages, ${this.getTotalWordCount()} words)`);
+  async trimToLimit() {
+    console.log(`[History] Trimming (${this.messages.length} messages, ${this.getTotalTokenCount()} tokens)`);
 
     if (this.messages.length <= 2) {
-      console.log('[History] Too few messages to compact, skipping');
+      console.log('[History] Too few messages to trim, skipping');
       return;
     }
 
-    const historyText = this.formatForPrompt();
+    // Remove oldest messages until under limit
+    while (this.messages.length > 2 && this.getTotalTokenCount() > MAX_HISTORY_TOKENS) {
+      const removed = this.messages.shift();
+      console.log(`[History] Removed oldest message (${countTokens(removed.content)} tokens)`);
+    }
 
-    const prompt = `Summarize this conversation history concisely, preserving key facts, context, and any important details the user mentioned. Keep it under 200 words:
-
-${historyText}`;
-
-    console.log('[History] Summarizing history...');
-    const summary = await summarize(prompt);
-    console.log(`[History] Summary generated (${countWords(summary)} words)`);
-
-    this.messages = [{
-      role: 'assistant',
-      content: `[Previous conversation summary: ${summary}]`,
-      timestamp: Date.now()
-    }];
-
+    console.log(`[History] After trim: ${this.messages.length} messages, ${this.getTotalTokenCount()} tokens`);
     await this.save();
     this.notifyListeners();
-    console.log('[History] Compaction complete');
   }
 
   /**
