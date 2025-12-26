@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@mlc-ai/web-llm": "^0.2.80",
+    "gpt-tokenizer": "^3.4.0",
     "marked": "^17.0.1"
   }
 }

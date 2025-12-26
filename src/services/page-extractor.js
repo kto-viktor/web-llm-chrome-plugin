@@ -3,18 +3,17 @@
  * @module services/page-extractor
  */
 
-import { extractReadableText } from '../utils/html-cleaner.js';
-import { truncateToWords, countWords } from '../utils/text-utils.js';
+import { countTokens, truncateToTokens } from '../utils/token-utils.js';
 
 /**
- * Maximum words to include from page content.
+ * Maximum tokens to include from page content.
+ * Leaves room for system prompt (~500) + history (~1000) within 4096 context.
  */
-const MAX_PAGE_WORDS = 3000;
+const MAX_PAGE_TOKENS = 2500;
 
 /**
  * Fallback message when page content is unavailable.
  */
-// TODO: seems to be not used, because overridden in downstream code - need to rewrite downstream code to use this message
 const UNAVAILABLE_MESSAGE = 'Page content is not available. If you need it, ask user to refresh the page';
 
 /**
@@ -23,7 +22,7 @@ const UNAVAILABLE_MESSAGE = 'Page content is not available. If you need it, ask 
  * @property {string} title - The page title
  * @property {string} url - The page URL
  * @property {string} content - The cleaned page content
- * @property {number} wordCount - Number of words in content
+ * @property {number} tokenCount - Number of tokens in content
  * @property {boolean} truncated - Whether content was truncated
  */
 
@@ -69,33 +68,35 @@ function createFallbackContent() {
     title: '',
     url: '',
     content: UNAVAILABLE_MESSAGE,
-    wordCount: 0,
+    tokenCount: 0,
     truncated: false
   };
 }
 
 /**
  * Processes raw page content into a cleaned format.
+ * Uses token-based truncation for accurate context window management.
  * @param {Object} raw - Raw content from content script
  * @returns {PageContent} Processed page content
  */
 function processPageContent(raw) {
-  const { title = '', url = '', html = '' } = raw;
+  const { title = '', url = '', textContent = '' } = raw;
 
-  let content = extractReadableText(html);
-  const originalWordCount = countWords(content);
-  let truncated = false;
+  // Use pre-cleaned textContent from content script
+  const originalTokens = countTokens(textContent);
+  console.log(`[Page Extractor] Original token count: ${originalTokens}`);
 
-  if (originalWordCount > MAX_PAGE_WORDS) {
-    content = truncateToWords(content, MAX_PAGE_WORDS);
-    truncated = true;
+  const { text: content, tokenCount, truncated } = truncateToTokens(textContent, MAX_PAGE_TOKENS);
+
+  if (truncated) {
+    console.log(`[Page Extractor] Truncated from ${originalTokens} to ${tokenCount} tokens`);
   }
 
   return {
     title,
     url,
     content,
-    wordCount: countWords(content),
+    tokenCount,
     truncated
   };
 }
@@ -128,7 +129,7 @@ export function formatPageContext(pageContent) {
   parts.push(`\nPage Content:\n${pageContent.content}`);
 
   if (pageContent.truncated) {
-    parts.push('\n[Content truncated to 3000 words]');
+    parts.push(`\n[Content truncated to ${MAX_PAGE_TOKENS} tokens]`);
   }
 
   return parts.join('\n');
