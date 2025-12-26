@@ -10,6 +10,7 @@ import { llm } from '../core/llm-interface.js';
 import { chatService } from '../services/chat-service.js';
 import { historyManager } from '../services/history-manager.js';
 import { getPageContent } from '../services/page-extractor.js';
+import { formatResponse } from '../utils/response-formatter.js';
 
 console.log('[Sidebar] Modules imported successfully');
 
@@ -157,9 +158,17 @@ function renderMessage(message, isGenerating = false) {
     div.appendChild(attachmentDiv);
   }
 
-  const contentSpan = document.createElement('span');
-  contentSpan.textContent = message.content;
-  div.appendChild(contentSpan);
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+
+  // Format assistant messages with markdown, keep user messages as plain text
+  if (message.role === 'assistant' && !isGenerating) {
+    contentDiv.innerHTML = formatResponse(message.content);
+  } else {
+    contentDiv.textContent = message.content;
+  }
+
+  div.appendChild(contentDiv);
 
   return div;
 }
@@ -218,6 +227,9 @@ async function handleSendMessage() {
 
   const assistantMsgEl = document.createElement('div');
   assistantMsgEl.className = 'message assistant generating';
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+  assistantMsgEl.appendChild(contentDiv);
   elements.messages.appendChild(assistantMsgEl);
   scrollToBottom();
 
@@ -227,16 +239,21 @@ async function handleSendMessage() {
   currentAttachment = null;
   elements.attachmentSection.classList.add('hidden');
 
+  let fullResponse = '';
+
   try {
     await chatService.sendMessage(message, {
       attachment,
       onToken: (token) => {
-        assistantMsgEl.textContent += token;
+        fullResponse += token;
+        contentDiv.textContent = fullResponse;
         scrollToBottom();
       }
     });
 
+    // Format complete response with markdown
     assistantMsgEl.classList.remove('generating');
+    contentDiv.innerHTML = formatResponse(fullResponse);
   } catch (error) {
     const errorMsg = error?.message || String(error) || 'Unknown error';
     await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
@@ -264,6 +281,9 @@ async function handlePageSummary() {
 
   const assistantMsgEl = document.createElement('div');
   assistantMsgEl.className = 'message assistant generating';
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+  assistantMsgEl.appendChild(contentDiv);
   elements.messages.appendChild(assistantMsgEl);
   scrollToBottom();
 
@@ -273,13 +293,18 @@ async function handlePageSummary() {
   currentAttachment = null;
   elements.attachmentSection.classList.add('hidden');
 
+  let fullResponse = '';
+
   try {
     await chatService.requestPageSummary(attachment, (token) => {
-      assistantMsgEl.textContent += token;
+      fullResponse += token;
+      contentDiv.textContent = fullResponse;
       scrollToBottom();
     });
 
+    // Format complete response with markdown
     assistantMsgEl.classList.remove('generating');
+    contentDiv.innerHTML = formatResponse(fullResponse);
   } catch (error) {
     const errorMsg = error?.message || String(error) || 'Unknown error';
     await historyManager.addMessage('assistant', `Error: ${errorMsg}`);

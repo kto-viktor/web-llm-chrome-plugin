@@ -14,6 +14,7 @@ const MAX_PAGE_WORDS = 3000;
 /**
  * Fallback message when page content is unavailable.
  */
+// TODO: seems to be not used, because overridden in downstream code - need to rewrite downstream code to use this message
 const UNAVAILABLE_MESSAGE = 'Page content is not available. If you need it, ask user to refresh the page';
 
 /**

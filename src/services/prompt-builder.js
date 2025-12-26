@@ -34,7 +34,7 @@ function formatPageContent(pageContent) {
     return {
       page_title: '',
       page_url: '',
-      page_content: '[No page content available]'
+      page_content: '[No page content available. Ask user to refresh the page.]'
     };
   }
 
