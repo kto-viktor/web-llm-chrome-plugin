@@ -26,6 +26,8 @@ const elements = {
   progressFill: document.getElementById('progress-fill'),
   errorSection: document.getElementById('error-section'),
   errorMessage: document.getElementById('error-message'),
+  geminiSetupSection: document.getElementById('gemini-setup-section'),
+  geminiSetupDismiss: document.getElementById('gemini-setup-dismiss'),
   attachmentSection: document.getElementById('attachment-section'),
   attachmentTitle: document.getElementById('attachment-title'),
   attachmentRemove: document.getElementById('attachment-remove'),
@@ -54,6 +56,7 @@ function updateStatusDisplay(state) {
   elements.statusIndicator.className = 'status-indicator';
   elements.downloadSection.classList.add('hidden');
   elements.errorSection.classList.add('hidden');
+  elements.geminiSetupSection.classList.add('hidden');
 
   switch (status) {
     case 'detecting':
@@ -72,6 +75,10 @@ function updateStatusDisplay(state) {
       elements.statusIndicator.classList.add('ready');
       elements.statusText.textContent = displayName || 'Ready';
       setInputEnabled(true);
+      // Sync selector with active model
+      if (state.modelName) {
+        elements.modelSelector.value = state.modelName;
+      }
       break;
 
     case 'error':
@@ -79,6 +86,13 @@ function updateStatusDisplay(state) {
       elements.statusText.textContent = 'Error';
       elements.errorSection.classList.remove('hidden');
       elements.errorMessage.textContent = error || 'Unknown error occurred';
+      setInputEnabled(false);
+      break;
+
+    case 'gemini-unavailable':
+      elements.statusIndicator.classList.add('error');
+      elements.statusText.textContent = 'Gemini Nano unavailable';
+      elements.geminiSetupSection.classList.remove('hidden');
       setInputEnabled(false);
       break;
 
@@ -347,6 +361,42 @@ async function handleModelChange() {
 }
 
 /**
+ * Handles clicking on chrome:// links.
+ * Copies the URL to clipboard since chrome:// URLs can't be opened directly.
+ * @param {Event} event - The click event
+ */
+async function handleChromeLink(event) {
+  event.preventDefault();
+  const url = event.target.dataset.url;
+  if (!url) return;
+
+  try {
+    await navigator.clipboard.writeText(url);
+    const originalText = event.target.textContent;
+    event.target.textContent = 'Copied!';
+    event.target.style.background = 'rgba(15, 157, 88, 0.2)';
+    setTimeout(() => {
+      event.target.textContent = originalText;
+      event.target.style.background = '';
+    }, 1500);
+  } catch (error) {
+    console.error('[Sidebar] Failed to copy URL:', error);
+  }
+}
+
+/**
+ * Handles dismissing the Gemini Nano setup instructions.
+ * Reverts to Qwen model.
+ */
+async function handleGeminiSetupDismiss() {
+  elements.geminiSetupSection.classList.add('hidden');
+  // Reset selector to Qwen
+  elements.modelSelector.value = 'webllm-qwen';
+  // Switch to Qwen model
+  await llm.switchModel('webllm-qwen');
+}
+
+/**
  * Auto-resizes the textarea based on content.
  */
 function autoResizeTextarea() {
@@ -377,6 +427,14 @@ function setupEventListeners() {
   elements.modelSelector.addEventListener('change', handleModelChange);
 
   elements.attachmentRemove.addEventListener('click', removeAttachment);
+
+  // Gemini Nano setup section handlers
+  elements.geminiSetupDismiss.addEventListener('click', handleGeminiSetupDismiss);
+
+  // Handle chrome:// link clicks
+  document.querySelectorAll('.chrome-link').forEach(link => {
+    link.addEventListener('click', handleChromeLink);
+  });
 
   // Listen for tab changes to refresh attachment
   chrome.tabs.onActivated.addListener(() => {

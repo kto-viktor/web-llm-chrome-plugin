@@ -151,7 +151,8 @@ body {
 
 .download-note {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-primary);
+  font-weight: 600;
   margin-top: 6px;
 }
 
@@ -165,6 +166,70 @@ body {
 .error-message {
   font-size: 13px;
   color: var(--error-color);
+}
+
+/* Gemini Nano Setup Instructions */
+.gemini-setup-section {
+  padding: 16px;
+  background: #e8f0fe;
+  border-bottom: 1px solid #c2d7f4;
+}
+
+.gemini-setup-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-color);
+  margin-bottom: 8px;
+}
+
+.gemini-setup-intro {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.gemini-setup-steps {
+  font-size: 12px;
+  color: var(--text-primary);
+  padding-left: 20px;
+  margin: 0 0 12px 0;
+}
+
+.gemini-setup-steps li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.gemini-setup-steps a.chrome-link {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+  font-size: 11px;
+  background: rgba(66, 133, 244, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.gemini-setup-steps a.chrome-link:hover {
+  text-decoration: underline;
+  background: rgba(66, 133, 244, 0.2);
+}
+
+.gemini-setup-dismiss {
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent-color);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.gemini-setup-dismiss:hover {
+  background: var(--accent-hover);
 }
 
 /* Messages Container */

@@ -12,13 +12,14 @@ import { SummarizerAdapter } from './summarizer.js';
 /**
  * LLM state.
  * @typedef {Object} LLMState
- * @property {'idle'|'detecting'|'downloading'|'ready'|'error'} status
+ * @property {'idle'|'detecting'|'downloading'|'ready'|'error'|'gemini-unavailable'} status
  * @property {string|null} modelName
  * @property {string|null} displayName
  * @property {string|null} error
  * @property {number} downloadProgress - 0 to 1
  * @property {string} downloadText
  * @property {boolean} summarizerAvailable - Whether native Summarizer is available
+ * @property {boolean} geminiNanoAvailable - Whether Gemini Nano is available
  */
 
 /**
@@ -40,7 +41,8 @@ export class LLMInterface {
       error: null,
       downloadProgress: 0,
       downloadText: '',
-      summarizerAvailable: false
+      summarizerAvailable: false,
+      geminiNanoAvailable: false
     };
 
     /** @type {Set<Function>} */
@@ -83,6 +85,9 @@ export class LLMInterface {
       console.log(`[LLM Interface] Summarizer available: ${detection.summarizerAvailable}`);
       console.log(`[LLM Interface] WebLLM supported: ${detection.webLLMSupported}`);
       console.log(`[LLM Interface] Recommended model: ${detection.recommendedModel}`);
+
+      // Store Gemini Nano availability for UI
+      this.updateState({ geminiNanoAvailable: detection.geminiNanoAvailable });
 
       if (detection.geminiNanoReason) {
         console.log(`[LLM Interface] Gemini Nano reason: ${detection.geminiNanoReason}`);
@@ -127,8 +132,9 @@ export class LLMInterface {
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
       } else if (detection.recommendedModel === 'webllm') {
-        console.log('[LLM Interface] Using WebLLM (DeepSeek-R1)');
-        this.adapter = new WebLLMAdapter();
+        // Default to Qwen when Gemini Nano is not available
+        console.log('[LLM Interface] Using WebLLM (Qwen 2.5 7B)');
+        this.adapter = new WebLLMAdapter('qwen');
         this.updateState({
           status: 'downloading',
           modelName: this.adapter.getName(),
@@ -224,11 +230,25 @@ export class LLMInterface {
 
   /**
    * Switches to a different model.
-   * @param {'gemini-nano'|'webllm'} modelName - The model to switch to
+   * @param {'gemini-nano'|'webllm-qwen'|'webllm-deepseek'} modelName - The model to switch to
    * @returns {Promise<void>}
    */
   async switchModel(modelName) {
     console.log(`[LLM Interface] Switching to model: ${modelName}`);
+
+    // Check Gemini Nano availability before attempting to switch
+    if (modelName === 'gemini-nano') {
+      const detection = await detectModels();
+      if (!detection.geminiNanoAvailable) {
+        console.log('[LLM Interface] Gemini Nano not available');
+        this.updateState({
+          status: 'gemini-unavailable',
+          geminiNanoAvailable: false,
+          error: 'Gemini Nano requires setup in Chrome flags'
+        });
+        return; // Don't throw - let UI handle this state
+      }
+    }
 
     // Clean up current adapter
     await this.destroy();
@@ -241,7 +261,8 @@ export class LLMInterface {
         this.adapter = new GeminiNanoAdapter();
         this.updateState({
           modelName: this.adapter.getName(),
-          displayName: this.adapter.getDisplayName()
+          displayName: this.adapter.getDisplayName(),
+          geminiNanoAvailable: true
         });
 
         await this.adapter.initialize((progress) => {
@@ -264,9 +285,9 @@ export class LLMInterface {
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
 
-      } else if (modelName === 'webllm') {
-        console.log('[LLM Interface] Loading WebLLM...');
-        this.adapter = new WebLLMAdapter();
+      } else if (modelName === 'webllm-qwen') {
+        console.log('[LLM Interface] Loading WebLLM Qwen...');
+        this.adapter = new WebLLMAdapter('qwen');
         this.updateState({
           status: 'downloading',
           modelName: this.adapter.getName(),
@@ -282,7 +303,28 @@ export class LLMInterface {
         });
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM ready');
+        console.log('[LLM Interface] WebLLM Qwen ready');
+
+      } else if (modelName === 'webllm-deepseek') {
+        console.log('[LLM Interface] Loading WebLLM DeepSeek...');
+        this.adapter = new WebLLMAdapter('deepseek');
+        this.updateState({
+          status: 'downloading',
+          modelName: this.adapter.getName(),
+          displayName: this.adapter.getDisplayName(),
+          downloadText: 'Starting model download (one-time)...'
+        });
+
+        await this.adapter.initialize((progress) => {
+          this.updateState({
+            downloadProgress: progress.progress,
+            downloadText: progress.text
+          });
+        });
+
+        this.updateState({ status: 'ready', downloadProgress: 1 });
+        console.log('[LLM Interface] WebLLM DeepSeek ready');
+
       } else {
         throw new Error(`Unknown model: ${modelName}`);
       }
@@ -315,7 +357,8 @@ export class LLMInterface {
       error: null,
       downloadProgress: 0,
       downloadText: '',
-      summarizerAvailable: false
+      summarizerAvailable: false,
+      geminiNanoAvailable: this.state.geminiNanoAvailable // Preserve detection result
     });
   }
 }

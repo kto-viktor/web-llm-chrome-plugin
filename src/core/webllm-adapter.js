@@ -1,20 +1,47 @@
 /**
- * WebLLM adapter for running DeepSeek-R1 locally via WebGPU.
+ * WebLLM adapter for running LLM models locally via WebGPU.
+ * Supports Qwen (default) and DeepSeek models.
  * @module core/webllm-adapter
  */
 
 import * as webllm from '@mlc-ai/web-llm';
 
 /**
- * The DeepSeek-R1 model ID for WebLLM.
+ * Available WebLLM models configuration.
  */
-const MODEL_ID = 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC';
+export const WEBLLM_MODELS = {
+  qwen: {
+    id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
+    name: 'webllm-qwen',
+    displayName: 'Qwen 2.5 7B (WebLLM)'
+  },
+  deepseek: {
+    id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
+    name: 'webllm-deepseek',
+    displayName: 'DeepSeek-R1 (WebLLM)'
+  }
+};
 
 /**
- * Adapter for WebLLM with DeepSeek-R1 model.
+ * Adapter for WebLLM models.
  */
 export class WebLLMAdapter {
-  constructor() {
+  /**
+   * Creates a WebLLM adapter.
+   * @param {'qwen'|'deepseek'} [modelKey='qwen'] - The model key to use
+   */
+  constructor(modelKey = 'qwen') {
+    const config = WEBLLM_MODELS[modelKey];
+    if (!config) {
+      throw new Error(`Unknown WebLLM model: ${modelKey}`);
+    }
+
+    /** @type {string} */
+    this.modelId = config.id;
+    /** @type {string} */
+    this.modelName = config.name;
+    /** @type {string} */
+    this.displayModelName = config.displayName;
     /** @type {Object|null} */
     this.engine = null;
     /** @type {boolean} */
@@ -28,7 +55,7 @@ export class WebLLMAdapter {
    * @returns {string} The model identifier
    */
   getName() {
-    return 'webllm-deepseek';
+    return this.modelName;
   }
 
   /**
@@ -36,7 +63,7 @@ export class WebLLMAdapter {
    * @returns {string} The display name
    */
   getDisplayName() {
-    return 'DeepSeek-R1 (WebLLM)';
+    return this.displayModelName;
   }
 
   /**
@@ -66,7 +93,7 @@ export class WebLLMAdapter {
         }
       };
 
-      this.engine = await webllm.CreateMLCEngine(MODEL_ID, {
+      this.engine = await webllm.CreateMLCEngine(this.modelId, {
         initProgressCallback
       });
 

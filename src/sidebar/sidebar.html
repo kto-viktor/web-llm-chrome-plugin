@@ -14,7 +14,8 @@
         <h1 class="title">Offline GPT</h1>
         <select class="model-selector" id="model-selector">
           <option value="gemini-nano">Gemini Nano</option>
-          <option value="webllm">WebLLM</option>
+          <option value="webllm-qwen">Qwen 2.5 7B</option>
+          <option value="webllm-deepseek">DeepSeek-R1</option>
         </select>
       </div>
       <div class="model-status" id="model-status">
@@ -35,6 +36,19 @@
     <!-- Error Display -->
     <div class="error-section hidden" id="error-section">
       <div class="error-message" id="error-message"></div>
+    </div>
+
+    <!-- Gemini Nano Setup Instructions -->
+    <div class="gemini-setup-section hidden" id="gemini-setup-section">
+      <div class="gemini-setup-header">Gemini Nano Setup Required</div>
+      <p class="gemini-setup-intro">Gemini Nano is a fast model embedded in Google Chrome. One-time setup required:</p>
+      <ol class="gemini-setup-steps">
+        <li>Go to <a href="#" class="chrome-link" data-url="chrome://flags/#prompt-api-for-gemini-nano">chrome://flags/#prompt-api-for-gemini-nano</a> and enable <strong>Prompt API for Gemini Nano</strong></li>
+        <li>Go to <a href="#" class="chrome-link" data-url="chrome://flags/#optimization-guide-on-device-model">chrome://flags/#optimization-guide-on-device-model</a> and enable <strong>Optimization guide on device</strong></li>
+        <li>Go to <a href="#" class="chrome-link" data-url="chrome://components/">chrome://components/</a> and download <strong>Optimization Guide On Device Model</strong></li>
+        <li>Restart Chrome</li>
+      </ol>
+      <button class="gemini-setup-dismiss" id="gemini-setup-dismiss">Got it</button>
     </div>
 
     <!-- Chat Messages -->
