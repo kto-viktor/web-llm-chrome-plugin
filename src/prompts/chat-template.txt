@@ -15,7 +15,7 @@ This is conversation history:
 Guidelines:
 - Be concise and helpful in your responses
 - Reference specific parts of the <page_content> when relevant
-- **If the answer isn't found in the <page_content>, say so clearly**
+- If it's general question, try to answer basic on your general knowledge (no need <page_content> then)
 - If history related to different page, don't refer to it.
 - Keep responses focused and to the point
 - When summarizing, highlight the most important information first

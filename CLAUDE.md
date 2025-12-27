@@ -1,5 +1,5 @@
 ### Todo file
-1. Remaining work in TODO.md file
+1. Remaining work in _internal-claude-prompts/TODO.md file
 2. once you finished it, change todo.md file
 
 ### Code style
