@@ -109,8 +109,8 @@ async function loadPageAttachment() {
 
     // Check if we have valid page content (not the fallback message)
     const hasValidContent = pageContent &&
-      pageContent.content &&
-      !pageContent.content.includes('not available');
+        pageContent.content &&
+        !pageContent.content.includes('not available');
 
     if (hasValidContent) {
       currentAttachment = pageContent;
@@ -226,8 +226,13 @@ async function handleSendMessage() {
   const userMsgEl = renderMessage({ role: 'user', content: message, attachment });
   elements.messages.appendChild(userMsgEl);
 
-  // Show thinking indicator
   elements.thinkingIndicator.classList.remove('hidden');
+  const assistantMsgEl = document.createElement('div');
+  assistantMsgEl.className = 'message assistant generating';
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+  assistantMsgEl.appendChild(contentDiv);
+  elements.messages.appendChild(assistantMsgEl);
   scrollToBottom();
 
   setInputEnabled(false);
@@ -237,35 +242,22 @@ async function handleSendMessage() {
   elements.attachmentSection.classList.add('hidden');
 
   let fullResponse = '';
-  let assistantMsgEl = null;
 
   try {
     await chatService.sendMessage(message, {
       attachment,
       onToken: (token) => {
-        // Hide thinking indicator and create assistant message on first token
-        if (!assistantMsgEl) {
-          elements.thinkingIndicator.classList.add('hidden');
-          assistantMsgEl = document.createElement('div');
-          assistantMsgEl.className = 'message assistant generating';
-          const contentDiv = document.createElement('div');
-          contentDiv.className = 'message-content';
-          assistantMsgEl.appendChild(contentDiv);
-          elements.messages.appendChild(assistantMsgEl);
-        }
+        elements.thinkingIndicator.classList.add('hidden');
         fullResponse += token;
-        assistantMsgEl.querySelector('.message-content').textContent = fullResponse;
+        contentDiv.textContent = fullResponse;
         scrollToBottom();
       }
     });
 
     // Format complete response with markdown
-    if (assistantMsgEl) {
-      assistantMsgEl.classList.remove('generating');
-      assistantMsgEl.querySelector('.message-content').innerHTML = formatResponse(fullResponse);
-    }
+    assistantMsgEl.classList.remove('generating');
+    contentDiv.innerHTML = formatResponse(fullResponse);
   } catch (error) {
-    elements.thinkingIndicator.classList.add('hidden');
     const errorMsg = error?.message || String(error) || 'Unknown error';
     await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
   } finally {
@@ -290,8 +282,14 @@ async function handlePageSummary() {
   const userMsgEl = renderMessage({ role: 'user', content: 'Give a summary of this page.', attachment });
   elements.messages.appendChild(userMsgEl);
 
-  // Show thinking indicator
   elements.thinkingIndicator.classList.remove('hidden');
+
+    const assistantMsgEl = document.createElement('div');
+  assistantMsgEl.className = 'message assistant generating';
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'message-content';
+  assistantMsgEl.appendChild(contentDiv);
+  elements.messages.appendChild(assistantMsgEl);
   scrollToBottom();
 
   setInputEnabled(false);
@@ -301,32 +299,19 @@ async function handlePageSummary() {
   elements.attachmentSection.classList.add('hidden');
 
   let fullResponse = '';
-  let assistantMsgEl = null;
 
   try {
     await chatService.requestPageSummary(attachment, (token) => {
-      // Hide thinking indicator and create assistant message on first token
-      if (!assistantMsgEl) {
-        elements.thinkingIndicator.classList.add('hidden');
-        assistantMsgEl = document.createElement('div');
-        assistantMsgEl.className = 'message assistant generating';
-        const contentDiv = document.createElement('div');
-        contentDiv.className = 'message-content';
-        assistantMsgEl.appendChild(contentDiv);
-        elements.messages.appendChild(assistantMsgEl);
-      }
+      elements.thinkingIndicator.classList.add('hidden');
       fullResponse += token;
-      assistantMsgEl.querySelector('.message-content').textContent = fullResponse;
+      contentDiv.textContent = fullResponse;
       scrollToBottom();
     });
 
     // Format complete response with markdown
-    if (assistantMsgEl) {
-      assistantMsgEl.classList.remove('generating');
-      assistantMsgEl.querySelector('.message-content').innerHTML = formatResponse(fullResponse);
-    }
+    assistantMsgEl.classList.remove('generating');
+    contentDiv.innerHTML = formatResponse(fullResponse);
   } catch (error) {
-    elements.thinkingIndicator.classList.add('hidden');
     const errorMsg = error?.message || String(error) || 'Unknown error';
     await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
   } finally {
