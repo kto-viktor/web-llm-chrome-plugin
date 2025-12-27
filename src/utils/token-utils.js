@@ -15,7 +15,13 @@ export function countTokens(text) {
   if (!text || typeof text !== 'string') {
     return 0;
   }
-  return encode(text).length;
+  try {
+    return encode(text, { allowedSpecial: 'all' }).length;
+  } catch (error) {
+    // Fallback: estimate tokens by word count (~1.3 tokens per word)
+    console.warn('[Token Utils] Encoding failed, using estimate:', error.message);
+    return Math.ceil(text.split(/\s+/).length * 1.3);
+  }
 }
 
 /**
@@ -29,21 +35,38 @@ export function truncateToTokens(text, maxTokens) {
     return { text: '', tokenCount: 0, truncated: false };
   }
 
-  const tokens = encode(text);
+  try {
+    const tokens = encode(text, { allowedSpecial: 'all' });
 
-  if (tokens.length <= maxTokens) {
-    return { text, tokenCount: tokens.length, truncated: false };
+    if (tokens.length <= maxTokens) {
+      return { text, tokenCount: tokens.length, truncated: false };
+    }
+
+    // Truncate tokens and decode back to text
+    const truncatedTokens = tokens.slice(0, maxTokens);
+    const truncatedText = decode(truncatedTokens);
+
+    return {
+      text: truncatedText + '...',
+      tokenCount: maxTokens,
+      truncated: true
+    };
+  } catch (error) {
+    // Fallback: truncate by estimated word count
+    console.warn('[Token Utils] Truncation encoding failed, using word-based:', error.message);
+    const words = text.split(/\s+/);
+    const estimatedWords = Math.floor(maxTokens / 1.3);
+
+    if (words.length <= estimatedWords) {
+      return { text, tokenCount: Math.ceil(words.length * 1.3), truncated: false };
+    }
+
+    return {
+      text: words.slice(0, estimatedWords).join(' ') + '...',
+      tokenCount: maxTokens,
+      truncated: true
+    };
   }
-
-  // Truncate tokens and decode back to text
-  const truncatedTokens = tokens.slice(0, maxTokens);
-  const truncatedText = decode(truncatedTokens);
-
-  return {
-    text: truncatedText + '...',
-    tokenCount: maxTokens,
-    truncated: true
-  };
 }
 
 /**
