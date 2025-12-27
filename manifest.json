@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Offline GPT",
+  "name": "Offline GPT: Offline (local) AI Chat Assistant - Gemini, Deepseek-R1, Qwen",
   "version": "1.0.0",
-  "description": "Chat with local LLMs in a sidebar with access to current page content",
+  "description": "Chat with AI using Chrome embedded Gemini or locally downloaded models (WebLLM) and current page context",
 
   "permissions": [
     "activeTab",
