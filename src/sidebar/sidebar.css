@@ -481,6 +481,24 @@ body {
   cursor: not-allowed;
 }
 
+/* Contact Link */
+.contact-row {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.contact-link {
+  font-size: 11px;
+  color: var(--success-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.contact-link:hover {
+  color: var(--success-color);
+  text-decoration: underline;
+}
+
 /* Utility classes */
 .hidden {
   display: none !important;
