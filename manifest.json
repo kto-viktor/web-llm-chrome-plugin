@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Offline GPT: Offline (local) AI Chat Assistant - Gemini, Deepseek-R1, Qwen",
-  "version": "4.0.1",
-  "description": "Chat with AI using Chrome embedded Gemini or locally downloaded models (WebLLM) and current page context",
+  "name": "Local LLM",
+  "version": "1.0.0",
+  "description": "Use Local LLM Chrome Extension: run llm locally (Gemini, DeepSeek, Qwen with WebLLM) and ask ai models about your tabs - private ai",
 
   "permissions": [
     "activeTab",
@@ -29,7 +29,7 @@
   ],
 
   "action": {
-    "default_title": "Open Offline GPT Sidebar",
+    "default_title": "Open Local LLM Sidebar",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",

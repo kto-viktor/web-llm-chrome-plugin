@@ -86,9 +86,20 @@ export class WebLLMAdapter {
     try {
       const initProgressCallback = (report) => {
         if (onProgress) {
+          // Customize the download text
+          let customText = report.text || 'Initializing...';
+
+          // Replace the verbose WebLLM message with something shorter
+          if (customText.includes('Fetching param cache')) {
+            const percent = Math.round((report.progress || 0) * 100);
+            customText = `Downloading model (just once 🚀please be patient 🙏)... ${percent}%`;
+          } else {
+            customText = 'Getting model .'
+          }
+
           onProgress({
             progress: report.progress || 0,
-            text: report.text || 'Initializing...'
+            text: customText
           });
         }
       };
