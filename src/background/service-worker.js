@@ -5,6 +5,32 @@
  */
 
 /**
+ * Injects content script into a specific tab.
+ * @param {number} tabId - The tab ID to inject the script into
+ */
+function injectContentScript(tabId) {
+  chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    files: ['src/content/content-script.js']
+  }).catch(error => {
+    // Silently ignore injection errors (e.g., chrome:// pages)
+    console.debug('Could not inject content script into tab:', tabId, error.message);
+  });
+}
+
+/**
+ * Injects content script into all existing tabs when extension is installed.
+ * This ensures tabs opened before installation also get the content script.
+ */
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.tabs.query({ url: ['http://*/*', 'https://*/*'] }, (tabs) => {
+    for (const tab of tabs) {
+      injectContentScript(tab.id);
+    }
+  });
+});
+
+/**
  * Opens the side panel when the extension icon is clicked.
  */
 chrome.action.onClicked.addListener(async (tab) => {

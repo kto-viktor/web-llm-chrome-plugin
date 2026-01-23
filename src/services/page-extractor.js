@@ -14,7 +14,22 @@ const MAX_PAGE_TOKENS = 2500;
 /**
  * Fallback message when page content is unavailable.
  */
-const UNAVAILABLE_MESSAGE = 'Page content is not available. If you need it, ask user to refresh the page';
+const UNAVAILABLE_MESSAGE = 'Page content is not available.';
+
+/**
+ * Elements that should be completely removed during extraction.
+ */
+const REMOVE_ELEMENTS = [
+  'script', 'style', 'noscript', 'iframe', 'svg', 'canvas',
+  'video', 'audio', 'embed', 'object', 'template', 'head'
+];
+
+/**
+ * Elements that typically don't contain main content.
+ */
+const SKIP_ELEMENTS = [
+  'nav', 'footer', 'header', 'aside', 'menu', 'menuitem'
+];
 
 /**
  * Extracted page content.
@@ -27,29 +42,77 @@ const UNAVAILABLE_MESSAGE = 'Page content is not available. If you need it, ask 
  */
 
 /**
+ * Extracts page content directly using chrome.scripting API.
+ * Used as fallback when content script is not available.
+ * @param {number} tabId - The tab ID to extract content from
+ * @returns {Promise<Object|null>} Extracted content or null on failure
+ */
+async function extractViaScriptingAPI(tabId) {
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tabId },
+      func: (removeElements, skipElements) => {
+        const clone = document.body.cloneNode(true);
+        const allTags = [...removeElements, ...skipElements];
+        for (const tag of allTags) {
+          const elements = clone.querySelectorAll(tag);
+          elements.forEach(el => el.remove());
+        }
+        const text = clone.textContent || clone.innerText || '';
+        const textContent = text
+          .replace(/\s+/g, ' ')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+
+        return {
+          title: document.title || '',
+          url: window.location.href,
+          html: document.body ? document.body.innerHTML : '',
+          textContent: textContent,
+          success: true
+        };
+      },
+      args: [REMOVE_ELEMENTS, SKIP_ELEMENTS]
+    });
+
+    if (results && results[0] && results[0].result) {
+      return results[0].result;
+    }
+    return null;
+  } catch (error) {
+    console.warn('[Page Extractor] Scripting API extraction failed:', error.message);
+    return null;
+  }
+}
+
+/**
  * Gets page content from the active tab.
- * Logs errors to console and returns fallback message instead of throwing.
+ * First tries via content script message, falls back to scripting API.
  * @returns {Promise<PageContent>} The page content or fallback
  */
 export async function getPageContent() {
   return new Promise((resolve) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       if (!tabs[0]?.id) {
         console.warn('[Page Extractor] No active tab found');
         resolve(createFallbackContent());
         return;
       }
 
-      chrome.tabs.sendMessage(tabs[0].id, { type: 'GET_PAGE_CONTENT' }, (response) => {
-        if (chrome.runtime.lastError) {
-          console.warn('[Page Extractor] Error getting page content:', chrome.runtime.lastError.message);
-          resolve(createFallbackContent());
-          return;
-        }
+      const tabId = tabs[0].id;
 
-        if (!response || response.error) {
-          console.warn('[Page Extractor] Invalid response:', response?.error);
-          resolve(createFallbackContent());
+      // Try content script first
+      chrome.tabs.sendMessage(tabId, { type: 'GET_PAGE_CONTENT' }, async (response) => {
+        if (chrome.runtime.lastError || !response || response.error) {
+          console.log('[Page Extractor] Content script unavailable, using scripting API fallback');
+
+          // Fallback to scripting API for tabs opened before extension install
+          const scriptResult = await extractViaScriptingAPI(tabId);
+          if (scriptResult) {
+            resolve(processPageContent(scriptResult));
+          } else {
+            resolve(createFallbackContent());
+          }
           return;
         }
 
