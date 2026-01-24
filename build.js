@@ -1,5 +1,5 @@
 /**
- * Build script for Offline GPT extension.
+ * Build script for Local LLM extension.
  * Bundles the sidebar JavaScript with dependencies.
  */
 

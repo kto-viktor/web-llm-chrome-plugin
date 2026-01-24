@@ -8,17 +8,24 @@ import * as webllm from '@mlc-ai/web-llm';
 
 /**
  * Available WebLLM models configuration.
+ * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
+ *
+ * Default HuggingFace URLs:
+ * - Qwen: https://huggingface.co/mlc-ai/Qwen2.5-7B-Instruct-q4f16_1-MLC/resolve/main/
+ * - DeepSeek: https://huggingface.co/mlc-ai/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/resolve/main/
  */
 export const WEBLLM_MODELS = {
   qwen: {
     id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
     name: 'webllm-qwen',
-    displayName: 'Qwen 2.5 7B (WebLLM)'
+    displayName: 'Qwen 2.5 7B (WebLLM)',
+    modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/Qwen2.5-7B-Instruct-q4f16_1-MLC/'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
-    displayName: 'DeepSeek-R1 (WebLLM)'
+    displayName: 'DeepSeek-R1 (WebLLM)',
+    modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
   }
 };
 
@@ -42,6 +49,8 @@ export class WebLLMAdapter {
     this.modelName = config.name;
     /** @type {string} */
     this.displayModelName = config.displayName;
+    /** @type {string|undefined} */
+    this.modelUrl = config.modelUrl;
     /** @type {Object|null} */
     this.engine = null;
     /** @type {boolean} */
@@ -92,7 +101,7 @@ export class WebLLMAdapter {
           // Replace the verbose WebLLM message with something shorter
           if (customText.includes('Fetching param cache')) {
             const percent = Math.round((report.progress || 0) * 100);
-            customText = `Downloading model (just once 🚀please be patient 🙏)... ${percent}%`;
+            customText = `Downloading model (just once 🚀)... ${percent}%`;
           } else {
             customText = 'Getting model .'
           }
@@ -104,9 +113,27 @@ export class WebLLMAdapter {
         }
       };
 
-      this.engine = await webllm.CreateMLCEngine(this.modelId, {
-        initProgressCallback
-      });
+      // Build engine options
+      const engineOptions = { initProgressCallback };
+
+      // Use custom CDN URL if specified
+      if (this.modelUrl) {
+        const defaultConfig = webllm.prebuiltAppConfig.model_list.find(
+          m => m.model_id === this.modelId
+        );
+
+        if (defaultConfig) {
+          engineOptions.appConfig = {
+            model_list: [{
+              ...defaultConfig,
+              model: this.modelUrl
+            }]
+          };
+          console.log(`[WebLLM] Using custom model URL: ${this.modelUrl}`);
+        }
+      }
+
+      this.engine = await webllm.CreateMLCEngine(this.modelId, engineOptions);
 
       this.initialized = true;
       this.downloading = false;
