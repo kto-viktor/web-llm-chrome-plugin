@@ -7,9 +7,10 @@ import { countTokens, truncateToTokens } from '../utils/token-utils.js';
 
 /**
  * Maximum tokens to include from page content.
- * Leaves room for system prompt (~500) + history (~1000) within 4096 context.
+ * TinyLlama has 2048 context, so we keep this conservative.
+ * Leaves room for system prompt (~300) + user message (~200) + response (~700).
  */
-const MAX_PAGE_TOKENS = 2500;
+const MAX_PAGE_TOKENS = 800;
 
 /**
  * Fallback message when page content is unavailable.

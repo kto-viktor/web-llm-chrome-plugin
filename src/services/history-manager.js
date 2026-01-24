@@ -8,7 +8,7 @@ import { countTokens } from '../utils/token-utils.js';
 /**
  * Maximum tokens allowed in history before trimming oldest messages.
  */
-const MAX_HISTORY_TOKENS = 800;
+const MAX_HISTORY_TOKENS = 300;
 
 /**
  * Maximum tokens allowed for a single user message.
