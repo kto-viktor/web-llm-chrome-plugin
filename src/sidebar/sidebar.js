@@ -391,9 +391,9 @@ async function handleChromeLink(event) {
 async function handleGeminiSetupDismiss() {
   elements.geminiSetupSection.classList.add('hidden');
   // Reset selector to Qwen
-  elements.modelSelector.value = 'webllm-tinyllama';
-  // Switch to TinyLlama model
-  await llm.switchModel('webllm-tinyllama');
+  elements.modelSelector.value = 'webllm-qwen';
+  // Switch to Qwen model
+  await llm.switchModel('webllm-qwen');
 }
 
 /**

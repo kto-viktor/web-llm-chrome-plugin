@@ -132,9 +132,9 @@ export class LLMInterface {
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
       } else if (detection.recommendedModel === 'webllm') {
-        // Default to TinyLlama when Gemini Nano is not available
-        console.log('[LLM Interface] Using WebLLM (TinyLlama 1.1B)');
-        this.adapter = new WebLLMAdapter('tinyllama');
+        // Default to Qwen when Gemini Nano is not available
+        console.log('[LLM Interface] Using WebLLM (Qwen 2.5 7B)');
+        this.adapter = new WebLLMAdapter('qwen');
         this.updateState({
           status: 'downloading',
           modelName: this.adapter.getName(),
@@ -284,26 +284,6 @@ export class LLMInterface {
 
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
-
-      } else if (modelName === 'webllm-tinyllama') {
-        console.log('[LLM Interface] Loading WebLLM TinyLlama...');
-        this.adapter = new WebLLMAdapter('tinyllama');
-        this.updateState({
-          status: 'downloading',
-          modelName: this.adapter.getName(),
-          displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (one-time)...'
-        });
-
-        await this.adapter.initialize((progress) => {
-          this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text
-          });
-        });
-
-        this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM TinyLlama ready');
 
       } else if (modelName === 'webllm-qwen') {
         console.log('[LLM Interface] Loading WebLLM Qwen...');

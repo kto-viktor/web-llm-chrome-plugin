@@ -9,25 +9,23 @@ import * as webllm from '@mlc-ai/web-llm';
 /**
  * Available WebLLM models configuration.
  * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
+ *
+ * Default HuggingFace URLs:
+ * - Qwen: https://huggingface.co/mlc-ai/Qwen2.5-7B-Instruct-q4f16_1-MLC/resolve/main/
+ * - DeepSeek: https://huggingface.co/mlc-ai/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/resolve/main/
  */
 export const WEBLLM_MODELS = {
-  tinyllama: {
-    id: 'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC',
-    name: 'webllm-tinyllama',
-    displayName: 'TinyLlama 1.1B (WebLLM)',
-    modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC/'
-  },
   qwen: {
     id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
     name: 'webllm-qwen',
     displayName: 'Qwen 2.5 7B (WebLLM)',
-    modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/Qwen2.5-7B-Instruct-q4f16_1-MLC/'
+    //modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/Qwen2.5-7B-Instruct-q4f16_1-MLC/'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
     displayName: 'DeepSeek-R1 (WebLLM)',
-    modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
+    //modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
   }
 };
 
@@ -37,9 +35,9 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'tinyllama'|'qwen'|'deepseek'} [modelKey='tinyllama'] - The model key to use
+   * @param {'qwen'|'deepseek'} [modelKey='qwen'] - The model key to use
    */
-  constructor(modelKey = 'tinyllama') {
+  constructor(modelKey = 'qwen') {
     const config = WEBLLM_MODELS[modelKey];
     if (!config) {
       throw new Error(`Unknown WebLLM model: ${modelKey}`);
