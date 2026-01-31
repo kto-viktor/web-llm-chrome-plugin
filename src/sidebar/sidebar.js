@@ -219,7 +219,7 @@ async function loadPageAttachment() {
     // Check if we have valid page content (not the fallback message)
     const hasValidContent = pageContent &&
         pageContent.content &&
-        !pageContent.content.includes('not available');
+        !pageContent.content.includes('LLM_PLUGIN_ERROR');
 
     if (hasValidContent) {
       currentAttachment = pageContent;

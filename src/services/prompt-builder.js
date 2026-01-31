@@ -44,8 +44,8 @@ function formatPageContent(pageContent) {
   }
 
   return {
-    page_title: pageContent.title || 'Not available',
-    page_url: pageContent.url || 'Not available',
+    page_title: pageContent.title || 'LLM_PLUGIN_ERROR_CONTENT_NOT_AVAILABLE',
+    page_url: pageContent.url || 'LLM_PLUGIN_ERROR_CONTENT_NOT_AVAILABLE',
     page_content: content
   };
 }
