@@ -23,6 +23,7 @@ const elements = {
   modelSelector: document.getElementById('model-selector'),
   downloadSection: document.getElementById('download-section'),
   downloadInfo: document.getElementById('download-info'),
+  downloadNote: document.getElementById('download-note'),
   progressFill: document.getElementById('progress-fill'),
   errorSection: document.getElementById('error-section'),
   errorMessage: document.getElementById('error-message'),
@@ -80,14 +81,14 @@ const MODEL_INFO = {
   'webllm-qwen': {
     name: 'Qwen 2.5 7B',
     tagline: 'Balanced & Capable',
-    description: 'Alibaba\'s powerful 7 billion parameter model. Excellent for general tasks, coding help, and creative writing.',
+    description: 'Alibaba\'s powerful 7 billion parameter model. Excellent for general tasks, summary, and creative writing.',
     icon: '🧠',
     benefits: ['Great all-rounder', 'Strong reasoning', 'Multilingual']
   },
   'webllm-deepseek': {
     name: 'DeepSeek-R1',
     tagline: 'Deep Thinking Model',
-    description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems, math, and logical analysis.',
+    description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems and advanced users, who need to see LLM thinking process.',
     icon: '🔬',
     benefits: ['Chain-of-thought', 'Complex reasoning', 'Problem solving']
   }
@@ -125,6 +126,13 @@ function updateStatusDisplay(state) {
     elements.progressFill.style.width = `${(downloadProgress * 100).toFixed(1)}%`;
     elements.statusIndicator.classList.add('downloading');
     elements.statusText.textContent = displayName || 'Downloading model...';
+
+    // Update note based on cache vs download
+    if (state.isFromCache) {
+      elements.downloadNote.textContent = 'Quickly loading from your device — no more internet needed! :)';
+    } else {
+      elements.downloadNote.textContent = 'This is a one-time download.';
+    }
 
     // Sync dropdown to match the model being downloaded (if user hasn't explicitly selected another)
     if (!previewSelectedModel && modelName) {
@@ -323,7 +331,7 @@ function renderCacheLoadingScreen() {
   screen.innerHTML = `
     <div class="cache-loading-icon">💾</div>
     <div class="cache-loading-text">Loading from your device...</div>
-    <div class="cache-loading-subtext">This will be quick</div>
+    <div class="cache-loading-subtext">The LLM is yours now.</div>
   `;
   return screen;
 }

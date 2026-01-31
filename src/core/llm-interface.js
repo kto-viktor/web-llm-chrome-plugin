@@ -142,7 +142,7 @@ export class LLMInterface {
           status: 'downloading',
           modelName: this.adapter.getName(),
           displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (one-time)...'
+          downloadText: 'Starting model download (from web to your device)...'
         });
 
         await this.adapter.initialize((progress) => {
@@ -297,7 +297,7 @@ export class LLMInterface {
           status: 'downloading',
           modelName: this.adapter.getName(),
           displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (one-time)...'
+          downloadText: 'Starting model download (from web to your device)...'
         });
 
         await this.adapter.initialize((progress) => {
@@ -318,7 +318,7 @@ export class LLMInterface {
           status: 'downloading',
           modelName: this.adapter.getName(),
           displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (one-time)...'
+          downloadText: 'Starting model download (from web to your device)...'
         });
 
         await this.adapter.initialize((progress) => {
