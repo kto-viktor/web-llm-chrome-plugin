@@ -118,7 +118,10 @@ function updateStatusDisplay(state) {
   // Always show download progress if downloading (regardless of preview selection)
   if (status === 'downloading') {
     elements.downloadSection.classList.remove('hidden');
-    elements.downloadInfo.textContent = downloadText || 'Downloading...';
+    // Show which model is being downloaded in the progress text
+    const modelInfo = MODEL_INFO[modelName] || { name: 'model' };
+    const progressText = downloadText || 'Downloading...';
+    elements.downloadInfo.textContent = `${modelInfo.name}: ${progressText}`;
     elements.progressFill.style.width = `${(downloadProgress * 100).toFixed(1)}%`;
     elements.statusIndicator.classList.add('downloading');
     elements.statusText.textContent = displayName || 'Downloading model...';
@@ -289,11 +292,11 @@ function renderDownloadScreen(modelKey) {
 
   downloadScreen.innerHTML = `
     <div class="download-screen-icon">${info.icon}</div>
-    <h2 class="download-screen-title">Setting up ${info.name}</h2>
+    <h2 class="download-screen-title">Introducing: ${info.name}</h2>
     <p class="download-screen-tagline">${info.tagline}</p>
 
     <div class="download-screen-message">
-      <p><strong>One-time setup</strong> — we're downloading this AI model directly to your computer.</p>
+      <p><strong>One-time setup</strong> — currently we're downloading LLM directly to your computer.</p>
       <p>Once complete, it's yours forever. No internet needed, complete privacy.</p>
     </div>
 
