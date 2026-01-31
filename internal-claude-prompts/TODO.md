@@ -7,9 +7,9 @@
 - don't block window during model load - model selector stays enabled during download, user can browse other models and see Gemini setup instructions while download continues in background
 - engaging download screen (35-45% of screen) with model info, benefits, and "one-time download to your computer" message; updates when user previews different models in dropdown
 - compact cache loading screen when model loads from disk (shows disk icon and "Loading from your device... This will be quick")
+- **fix streaming DOM updates**: Migrated sidebar from vanilla JS to React + TypeScript. React's state-based rendering handles streaming properly in Chrome extension sidebars (unlike vanilla JS DOM manipulation which Chrome doesn't repaint). Original sidebar.js backed up as sidebar.js.bak.
 
 ## Todo
-- add streaming animation
 - **add waiting animation**, similarly to claude - generate 1000 "thinking" words and keep animation
 - When download just initiated, first minute it just shows text: "Getting model". I want to show some progress bar. For example: "Getting metainformation of model:" and then can fake some progress bar where 100% is 1 minute.
 - **migrate to amazon CDN**

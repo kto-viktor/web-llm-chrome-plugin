@@ -8,7 +8,7 @@ import * as esbuild from 'esbuild';
 const isWatch = process.argv.includes('--watch');
 
 const buildOptions = {
-  entryPoints: ['src/sidebar/sidebar.js'],
+  entryPoints: ['src/sidebar/index.tsx'],
   bundle: true,
   outfile: 'dist/sidebar.bundle.js',
   format: 'esm',
@@ -18,7 +18,9 @@ const buildOptions = {
   minify: !isWatch,
   logLevel: 'info',
   loader: {
-    '.txt': 'text',  // Inline .txt files as strings
+    '.txt': 'text',
+    '.ts': 'ts',
+    '.tsx': 'tsx',
   },
 };
 
