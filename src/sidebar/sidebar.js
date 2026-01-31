@@ -47,37 +47,74 @@ const elements = {
 let currentAttachment = null;
 
 /**
+ * Tracks the model currently selected in dropdown for preview.
+ * May differ from the model being downloaded.
+ * @type {string|null}
+ */
+let previewSelectedModel = null;
+
+/**
+ * Whether a download is currently in progress.
+ * @type {boolean}
+ */
+let isDownloading = false;
+
+/**
  * Updates the model status display.
+ * Handles both the actual LLM state and preview selection during downloads.
  * @param {Object} state - The LLM state
  */
 function updateStatusDisplay(state) {
-  const { status, displayName, error, downloadProgress, downloadText } = state;
+  const { status, displayName, error, downloadProgress, downloadText, modelName } = state;
 
   elements.statusIndicator.className = 'status-indicator';
-  elements.downloadSection.classList.add('hidden');
   elements.errorSection.classList.add('hidden');
-  elements.geminiSetupSection.classList.add('hidden');
+
+  // Track download state
+  isDownloading = (status === 'downloading');
+
+  // Always show download progress if downloading (regardless of preview selection)
+  if (status === 'downloading') {
+    elements.downloadSection.classList.remove('hidden');
+    elements.downloadInfo.textContent = downloadText || 'Downloading...';
+    elements.progressFill.style.width = `${(downloadProgress * 100).toFixed(1)}%`;
+    elements.statusIndicator.classList.add('downloading');
+    elements.statusText.textContent = displayName || 'Downloading model...';
+  } else {
+    elements.downloadSection.classList.add('hidden');
+  }
+
+  // Show Gemini setup if Gemini is selected in dropdown (preview) while downloading another model
+  // OR if Gemini is unavailable when actually trying to use it
+  const dropdownValue = elements.modelSelector.value;
+  const isGeminiPreviewDuringDownload = isDownloading && dropdownValue === 'gemini-nano' && modelName !== 'gemini-nano';
+  const isGeminiUnavailable = status === 'gemini-unavailable';
+
+  if (isGeminiPreviewDuringDownload || isGeminiUnavailable) {
+    elements.geminiSetupSection.classList.remove('hidden');
+  } else {
+    elements.geminiSetupSection.classList.add('hidden');
+  }
 
   switch (status) {
     case 'detecting':
       elements.statusText.textContent = 'Detecting available models...';
+      setInputEnabled(false);
       break;
 
     case 'downloading':
-      elements.statusIndicator.classList.add('downloading');
-      elements.statusText.textContent = displayName || 'Downloading model...';
-      elements.downloadSection.classList.remove('hidden');
-      elements.downloadInfo.textContent = downloadText || 'Downloading...';
-      elements.progressFill.style.width = `${(downloadProgress * 100).toFixed(1)}%`;
+      // Already handled above, just disable chat input
+      setInputEnabled(false);
       break;
 
     case 'ready':
       elements.statusIndicator.classList.add('ready');
       elements.statusText.textContent = displayName || 'Ready';
       setInputEnabled(true);
-      // Sync selector with active model
-      if (state.modelName) {
-        elements.modelSelector.value = state.modelName;
+      // Sync selector with active model and clear preview
+      if (modelName) {
+        elements.modelSelector.value = modelName;
+        previewSelectedModel = null;
       }
       break;
 
@@ -92,7 +129,6 @@ function updateStatusDisplay(state) {
     case 'gemini-unavailable':
       elements.statusIndicator.classList.add('error');
       elements.statusText.textContent = 'Gemini Nano unavailable';
-      elements.geminiSetupSection.classList.remove('hidden');
       setInputEnabled(false);
       break;
 
@@ -102,7 +138,8 @@ function updateStatusDisplay(state) {
 }
 
 /**
- * Enables or disables input controls.
+ * Enables or disables chat input controls (not the model selector).
+ * Model selector remains enabled to allow browsing models at any time.
  * @param {boolean} enabled - Whether to enable inputs
  */
 function setInputEnabled(enabled) {
@@ -110,7 +147,7 @@ function setInputEnabled(enabled) {
   elements.sendBtn.disabled = !enabled;
   elements.summaryBtn.disabled = !enabled;
   elements.clearBtn.disabled = !enabled;
-  elements.modelSelector.disabled = !enabled;
+  // Model selector is NOT disabled here - always allow browsing models
 }
 
 /**
@@ -346,12 +383,29 @@ async function handleClearHistory() {
 
 /**
  * Handles model selection change.
+ * During download: shows preview info without cancelling download.
+ * When not downloading: actually switches to the selected model.
  */
 async function handleModelChange() {
   const selectedModel = elements.modelSelector.value;
   console.log(`[Sidebar] User selected model: ${selectedModel}`);
 
-  setInputEnabled(false);
+  // If downloading, just show preview info without switching
+  if (isDownloading) {
+    previewSelectedModel = selectedModel;
+    console.log(`[Sidebar] Preview selection during download: ${selectedModel}`);
+
+    // Show/hide Gemini setup based on preview selection
+    if (selectedModel === 'gemini-nano') {
+      elements.geminiSetupSection.classList.remove('hidden');
+    } else {
+      elements.geminiSetupSection.classList.add('hidden');
+    }
+    return;
+  }
+
+  // Not downloading - actually switch the model
+  previewSelectedModel = null;
 
   try {
     await llm.switchModel(selectedModel);
@@ -386,13 +440,24 @@ async function handleChromeLink(event) {
 
 /**
  * Handles dismissing the Gemini Nano setup instructions.
- * Reverts to Qwen model.
+ * During download: just hides setup and reverts dropdown to downloading model.
+ * When not downloading: switches to Qwen model.
  */
 async function handleGeminiSetupDismiss() {
   elements.geminiSetupSection.classList.add('hidden');
-  // Reset selector to Qwen
+
+  // If downloading, just revert dropdown to the model being downloaded
+  if (isDownloading) {
+    const currentState = llm.getState();
+    if (currentState.modelName) {
+      elements.modelSelector.value = currentState.modelName;
+    }
+    previewSelectedModel = null;
+    return;
+  }
+
+  // Not downloading - switch to Qwen model
   elements.modelSelector.value = 'webllm-qwen';
-  // Switch to Qwen model
   await llm.switchModel('webllm-qwen');
 }
 
