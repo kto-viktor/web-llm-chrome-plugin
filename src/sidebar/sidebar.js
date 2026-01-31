@@ -60,6 +60,40 @@ let previewSelectedModel = null;
 let isDownloading = false;
 
 /**
+ * Whether current loading is from cache (vs internet download).
+ * @type {boolean}
+ */
+let isLoadingFromCache = false;
+
+/**
+ * Model information for the download screen.
+ * Provides engaging descriptions for each model.
+ */
+const MODEL_INFO = {
+  'gemini-nano': {
+    name: 'Gemini Nano',
+    tagline: 'Chrome Built-in AI',
+    description: 'Google\'s compact AI model embedded directly in Chrome. Lightning fast responses with zero download wait.',
+    icon: '✨',
+    benefits: ['Instant startup', 'No download needed', 'Privacy-first']
+  },
+  'webllm-qwen': {
+    name: 'Qwen 2.5 7B',
+    tagline: 'Balanced & Capable',
+    description: 'Alibaba\'s powerful 7 billion parameter model. Excellent for general tasks, coding help, and creative writing.',
+    icon: '🧠',
+    benefits: ['Great all-rounder', 'Strong reasoning', 'Multilingual']
+  },
+  'webllm-deepseek': {
+    name: 'DeepSeek-R1',
+    tagline: 'Deep Thinking Model',
+    description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems, math, and logical analysis.',
+    icon: '🔬',
+    benefits: ['Chain-of-thought', 'Complex reasoning', 'Problem solving']
+  }
+};
+
+/**
  * Updates the model status display.
  * Handles both the actual LLM state and preview selection during downloads.
  * @param {Object} state - The LLM state
@@ -70,8 +104,16 @@ function updateStatusDisplay(state) {
   elements.statusIndicator.className = 'status-indicator';
   elements.errorSection.classList.add('hidden');
 
-  // Track download state
+  // Track download state and cache state, re-render if changed
+  const wasDownloading = isDownloading;
+  const wasFromCache = isLoadingFromCache;
   isDownloading = (status === 'downloading');
+  isLoadingFromCache = state.isFromCache || false;
+
+  // Re-render messages when download state or cache state changes
+  if (wasDownloading !== isDownloading || (isDownloading && wasFromCache !== isLoadingFromCache)) {
+    renderMessages();
+  }
 
   // Always show download progress if downloading (regardless of preview selection)
   if (status === 'downloading') {
@@ -80,17 +122,22 @@ function updateStatusDisplay(state) {
     elements.progressFill.style.width = `${(downloadProgress * 100).toFixed(1)}%`;
     elements.statusIndicator.classList.add('downloading');
     elements.statusText.textContent = displayName || 'Downloading model...';
+
+    // Sync dropdown to match the model being downloaded (if user hasn't explicitly selected another)
+    if (!previewSelectedModel && modelName) {
+      elements.modelSelector.value = modelName;
+    }
   } else {
     elements.downloadSection.classList.add('hidden');
   }
 
-  // Show Gemini setup if Gemini is selected in dropdown (preview) while downloading another model
-  // OR if Gemini is unavailable when actually trying to use it
-  const dropdownValue = elements.modelSelector.value;
-  const isGeminiPreviewDuringDownload = isDownloading && dropdownValue === 'gemini-nano' && modelName !== 'gemini-nano';
+  // Show Gemini setup ONLY if:
+  // - User explicitly selected Gemini from dropdown during download (previewSelectedModel)
+  // - OR Gemini is unavailable when actually trying to use it
+  const isGeminiExplicitlySelected = previewSelectedModel === 'gemini-nano';
   const isGeminiUnavailable = status === 'gemini-unavailable';
 
-  if (isGeminiPreviewDuringDownload || isGeminiUnavailable) {
+  if (isGeminiExplicitlySelected || isGeminiUnavailable) {
     elements.geminiSetupSection.classList.remove('hidden');
   } else {
     elements.geminiSetupSection.classList.add('hidden');
@@ -226,12 +273,82 @@ function renderMessage(message, isGenerating = false) {
 }
 
 /**
+ * Renders the download screen with model info.
+ * Shows engaging content while model downloads.
+ * @param {string} modelKey - The model key to display info for
+ */
+function renderDownloadScreen(modelKey) {
+  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-qwen'];
+
+  const downloadScreen = document.createElement('div');
+  downloadScreen.className = 'download-screen';
+
+  const benefitsHtml = info.benefits
+    .map(b => `<li>${b}</li>`)
+    .join('');
+
+  downloadScreen.innerHTML = `
+    <div class="download-screen-icon">${info.icon}</div>
+    <h2 class="download-screen-title">Setting up ${info.name}</h2>
+    <p class="download-screen-tagline">${info.tagline}</p>
+
+    <div class="download-screen-message">
+      <p><strong>One-time setup</strong> — we're downloading this AI model directly to your computer.</p>
+      <p>Once complete, it's yours forever. No internet needed, complete privacy.</p>
+    </div>
+
+    <div class="download-screen-description">
+      ${info.description}
+    </div>
+
+    <ul class="download-screen-benefits">
+      ${benefitsHtml}
+    </ul>
+  `;
+
+  return downloadScreen;
+}
+
+/**
+ * Renders a compact loading screen for cache/disk loading.
+ * Shown when model is already downloaded and loading from device.
+ * @returns {HTMLElement} The cache loading screen element
+ */
+function renderCacheLoadingScreen() {
+  const screen = document.createElement('div');
+  screen.className = 'cache-loading-screen';
+  screen.innerHTML = `
+    <div class="cache-loading-icon">💾</div>
+    <div class="cache-loading-text">Loading from your device...</div>
+    <div class="cache-loading-subtext">This will be quick</div>
+  `;
+  return screen;
+}
+
+/**
  * Renders all messages from history.
+ * Shows download screen during download, cache screen for disk loading,
+ * or empty state when no messages.
  */
 function renderMessages() {
   const messages = historyManager.getMessages();
 
   elements.messages.innerHTML = '';
+
+  // During loading, show appropriate screen instead of empty state
+  if (isDownloading && messages.length === 0) {
+    // If loading from cache, show compact screen
+    if (isLoadingFromCache) {
+      elements.messages.appendChild(renderCacheLoadingScreen());
+      return;
+    }
+
+    // If downloading from internet, show full engaging screen
+    // Show info for preview model if selected, otherwise the downloading model
+    const displayModel = previewSelectedModel || llm.getState().modelName || 'webllm-qwen';
+    elements.messages.appendChild(renderDownloadScreen(displayModel));
+    return;
+  }
 
   if (messages.length === 0) {
     const emptyState = document.createElement('div');
@@ -401,6 +518,9 @@ async function handleModelChange() {
     } else {
       elements.geminiSetupSection.classList.add('hidden');
     }
+
+    // Re-render to show the selected model's info on download screen
+    renderMessages();
     return;
   }
 

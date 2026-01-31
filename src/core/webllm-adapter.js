@@ -97,18 +97,29 @@ export class WebLLMAdapter {
         if (onProgress) {
           // Customize the download text
           let customText = report.text || 'Initializing...';
+          let isFromCache = false;
 
-          // Replace the verbose WebLLM message with something shorter
+          // Detect if loading from cache or downloading from internet
           if (customText.includes('Fetching param cache')) {
+            // Downloading from internet
             const percent = Math.round((report.progress || 0) * 100);
-            customText = `Downloading model (just once 🚀)... ${percent}%`;
+            customText = `Downloading model... ${percent}%`;
+            isFromCache = false;
+          } else if (customText.includes('Loading model from cache') ||
+                     customText.includes('Loading GPU') ||
+                     customText.includes('Finish loading')) {
+            // Loading from local cache/disk
+            customText = 'Loading from your device...';
+            isFromCache = true;
           } else {
-            customText = 'Getting model .'
+            customText = 'Preparing model...';
+            isFromCache = true; // Assume cache for other init stages
           }
 
           onProgress({
             progress: report.progress || 0,
-            text: customText
+            text: customText,
+            isFromCache
           });
         }
       };

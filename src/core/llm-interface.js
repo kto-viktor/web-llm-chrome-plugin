@@ -18,6 +18,7 @@ import { SummarizerAdapter } from './summarizer.js';
  * @property {string|null} error
  * @property {number} downloadProgress - 0 to 1
  * @property {string} downloadText
+ * @property {boolean} isFromCache - Whether loading from cache (fast) vs downloading (slow)
  * @property {boolean} summarizerAvailable - Whether native Summarizer is available
  * @property {boolean} geminiNanoAvailable - Whether Gemini Nano is available
  */
@@ -41,6 +42,7 @@ export class LLMInterface {
       error: null,
       downloadProgress: 0,
       downloadText: '',
+      isFromCache: false,
       summarizerAvailable: false,
       geminiNanoAvailable: false
     };
@@ -111,7 +113,8 @@ export class LLMInterface {
           this.updateState({
             status: 'downloading',
             downloadProgress: progress.progress,
-            downloadText: progress.text
+            downloadText: progress.text,
+            isFromCache: progress.isFromCache || false
           });
         });
 
@@ -145,7 +148,8 @@ export class LLMInterface {
         await this.adapter.initialize((progress) => {
           this.updateState({
             downloadProgress: progress.progress,
-            downloadText: progress.text
+            downloadText: progress.text,
+            isFromCache: progress.isFromCache || false
           });
         });
 
@@ -269,7 +273,8 @@ export class LLMInterface {
           this.updateState({
             status: 'downloading',
             downloadProgress: progress.progress,
-            downloadText: progress.text
+            downloadText: progress.text,
+            isFromCache: progress.isFromCache || false
           });
         });
 
@@ -298,7 +303,8 @@ export class LLMInterface {
         await this.adapter.initialize((progress) => {
           this.updateState({
             downloadProgress: progress.progress,
-            downloadText: progress.text
+            downloadText: progress.text,
+            isFromCache: progress.isFromCache || false
           });
         });
 
@@ -318,7 +324,8 @@ export class LLMInterface {
         await this.adapter.initialize((progress) => {
           this.updateState({
             downloadProgress: progress.progress,
-            downloadText: progress.text
+            downloadText: progress.text,
+            isFromCache: progress.isFromCache || false
           });
         });
 

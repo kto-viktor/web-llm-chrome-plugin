@@ -302,6 +302,118 @@ body {
   font-size: 14px;
 }
 
+/* Download Screen - Engaging waiting experience */
+.download-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 40vh;
+  padding: 24px 20px;
+}
+
+.download-screen-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.download-screen-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.download-screen-tagline {
+  font-size: 14px;
+  color: var(--accent-color);
+  font-weight: 500;
+  margin: 0 0 20px 0;
+}
+
+.download-screen-message {
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, rgba(66, 133, 244, 0.08) 100%);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  max-width: 300px;
+  border: 1px solid var(--border-color);
+}
+
+.download-screen-message p {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.download-screen-message p:last-child {
+  margin-bottom: 0;
+  color: var(--text-secondary);
+}
+
+.download-screen-description {
+  color: var(--text-secondary);
+  font-size: 13px;
+  max-width: 280px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.download-screen-benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.download-screen-benefits li {
+  background: rgba(15, 157, 88, 0.1);
+  color: var(--success-color);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 16px;
+}
+
+/* Cache Loading Screen - Compact loading from disk */
+.cache-loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.cache-loading-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  animation: pulse 1.5s infinite;
+}
+
+.cache-loading-text {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cache-loading-subtext {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
 /* Page Attachment */
 .attachment-section {
   padding: 8px 16px;

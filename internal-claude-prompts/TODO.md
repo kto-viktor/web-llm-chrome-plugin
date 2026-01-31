@@ -4,16 +4,16 @@
 - model selection with multiple options: Gemini Nano (default when available), Qwen 2.5 7B (fallback), DeepSeek-R1 (optional)
 - Gemini Nano setup instructions shown when user selects it but it's unavailable (with clickable chrome:// URLs)
 - added "Contact Developer" link (mailto:kto.viktor.kto@gmail.com)
+- don't block window during model load - model selector stays enabled during download, user can browse other models and see Gemini setup instructions while download continues in background
+- engaging download screen (35-45% of screen) with model info, benefits, and "one-time download to your computer" message; updates when user previews different models in dropdown
+- compact cache loading screen when model loads from disk (shows disk icon and "Loading from your device... This will be quick")
 
 ## Todo
-- **don't block window during model load - add to see another models etc**
 - add streaming animation
 - **add waiting animation**, similarly to claude - generate 1000 "thinking" words and keep animation
 - When download just initiated, first minute it just shows text: "Getting model". I want to show some progress bar. For example: "Getting metainformation of model:" and then can fake some progress bar where 100% is 1 minute.
 - add loading indicator, when page is loading and can't be attached
 - add sentry and analytics
-- downloading model (just once 🚀) is not enough - it should be an **offer**, with size of screen limit
-- during loading from cache there is a text "this is one time download" - **VERY IMPORTANT TO REMOVE AND SHOW IT WILL BE QUICKLY LOADED FROM YOUR CACHE**
 - "thinking" scratchpad from deepseek should be under spoiler
 - instead of clear, add new chat button. Try to do somethign similarly to chat gpt
 - add ability to just copy support email
