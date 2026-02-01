@@ -1,5 +1,6 @@
 /**
  * Individual chat message component.
+ * Renders markdown during streaming for real-time formatted output.
  */
 
 import React from 'react';
@@ -28,17 +29,27 @@ export function Message({ message, isGenerating, streamingContent }: MessageProp
     return className;
   };
 
+  // User messages are plain text, assistant messages are markdown
+  const renderContent = () => {
+    if (isUser) {
+      return displayContent;
+    }
+
+    // Render markdown for assistant messages (including during streaming)
+    return (
+      <>
+        <span dangerouslySetInnerHTML={{ __html: formatResponse(displayContent) }} />
+        {isStreaming && <span className="streaming-cursor">▋</span>}
+      </>
+    );
+  };
+
   return (
     <div className={getClassName()}>
       {message.attachment && <MessageAttachment attachment={message.attachment} />}
-      <div
-        className="message-content"
-        {...(isUser || isStreaming
-          ? { children: displayContent }
-          : { dangerouslySetInnerHTML: { __html: formatResponse(displayContent) } }
-        )}
-      />
-      {isStreaming && <span className="streaming-cursor">▋</span>}
+      <div className="message-content">
+        {renderContent()}
+      </div>
     </div>
   );
 }
