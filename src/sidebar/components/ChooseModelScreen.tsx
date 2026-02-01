@@ -14,6 +14,11 @@ export function ChooseModelScreen() {
 
       <div className="model-options">
         <div className="model-option">
+          <span className="model-option-icon">🦙</span>
+          <strong className="model-option-name">Llama 3.2 1B</strong>
+          <p className="model-option-desc">Lightweight &amp; fast. Quick to download (705 MB).</p>
+        </div>
+        <div className="model-option">
           <span className="model-option-icon">🧠</span>
           <strong className="model-option-name">Qwen 2.5 7B</strong>
           <p className="model-option-desc">Balanced &amp; capable. Great for general tasks.</p>

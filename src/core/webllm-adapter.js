@@ -15,6 +15,11 @@ import * as webllm from '@mlc-ai/web-llm';
  * - DeepSeek: https://huggingface.co/mlc-ai/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/resolve/main/
  */
 export const WEBLLM_MODELS = {
+  llama: {
+    id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
+    name: 'webllm-llama',
+    displayName: 'Llama 3.2 1B (WebLLM)',
+  },
   qwen: {
     id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
     name: 'webllm-qwen',
@@ -35,7 +40,7 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'qwen'|'deepseek'} [modelKey='qwen'] - The model key to use
+   * @param {'llama'|'qwen'|'deepseek'} [modelKey='qwen'] - The model key to use
    */
   constructor(modelKey = 'qwen') {
     const config = WEBLLM_MODELS[modelKey];

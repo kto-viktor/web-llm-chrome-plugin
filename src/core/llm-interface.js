@@ -136,13 +136,35 @@ export class LLMInterface {
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
       } else if (detection.recommendedModel === 'webllm') {
-        // Check if any WebLLM model is already cached
+        // Check if any WebLLM model is already cached (check smallest first)
+        const llamaCached = await hasModelInCache(WEBLLM_MODELS.llama.id, prebuiltAppConfig);
         const qwenCached = await hasModelInCache(WEBLLM_MODELS.qwen.id, prebuiltAppConfig);
         const deepseekCached = await hasModelInCache(WEBLLM_MODELS.deepseek.id, prebuiltAppConfig);
 
-        console.log(`[LLM Interface] Qwen cached: ${qwenCached}, DeepSeek cached: ${deepseekCached}`);
+        console.log(`[LLM Interface] Llama cached: ${llamaCached}, Qwen cached: ${qwenCached}, DeepSeek cached: ${deepseekCached}`);
 
-        if (qwenCached) {
+        if (llamaCached) {
+          // Use cached Llama (smallest)
+          console.log('[LLM Interface] Using cached WebLLM (Llama 3.2 1B)');
+          this.adapter = new WebLLMAdapter('llama');
+          this.updateState({
+            status: 'downloading',
+            modelName: this.adapter.getName(),
+            displayName: this.adapter.getDisplayName(),
+            downloadText: 'Loading from your device...'
+          });
+
+          await this.adapter.initialize((progress) => {
+            this.updateState({
+              downloadProgress: progress.progress,
+              downloadText: progress.text,
+              isFromCache: progress.isFromCache || false
+            });
+          });
+
+          this.updateState({ status: 'ready', downloadProgress: 1 });
+          console.log('[LLM Interface] WebLLM ready');
+        } else if (qwenCached) {
           // Use cached Qwen
           console.log('[LLM Interface] Using cached WebLLM (Qwen 2.5 7B)');
           this.adapter = new WebLLMAdapter('qwen');
@@ -272,7 +294,7 @@ export class LLMInterface {
 
   /**
    * Switches to a different model.
-   * @param {'gemini-nano'|'webllm-qwen'|'webllm-deepseek'} modelName - The model to switch to
+   * @param {'gemini-nano'|'webllm-llama'|'webllm-qwen'|'webllm-deepseek'} modelName - The model to switch to
    * @returns {Promise<void>}
    */
   async switchModel(modelName) {
@@ -327,6 +349,27 @@ export class LLMInterface {
 
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
+
+      } else if (modelName === 'webllm-llama') {
+        console.log('[LLM Interface] Loading WebLLM Llama...');
+        this.adapter = new WebLLMAdapter('llama');
+        this.updateState({
+          status: 'downloading',
+          modelName: this.adapter.getName(),
+          displayName: this.adapter.getDisplayName(),
+          downloadText: 'Starting model download (from web to your device)...'
+        });
+
+        await this.adapter.initialize((progress) => {
+          this.updateState({
+            downloadProgress: progress.progress,
+            downloadText: progress.text,
+            isFromCache: progress.isFromCache || false
+          });
+        });
+
+        this.updateState({ status: 'ready', downloadProgress: 1 });
+        console.log('[LLM Interface] WebLLM Llama ready');
 
       } else if (modelName === 'webllm-qwen') {
         console.log('[LLM Interface] Loading WebLLM Qwen...');
