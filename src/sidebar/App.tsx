@@ -114,6 +114,7 @@ function AppContent() {
         isGenerating={chat.isGenerating}
         currentResponse={chat.currentResponse}
         showThinking={true}
+        llmStatus={llm.status}
       />
 
       <InputArea

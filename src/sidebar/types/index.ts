@@ -21,7 +21,7 @@ export interface Message {
 
 /** LLM state from llm-interface */
 export interface LLMState {
-  status: 'detecting' | 'initializing' | 'downloading' | 'ready' | 'error' | 'gemini-unavailable';
+  status: 'detecting' | 'initializing' | 'downloading' | 'ready' | 'error' | 'gemini-unavailable' | 'awaiting-selection';
   modelName: string | null;
   displayName: string | null;
   error: string | null;

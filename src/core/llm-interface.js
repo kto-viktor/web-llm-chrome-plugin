@@ -6,13 +6,14 @@
 
 import { detectModels } from './model-detector.js';
 import { GeminiNanoAdapter } from './gemini-nano.js';
-import { WebLLMAdapter } from './webllm-adapter.js';
+import { WebLLMAdapter, WEBLLM_MODELS } from './webllm-adapter.js';
 import { SummarizerAdapter } from './summarizer.js';
+import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
 
 /**
  * LLM state.
  * @typedef {Object} LLMState
- * @property {'idle'|'detecting'|'downloading'|'ready'|'error'|'gemini-unavailable'} status
+ * @property {'idle'|'detecting'|'downloading'|'ready'|'error'|'gemini-unavailable'|'awaiting-selection'} status
  * @property {string|null} modelName
  * @property {string|null} displayName
  * @property {string|null} error
@@ -135,26 +136,63 @@ export class LLMInterface {
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
       } else if (detection.recommendedModel === 'webllm') {
-        // Default to Qwen when Gemini Nano is not available
-        console.log('[LLM Interface] Using WebLLM (Qwen 2.5 7B)');
-        this.adapter = new WebLLMAdapter('qwen');
-        this.updateState({
-          status: 'downloading',
-          modelName: this.adapter.getName(),
-          displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (from web to your device)...'
-        });
+        // Check if any WebLLM model is already cached
+        const qwenCached = await hasModelInCache(WEBLLM_MODELS.qwen.id, prebuiltAppConfig);
+        const deepseekCached = await hasModelInCache(WEBLLM_MODELS.deepseek.id, prebuiltAppConfig);
 
-        await this.adapter.initialize((progress) => {
+        console.log(`[LLM Interface] Qwen cached: ${qwenCached}, DeepSeek cached: ${deepseekCached}`);
+
+        if (qwenCached) {
+          // Use cached Qwen
+          console.log('[LLM Interface] Using cached WebLLM (Qwen 2.5 7B)');
+          this.adapter = new WebLLMAdapter('qwen');
           this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache || false
+            status: 'downloading',
+            modelName: this.adapter.getName(),
+            displayName: this.adapter.getDisplayName(),
+            downloadText: 'Loading from your device...'
           });
-        });
 
-        this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM ready');
+          await this.adapter.initialize((progress) => {
+            this.updateState({
+              downloadProgress: progress.progress,
+              downloadText: progress.text,
+              isFromCache: progress.isFromCache || false
+            });
+          });
+
+          this.updateState({ status: 'ready', downloadProgress: 1 });
+          console.log('[LLM Interface] WebLLM ready');
+        } else if (deepseekCached) {
+          // Use cached DeepSeek
+          console.log('[LLM Interface] Using cached WebLLM (DeepSeek-R1)');
+          this.adapter = new WebLLMAdapter('deepseek');
+          this.updateState({
+            status: 'downloading',
+            modelName: this.adapter.getName(),
+            displayName: this.adapter.getDisplayName(),
+            downloadText: 'Loading from your device...'
+          });
+
+          await this.adapter.initialize((progress) => {
+            this.updateState({
+              downloadProgress: progress.progress,
+              downloadText: progress.text,
+              isFromCache: progress.isFromCache || false
+            });
+          });
+
+          this.updateState({ status: 'ready', downloadProgress: 1 });
+          console.log('[LLM Interface] WebLLM ready');
+        } else {
+          // No cached model, let user choose
+          this.updateState({
+            status: 'awaiting-selection',
+            geminiNanoAvailable: detection.geminiNanoAvailable
+          });
+          console.log('[LLM Interface] WebGPU available, awaiting user model selection');
+          return;
+        }
       }
     } catch (error) {
       console.error('[LLM Interface] Initialization failed:', error);

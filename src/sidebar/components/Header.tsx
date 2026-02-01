@@ -41,13 +41,15 @@ export function Header({
         return 'Error';
       case 'gemini-unavailable':
         return 'Gemini Nano unavailable';
+      case 'awaiting-selection':
+        return 'Choose a model to start';
       default:
         return 'Initializing...';
     }
   };
 
   // Determine which value to show in selector
-  const selectorValue = previewModel || modelName || 'webllm-qwen';
+  const selectorValue = previewModel || modelName || '';
 
   return (
     <>
@@ -59,6 +61,7 @@ export function Header({
             value={selectorValue}
             onChange={handleModelChange}
           >
+            {!modelName && !previewModel && <option value="">Select a model...</option>}
             <option value="gemini-nano">Gemini Nano - Chrome embedded model</option>
             <option value="webllm-qwen">Qwen 2.5 7B - balanced model</option>
             <option value="webllm-deepseek">DeepSeek-R1 - deep thinking model</option>

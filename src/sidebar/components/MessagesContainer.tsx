@@ -9,6 +9,7 @@ import { Message } from './Message';
 import { EmptyState } from './EmptyState';
 import { DownloadScreen } from './DownloadScreen';
 import { CacheLoadingScreen } from './CacheLoadingScreen';
+import { ChooseModelScreen } from './ChooseModelScreen';
 import { ThinkingIndicator } from './ThinkingIndicator';
 
 interface MessagesContainerProps {
@@ -20,6 +21,7 @@ interface MessagesContainerProps {
   isGenerating: boolean;
   currentResponse: string;
   showThinking: boolean;
+  llmStatus: string;
 }
 
 export function MessagesContainer({
@@ -31,6 +33,7 @@ export function MessagesContainer({
   isGenerating,
   currentResponse,
   showThinking,
+  llmStatus,
 }: MessagesContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +45,11 @@ export function MessagesContainer({
   }, [messages, currentResponse, isGenerating]);
 
   const renderContent = () => {
+    // Show choose model screen when awaiting user selection
+    if (llmStatus === 'awaiting-selection') {
+      return <ChooseModelScreen />;
+    }
+
     // Show loading screen during download
     if (isDownloading) {
       const displayModelKey = previewModelKey || modelName || 'webllm-qwen';
