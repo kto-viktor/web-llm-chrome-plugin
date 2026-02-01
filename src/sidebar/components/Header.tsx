@@ -62,9 +62,9 @@ export function Header({
             onChange={handleModelChange}
           >
             {!modelName && !previewModel && <option value="">Select a model...</option>}
+            <option value="webllm-qwen">Qwen 2.5 7B - balanced model - 4.3 Gb</option>
+            <option value="webllm-deepseek">DeepSeek-R1 - deep thinking model - 4.5 Gb</option>
             <option value="gemini-nano">Gemini Nano - Chrome embedded model</option>
-            <option value="webllm-qwen">Qwen 2.5 7B - balanced model</option>
-            <option value="webllm-deepseek">DeepSeek-R1 - deep thinking model</option>
           </select>
         </div>
         <div className="model-status">
