@@ -432,6 +432,12 @@ export class LLMInterface {
    */
   async cancelDownload() {
     console.log('[LLM Interface] Cancelling download...');
+
+    // Signal adapter to cancel (stops progress callbacks from continuing)
+    if (this.adapter && typeof this.adapter.cancel === 'function') {
+      this.adapter.cancel();
+    }
+
     await this.destroy();
     this.updateState({
       status: 'awaiting-selection',

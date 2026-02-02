@@ -63,6 +63,8 @@ export class WebLLMAdapter {
     this.initialized = false;
     /** @type {boolean} */
     this.downloading = false;
+    /** @type {boolean} */
+    this.cancelled = false;
   }
 
   /**
@@ -97,9 +99,15 @@ export class WebLLMAdapter {
     }
 
     this.downloading = true;
+    this.cancelled = false;
 
     try {
       const initProgressCallback = (report) => {
+        // Check if cancelled
+        if (this.cancelled) {
+          throw new Error('Download cancelled');
+        }
+
         if (onProgress) {
           // Customize the download text
           let customText = report.text || 'Initializing...';
@@ -266,6 +274,14 @@ export class WebLLMAdapter {
     if (this.engine) {
       await this.engine.resetChat();
     }
+  }
+
+  /**
+   * Cancels the current download.
+   */
+  cancel() {
+    this.cancelled = true;
+    this.downloading = false;
   }
 
   /**
