@@ -427,6 +427,21 @@ export class LLMInterface {
   }
 
   /**
+   * Cancels the current download and returns to model selection screen.
+   * @returns {Promise<void>}
+   */
+  async cancelDownload() {
+    console.log('[LLM Interface] Cancelling download...');
+    await this.destroy();
+    this.updateState({
+      status: 'awaiting-selection',
+      downloadProgress: 0,
+      downloadText: ''
+    });
+    console.log('[LLM Interface] Download cancelled, returning to model selection');
+  }
+
+  /**
    * Destroys the adapter and cleans up resources.
    */
   async destroy() {

@@ -13,6 +13,7 @@ interface HeaderProps {
   previewModel: string | null;
   onModelChange: (modelName: string) => void;
   onGeminiDismiss: () => void;
+  onCancelDownload: () => void;
   showGeminiSetup: boolean;
 }
 
@@ -21,6 +22,7 @@ export function Header({
   previewModel,
   onModelChange,
   onGeminiDismiss,
+  onCancelDownload,
   showGeminiSetup,
 }: HeaderProps) {
   const { status, displayName, modelName, downloadProgress, downloadText, isFromCache } = llmState;
@@ -80,6 +82,7 @@ export function Header({
         progress={downloadProgress}
         text={downloadText}
         isFromCache={isFromCache}
+        onCancel={onCancelDownload}
       />
 
       {llmState.error && (

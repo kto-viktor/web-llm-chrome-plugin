@@ -69,6 +69,13 @@ function AppContent() {
     chat.clearHistory();
   }, [chat]);
 
+  // Handle cancel download
+  const handleCancelDownload = useCallback(() => {
+    llm.cancelDownload();
+    setPreviewModel(null);
+    setShowGeminiSetup(false);
+  }, [llm]);
+
   // Clear preview when download completes
   useEffect(() => {
     if (!isDownloading && previewModel) {
@@ -102,6 +109,7 @@ function AppContent() {
         previewModel={previewModel}
         onModelChange={handleModelChange}
         onGeminiDismiss={handleGeminiDismiss}
+        onCancelDownload={handleCancelDownload}
         showGeminiSetup={shouldShowGeminiSetup}
       />
 

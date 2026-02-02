@@ -13,6 +13,7 @@ import { llm } from '../../core/llm-interface.js';
 interface UseLLMResult extends LLMState {
   initialize: () => Promise<void>;
   switchModel: (modelName: string) => Promise<void>;
+  cancelDownload: () => Promise<void>;
   generate: (prompt: string, options?: { onToken?: (token: string) => void }) => Promise<string>;
   isReady: () => boolean;
   isSummarizerAvailable: () => boolean;
@@ -42,6 +43,10 @@ export function useLLM(): UseLLMResult {
     await llm.switchModel(modelName);
   }, []);
 
+  const cancelDownload = useCallback(async () => {
+    await llm.cancelDownload();
+  }, []);
+
   const generate = useCallback(async (prompt: string, options?: { onToken?: (token: string) => void }) => {
     return llm.generate(prompt, options);
   }, []);
@@ -58,6 +63,7 @@ export function useLLM(): UseLLMResult {
     ...state,
     initialize,
     switchModel,
+    cancelDownload,
     generate,
     isReady,
     isSummarizerAvailable,

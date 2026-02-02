@@ -12,6 +12,7 @@ interface DownloadProgressProps {
   progress: number;
   text: string;
   isFromCache: boolean;
+  onCancel?: () => void;
 }
 
 export function DownloadProgress({
@@ -20,6 +21,7 @@ export function DownloadProgress({
   progress,
   text,
   isFromCache,
+  onCancel,
 }: DownloadProgressProps) {
   if (!visible) return null;
 
@@ -32,11 +34,22 @@ export function DownloadProgress({
       <div className="download-info">
         {displayName}: {progressText}
       </div>
-      <div className="progress-bar">
-        <div
-          className="progress-fill"
-          style={{ width: `${(progress * 100).toFixed(1)}%` }}
-        />
+      <div className="progress-bar-container">
+        <div className="progress-bar">
+          <div
+            className="progress-fill"
+            style={{ width: `${(progress * 100).toFixed(1)}%` }}
+          />
+        </div>
+        {onCancel && (
+          <button
+            className="cancel-download-btn"
+            onClick={onCancel}
+            title="Cancel download"
+          >
+            ✕
+          </button>
+        )}
       </div>
       <div className="download-note">
         {isFromCache
