@@ -141,7 +141,7 @@ function AppContent() {
  * Main App component with providers.
  */
 export function App() {
-  const { attachment, clear: clearAttachment } = usePageAttachment();
+  const { attachment } = usePageAttachment();
   const [initialized, setInitialized] = useState(false);
 
   // Initialize services on mount
@@ -165,7 +165,7 @@ export function App() {
   }
 
   return (
-    <ChatProvider attachment={attachment} onAttachmentClear={clearAttachment}>
+    <ChatProvider attachment={attachment}>
       <AppContent />
     </ChatProvider>
   );

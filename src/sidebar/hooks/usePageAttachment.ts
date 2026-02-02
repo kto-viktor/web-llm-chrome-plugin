@@ -64,6 +64,10 @@ export function usePageAttachment(): UsePageAttachmentResult {
   useEffect(() => {
     const handleTabChange = () => {
       console.log('[usePageAttachment] Tab changed, reloading attachment...');
+
+      // TODO: possible, if we want to do this:
+      // setAttachment(null);
+
       loadAttachment();
     };
 

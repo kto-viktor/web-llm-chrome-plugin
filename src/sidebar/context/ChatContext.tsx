@@ -16,14 +16,13 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 interface ChatProviderProps {
   children: ReactNode;
   attachment: PageAttachment | null;
-  onAttachmentClear: () => void;
 }
 
 /**
  * Chat context provider.
  * Manages chat state and provides streaming via React state updates.
  */
-export function ChatProvider({ children, attachment, onAttachmentClear }: ChatProviderProps) {
+export function ChatProvider({ children, attachment }: ChatProviderProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
@@ -61,9 +60,10 @@ export function ChatProvider({ children, attachment, onAttachmentClear }: ChatPr
     } finally {
       setIsGenerating(false);
       setCurrentResponse('');
-      onAttachmentClear();
+      // Keep attachment for subsequent messages on same page
+      // User can manually clear via X button if needed
     }
-  }, [isGenerating, attachment, onAttachmentClear]);
+  }, [isGenerating, attachment]);
 
   /**
    * Request a page summary.
@@ -86,9 +86,10 @@ export function ChatProvider({ children, attachment, onAttachmentClear }: ChatPr
     } finally {
       setIsGenerating(false);
       setCurrentResponse('');
-      onAttachmentClear();
+      // Keep attachment for subsequent messages on same page
+      // User can manually clear via X button if needed
     }
-  }, [isGenerating, attachment, onAttachmentClear]);
+  }, [isGenerating, attachment]);
 
   /**
    * Clear chat history.
