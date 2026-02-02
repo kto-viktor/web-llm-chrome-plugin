@@ -54,6 +54,13 @@ chrome.sidePanel
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'CONTENT_SCRIPT_READY') {
     console.log('Content script ready on tab:', sender.tab?.id);
+    // Notify sidebar to clear and reload attachment
+    chrome.runtime.sendMessage({
+      type: 'CLEAR_ATTACHMENT',
+      tabId: sender.tab?.id
+    }).catch(() => {
+      // Sidebar might not be open, ignore error
+    });
   }
 
   return false;

@@ -86,6 +86,22 @@ export function usePageAttachment(): UsePageAttachmentResult {
     };
   }, [loadAttachment]);
 
+  // Listen for CLEAR_ATTACHMENT message from service worker
+  useEffect(() => {
+    const handleMessage = (message: { type: string; tabId?: number }) => {
+      if (message.type === 'CLEAR_ATTACHMENT') {
+        console.log('[usePageAttachment] Received CLEAR_ATTACHMENT, reloading...');
+        setAttachment(null);
+        loadAttachment();
+      }
+    };
+
+    chrome.runtime?.onMessage?.addListener(handleMessage);
+    return () => {
+      chrome.runtime?.onMessage?.removeListener(handleMessage);
+    };
+  }, [loadAttachment]);
+
   return {
     attachment,
     isLoading,
