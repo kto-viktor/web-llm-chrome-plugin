@@ -111,6 +111,10 @@ export class WebLLMAdapter {
             const percent = Math.round((report.progress || 0) * 100);
             customText = `Downloading model... ${percent}%`;
             isFromCache = false;
+          } else if (customText.includes('Start to fetch params')) {
+            customText = `Connecting to CDN to download model...`
+            // TODO: here add some progressbar, which just takes approximately 10 seconds
+            isFromCache = false;
           } else if (customText.includes('Loading model from cache') ||
                      customText.includes('Loading GPU') ||
                      customText.includes('Finish loading')) {
