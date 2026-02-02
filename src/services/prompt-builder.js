@@ -34,7 +34,7 @@ function formatPageContent(pageContent) {
     return {
       page_title: '',
       page_url: '',
-      page_content: '[No page content available. Ask user to refresh the page.]'
+      page_content: '[No page content available. Ask user to refresh the page; mention, that chrome:// internal urls will not work]'
     };
   }
 
@@ -44,8 +44,8 @@ function formatPageContent(pageContent) {
   }
 
   return {
-    page_title: pageContent.title || 'LLM_PLUGIN_ERROR_CONTENT_NOT_AVAILABLE',
-    page_url: pageContent.url || 'LLM_PLUGIN_ERROR_CONTENT_NOT_AVAILABLE',
+    page_title: pageContent.title || 'LOCAL_LLM_ERR_CONTENT_NOT_AVAILABLE',
+    page_url: pageContent.url || 'LOCAL_LLM_ERR_CONTENT_NOT_AVAILABLE',
     page_content: content
   };
 }

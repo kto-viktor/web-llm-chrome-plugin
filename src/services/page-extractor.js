@@ -14,7 +14,7 @@ const MAX_PAGE_TOKENS = 2500;
 /**
  * Fallback message when page content is unavailable.
  */
-const UNAVAILABLE_MESSAGE = 'Page content is not available.';
+const UNAVAILABLE_MESSAGE = 'ERR_LOCAL_LLM: Page content is not available.';
 
 /**
  * Elements that should be completely removed during extraction.

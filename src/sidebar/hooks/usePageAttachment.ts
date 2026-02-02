@@ -31,7 +31,7 @@ export function usePageAttachment(): UsePageAttachmentResult {
 
       // Validate content - check for error flags
       if (pageContent &&
-          !pageContent.content?.includes('not available') &&
+          !pageContent.content?.includes('LOCAL_LLM_ERR') &&
           pageContent.title) {
         setAttachment({
           title: pageContent.title,
