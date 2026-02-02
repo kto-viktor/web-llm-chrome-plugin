@@ -19,18 +19,19 @@ export const WEBLLM_MODELS = {
     id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
     name: 'webllm-llama',
     displayName: 'Llama 3.2 1B (WebLLM)',
+    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Llama-3.2-1B-Instruct-q4f16_1-MLC/'
   },
   qwen: {
     id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
     name: 'webllm-qwen',
     displayName: 'Qwen 2.5 7B (WebLLM)',
-    //modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/Qwen2.5-7B-Instruct-q4f16_1-MLC/'
+    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Qwen2.5-7B-Instruct-q4f16_1-MLC/'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
     displayName: 'DeepSeek-R1 (WebLLM)',
-    //modelUrl: 'https://pub-fd0276f7e1f74acd90d3897a69989ca7.r2.dev/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
+    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
   }
 };
 
