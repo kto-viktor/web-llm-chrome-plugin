@@ -17,6 +17,7 @@ export interface Message {
   content: string;
   timestamp?: number;
   attachment?: PageAttachment;
+  pageUrl?: string | null;
 }
 
 /** LLM state from llm-interface */

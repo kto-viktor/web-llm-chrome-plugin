@@ -105,6 +105,7 @@ export async function getPageContent() {
       chrome.tabs.sendMessage(tabId, { type: 'GET_PAGE_CONTENT' }, async (response) => {
         if (chrome.runtime.lastError || !response || response.error) {
           console.log('[Page Extractor] Content script unavailable, using scripting API fallback');
+          // TODO: remove attached previous page same as in content script. Check on https://www.latomatinatours.com/
 
           // Fallback to scripting API for tabs opened before extension install
           const scriptResult = await extractViaScriptingAPI(tabId);

@@ -4,6 +4,7 @@
  */
 
 import { countTokens } from '../utils/token-utils.js';
+import { normalizePageUrl } from '../utils/url-utils.js';
 
 /**
  * Maximum tokens allowed in history before trimming oldest messages.
@@ -35,6 +36,7 @@ const STORAGE_KEY = 'chat_history';
  * @property {string} content
  * @property {number} timestamp
  * @property {PageAttachment} [attachment] - Optional page attachment
+ * @property {string} [pageUrl] - Normalized URL of the page this message was sent on
  */
 
 /**
@@ -124,11 +126,13 @@ export class HistoryManager {
    * @param {'user'|'assistant'} role - The message role
    * @param {string} content - The message content
    * @param {PageAttachment} [attachment] - Optional page attachment
+   * @param {string} [pageUrl] - URL of the page this message was sent on
    * @returns {Promise<void>}
    */
-  async addMessage(role, content, attachment = null) {
+  async addMessage(role, content, attachment = null, pageUrl = null) {
     const tokenCount = countTokens(content);
-    console.log(`[History] Adding ${role} message (${tokenCount} tokens)${attachment ? ' with attachment' : ''}`);
+    const normalizedPageUrl = normalizePageUrl(pageUrl);
+    console.log(`[History] Adding ${role} message (${tokenCount} tokens)${attachment ? ' with attachment' : ''}${normalizedPageUrl ? ` for page: ${normalizedPageUrl}` : ''}`);
 
     const message = {
       role,
@@ -144,6 +148,10 @@ export class HistoryManager {
       };
     }
 
+    if (normalizedPageUrl) {
+      message.pageUrl = normalizedPageUrl;
+    }
+
     this.messages.push(message);
 
     console.log(`[History] Total: ${this.messages.length} messages, ${this.getTotalTokenCount()} tokens`);
@@ -157,6 +165,24 @@ export class HistoryManager {
    */
   getMessages() {
     return [...this.messages];
+  }
+
+  /**
+   * Gets messages filtered by page URL.
+   * Includes orphan messages (no pageUrl) for backward compatibility.
+   * @param {string} pageUrl - The page URL to filter by
+   * @returns {ChatMessage[]} Filtered messages array
+   */
+  getMessagesByPage(pageUrl) {
+    const normalizedTarget = normalizePageUrl(pageUrl);
+    const filtered = this.messages.filter(msg => {
+      // Include orphans (no pageUrl) everywhere for backward compat
+      if (!msg.pageUrl) return true;
+      // Match normalized URLs
+      return msg.pageUrl === normalizedTarget;
+    });
+    console.log(`[History] Filtering ${this.messages.length} messages for page: ${normalizedTarget} → ${filtered.length} matches`);
+    return filtered;
   }
 
   /**

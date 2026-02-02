@@ -63,12 +63,14 @@ export class ChatService {
 
   /**
    * Builds the full prompt with context using the template.
+   * Filters history to only include messages from the current page.
    * @param {string} userMessage - The user's message
    * @param {Object|null} pageContent - The page content
    * @returns {string} The complete prompt
    */
   buildPrompt(userMessage, pageContent) {
-    const messages = historyManager.getMessages();
+    const pageUrl = pageContent?.url || null;
+    const messages = historyManager.getMessagesByPage(pageUrl);
     return buildChatPrompt(userMessage, pageContent, messages);
   }
 
@@ -102,9 +104,12 @@ export class ChatService {
 
     this.updateState({ isGenerating: true, currentResponse: '', error: null });
 
+    // Determine page URL for history filtering
+    const pageUrl = attachment?.url || null;
+
     try {
       console.log('[Chat Service] Adding user message to history...');
-      await historyManager.addMessage('user', message, attachment);
+      await historyManager.addMessage('user', message, attachment, pageUrl);
 
       // Trim history if needed (sliding window)
       if (historyManager.needsTrimming()) {
@@ -127,7 +132,7 @@ export class ChatService {
 
       console.log(`[Chat Service] Response received (${response.length} chars)`);
       console.log('[Chat Service] Adding assistant message to history...');
-      await historyManager.addMessage('assistant', response);
+      await historyManager.addMessage('assistant', response, null, pageUrl);
 
       this.updateState({ isGenerating: false, currentResponse: null });
       console.log('[Chat Service] Message exchange complete');
@@ -152,6 +157,9 @@ export class ChatService {
    * @returns {Promise<string>} The summary
    */
   async requestPageSummary(attachment, onToken) {
+    // Determine page URL for history filtering
+    const pageUrl = attachment?.url || null;
+
     // If we have attachment content and Summarizer is available, use it directly
     if (attachment?.content && llm.isSummarizerAvailable()) {
       console.log('[Chat Service] Using Summarizer API for page summary');
@@ -160,7 +168,7 @@ export class ChatService {
 
       try {
         // Add user message to history with attachment
-        await historyManager.addMessage('user', 'Give a summary of this page.', attachment);
+        await historyManager.addMessage('user', 'Give a summary of this page.', attachment, pageUrl);
 
         // Use Summarizer API
         const summary = await llm.summarize(attachment.content, {
@@ -173,7 +181,7 @@ export class ChatService {
         });
 
         // Add assistant response to history
-        await historyManager.addMessage('assistant', summary);
+        await historyManager.addMessage('assistant', summary, null, pageUrl);
 
         this.updateState({ isGenerating: false, currentResponse: null });
         return summary;
