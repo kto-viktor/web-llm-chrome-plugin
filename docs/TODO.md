@@ -12,13 +12,16 @@
 - **migrate to amazon CDN**
 - there is a blinking bug - when first time downloading, for a few seconds it show like "loading from cache"
 - **add cancel download button**
+- add steps about enable multilang option - make multilang word bold. Add clickable urls. And in case if component missing, tells that this is experimental feature in Chrome and not available for everyone yet. Actually, first need to check with someone - how to setup it properly.
 
 ## Todo
-- add loading indicator, when page is loading and can't be attached
 - "thinking" scratchpad from deepseek should be under spoiler
-- instead of clear, add new chat button. Try to do somethign similarly to chat gpt
-- add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
-- add steps about enable multilang option - make multilang word bold. Add clickable urls. And in case if component missing, tells that this is experimental feature in Chrome and not available for everyone yet. Actually, first need to check with someone - how to setup it properly.
+- instead of clear, add new chat button. Try to do something similarly to chat gpt
 - add ability to just copy support email
-- add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
+
+phase 2:
 - add sentry and analytics
+- add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
+- refactor gemini setup - add screenshots, refactor step 4
+- add loading indicator, when page is loading and can't be attached
+- add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation

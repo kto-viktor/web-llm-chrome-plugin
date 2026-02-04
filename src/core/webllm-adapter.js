@@ -121,7 +121,7 @@ export class WebLLMAdapter {
             isFromCache = false;
           } else if (customText.includes('Start to fetch params')) {
             customText = `Connecting to CDN to download model...`
-            // TODO: here add some progressbar, which just takes approximately 10 seconds
+            // TODO: this place happens in both cases (cache and web)
             isFromCache = false;
           } else if (customText.includes('Loading model from cache') ||
                      customText.includes('Loading GPU') ||

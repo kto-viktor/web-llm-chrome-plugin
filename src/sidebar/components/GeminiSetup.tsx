@@ -3,6 +3,8 @@
  * Shows when Gemini is selected but unavailable.
  */
 
+declare const chrome: { tabs?: { create: (options: { url: string }) => void } };
+
 import React, { useCallback } from 'react';
 
 interface GeminiSetupProps {
@@ -16,16 +18,8 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
     const url = e.currentTarget.dataset.url;
     if (!url) return;
 
-    // Copy to clipboard since chrome:// URLs can't be opened directly
-    navigator.clipboard.writeText(url).then(() => {
-      const originalText = e.currentTarget.textContent;
-      e.currentTarget.textContent = 'Copied!';
-      setTimeout(() => {
-        if (e.currentTarget) {
-          e.currentTarget.textContent = originalText;
-        }
-      }, 2000);
-    });
+    // Use Chrome extension API to open chrome:// URLs in a new tab
+    chrome.tabs?.create({ url });
   }, []);
 
   if (!visible) return null;
@@ -47,7 +41,7 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
           >
             chrome://flags/#prompt-api-for-gemini-nano
           </a>{' '}
-          and enable <strong>Prompt API for Gemini Nano</strong>
+          and set <strong>Enabled Multilingual</strong> for "Prompt API for Gemini Nano"
         </li>
         <li>
           Go to{' '}
@@ -59,7 +53,10 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
           >
             chrome://flags/#optimization-guide-on-device-model
           </a>{' '}
-          and enable <strong>Optimization guide on device</strong>
+          and set <strong>Enabled BypassPerfRequirement</strong> for "Optimization guide on device"
+        </li>
+        <li>
+          Restart your Google Chrome - it will start download Gemini automatically.
         </li>
         <li>
           Go to{' '}
@@ -71,9 +68,8 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
           >
             chrome://components/
           </a>{' '}
-          and download <strong>Optimization Guide On Device Model</strong>
+          and search for <strong>Optimization Guide On Device Model</strong> - wait for downloading, until Status will be "Up-to-date"
         </li>
-        <li>Restart Chrome</li>
       </ol>
       <button className="gemini-setup-dismiss" onClick={onDismiss}>
         Got it
