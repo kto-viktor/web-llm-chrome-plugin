@@ -16,9 +16,9 @@
 - add ability to just copy support email
 - "thinking" scratchpad from deepseek should be under spoiler
 - FIX GRAMMAR
+- instead of clear, add new chat button. Try to do something similarly to chat gpt
 
 ## Todo
-- instead of clear, add new chat button. Try to do something similarly to chat gpt
 
 phase 2:
 - add sentry and analytics
