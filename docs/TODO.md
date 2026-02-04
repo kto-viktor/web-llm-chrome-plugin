@@ -13,11 +13,11 @@
 - there is a blinking bug - when first time downloading, for a few seconds it show like "loading from cache"
 - **add cancel download button**
 - add steps about enable multilang option - make multilang word bold. Add clickable urls. And in case if component missing, tells that this is experimental feature in Chrome and not available for everyone yet. Actually, first need to check with someone - how to setup it properly.
+- add ability to just copy support email
 
 ## Todo
 - "thinking" scratchpad from deepseek should be under spoiler
 - instead of clear, add new chat button. Try to do something similarly to chat gpt
-- add ability to just copy support email
 - FIX GRAMMAR
 
 phase 2:

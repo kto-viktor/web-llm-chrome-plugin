@@ -25,7 +25,14 @@ export function InputArea({
   disabled,
 }: InputAreaProps) {
   const [message, setMessage] = useState('');
+  const [emailCopied, setEmailCopied] = useState(false);
   const { textareaRef, handleInput, reset } = useAutoResize();
+
+  const handleCopyEmail = useCallback(() => {
+    navigator.clipboard.writeText('kto.viktor.kto@gmail.com');
+    setEmailCopied(true);
+    setTimeout(() => setEmailCopied(false), 2000);
+  }, []);
 
   const handleSend = useCallback(() => {
     const trimmed = message.trim();
@@ -97,13 +104,14 @@ export function InputArea({
         </div>
 
         <div className="contact-row">
-          <a
-            href="mailto:kto.viktor.kto@gmail.com"
+          <span className="contact-text">I will be happy to get in touch - </span>
+          <span
             className="contact-link"
-            title="Contact developer"
+            title="Click to copy email"
+            onClick={handleCopyEmail}
           >
-            I will be happy to get in touch. - Viktor
-          </a>
+            {emailCopied ? 'Copied!' : 'kto.viktor.kto@gmail.com'}
+          </span>
         </div>
       </div>
     </>

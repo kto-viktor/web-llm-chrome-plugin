@@ -627,17 +627,21 @@ body {
 .contact-row {
   text-align: center;
   margin-top: 8px;
+  font-size: 11px;
+}
+
+.contact-text {
+  color: var(--text-muted);
 }
 
 .contact-link {
-  font-size: 11px;
   color: var(--success-color);
   font-weight: 600;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .contact-link:hover {
-  color: var(--success-color);
   text-decoration: underline;
 }
 
