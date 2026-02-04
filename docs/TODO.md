@@ -18,6 +18,7 @@
 - "thinking" scratchpad from deepseek should be under spoiler
 - instead of clear, add new chat button. Try to do something similarly to chat gpt
 - add ability to just copy support email
+- FIX GRAMMAR
 
 phase 2:
 - add sentry and analytics

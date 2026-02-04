@@ -664,10 +664,9 @@ body {
   background: var(--text-muted);
 }
 
-/* Think Block (DeepSeek reasoning) */
+/* Think Block (DeepSeek reasoning) - Collapsible Spoiler */
 .think-block {
   margin-bottom: 12px;
-  padding: 8px 12px;
   background: rgba(0, 0, 0, 0.03);
   border-left: 2px solid var(--text-muted);
   border-radius: var(--radius-sm);
@@ -676,15 +675,38 @@ body {
 }
 
 .think-label {
+  padding: 8px 12px;
   font-weight: 500;
   font-style: italic;
-  margin-bottom: 4px;
   color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.think-label::-webkit-details-marker {
+  display: none;
+}
+
+.think-label::before {
+  content: '▶';
+  font-size: 8px;
+  transition: transform 0.2s ease;
+}
+
+.think-block[open] .think-label::before {
+  transform: rotate(90deg);
 }
 
 .think-content {
+  padding: 0 12px 8px 12px;
   white-space: pre-wrap;
   line-height: 1.4;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  margin-top: 4px;
 }
 
 /* Markdown Styles in Messages */

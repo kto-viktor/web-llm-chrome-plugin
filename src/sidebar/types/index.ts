@@ -28,7 +28,7 @@ export interface LLMState {
   error: string | null;
   downloadProgress: number;
   downloadText: string;
-  isFromCache: boolean;
+  isFromCache: boolean | null;
   summarizerAvailable: boolean;
   geminiNanoAvailable: boolean;
   geminiNanoReason?: string;

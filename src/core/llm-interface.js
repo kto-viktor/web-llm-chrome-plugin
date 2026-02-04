@@ -19,7 +19,7 @@ import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
  * @property {string|null} error
  * @property {number} downloadProgress - 0 to 1
  * @property {string} downloadText
- * @property {boolean} isFromCache - Whether loading from cache (fast) vs downloading (slow)
+ * @property {boolean|null} isFromCache - Whether loading from cache (true), downloading (false), or unknown (null)
  * @property {boolean} summarizerAvailable - Whether native Summarizer is available
  * @property {boolean} geminiNanoAvailable - Whether Gemini Nano is available
  */
@@ -43,7 +43,7 @@ export class LLMInterface {
       error: null,
       downloadProgress: 0,
       downloadText: '',
-      isFromCache: false,
+      isFromCache: null,
       summarizerAvailable: false,
       geminiNanoAvailable: false
     };
@@ -115,7 +115,7 @@ export class LLMInterface {
             status: 'downloading',
             downloadProgress: progress.progress,
             downloadText: progress.text,
-            isFromCache: progress.isFromCache || false
+            isFromCache: progress.isFromCache ?? null
           });
         });
 
@@ -158,7 +158,7 @@ export class LLMInterface {
             this.updateState({
               downloadProgress: progress.progress,
               downloadText: progress.text,
-              isFromCache: progress.isFromCache || false
+              isFromCache: progress.isFromCache ?? null
             });
           });
 
@@ -179,7 +179,7 @@ export class LLMInterface {
             this.updateState({
               downloadProgress: progress.progress,
               downloadText: progress.text,
-              isFromCache: progress.isFromCache || false
+              isFromCache: progress.isFromCache ?? null
             });
           });
 
@@ -200,7 +200,7 @@ export class LLMInterface {
             this.updateState({
               downloadProgress: progress.progress,
               downloadText: progress.text,
-              isFromCache: progress.isFromCache || false
+              isFromCache: progress.isFromCache ?? null
             });
           });
 
@@ -334,7 +334,7 @@ export class LLMInterface {
             status: 'downloading',
             downloadProgress: progress.progress,
             downloadText: progress.text,
-            isFromCache: progress.isFromCache || false
+            isFromCache: progress.isFromCache ?? null
           });
         });
 
@@ -357,14 +357,14 @@ export class LLMInterface {
           status: 'downloading',
           modelName: this.adapter.getName(),
           displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (from web to your device)...'
+          downloadText: 'Getting LLM for you...'
         });
 
         await this.adapter.initialize((progress) => {
           this.updateState({
             downloadProgress: progress.progress,
             downloadText: progress.text,
-            isFromCache: progress.isFromCache || false
+            isFromCache: progress.isFromCache ?? null
           });
         });
 
@@ -378,14 +378,14 @@ export class LLMInterface {
           status: 'downloading',
           modelName: this.adapter.getName(),
           displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (from web to your device)...'
+          downloadText: 'Getting LLM for you...'
         });
 
         await this.adapter.initialize((progress) => {
           this.updateState({
             downloadProgress: progress.progress,
             downloadText: progress.text,
-            isFromCache: progress.isFromCache || false
+            isFromCache: progress.isFromCache ?? null
           });
         });
 
@@ -399,14 +399,14 @@ export class LLMInterface {
           status: 'downloading',
           modelName: this.adapter.getName(),
           displayName: this.adapter.getDisplayName(),
-          downloadText: 'Starting model download (from web to your device)...'
+          downloadText: 'Getting LLM for you...'
         });
 
         await this.adapter.initialize((progress) => {
           this.updateState({
             downloadProgress: progress.progress,
             downloadText: progress.text,
-            isFromCache: progress.isFromCache || false
+            isFromCache: progress.isFromCache ?? null
           });
         });
 

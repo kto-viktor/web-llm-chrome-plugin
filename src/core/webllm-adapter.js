@@ -112,7 +112,7 @@ export class WebLLMAdapter {
           // Customize the download text
           let customText = report.text || 'Initializing...';
           let isFromCache = false;
-
+          console.log("[LOADING]: " + customText);
           // Detect if loading from cache or downloading from internet
           if (customText.includes('Fetching param cache')) {
             // Downloading from internet
@@ -120,9 +120,9 @@ export class WebLLMAdapter {
             customText = `Downloading model... ${percent}%`;
             isFromCache = false;
           } else if (customText.includes('Start to fetch params')) {
-            customText = `Connecting to CDN to download model...`
-            // TODO: this place happens in both cases (cache and web)
-            isFromCache = false;
+            // This happens in both cases (cache and web), so we don't know the source yet
+            customText = 'Loading model...';
+            isFromCache = null;
           } else if (customText.includes('Loading model from cache') ||
                      customText.includes('Loading GPU') ||
                      customText.includes('Finish loading')) {
