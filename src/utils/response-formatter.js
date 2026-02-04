@@ -23,12 +23,12 @@ export function formatResponse(text) {
 
   let result = text;
 
-  // Extract and replace <think> blocks with styled divs
+  // Extract and replace <think> blocks with collapsible spoiler
   const thinkRegex = /<think>([\s\S]*?)<\/think>/g;
   result = result.replace(thinkRegex, (match, content) => {
     // Escape HTML in think content for safety, then format
     const escaped = escapeHtml(content.trim());
-    return `<div class="think-block"><div class="think-label">Thinking...</div><div class="think-content">${escaped}</div></div>`;
+    return `<details class="think-block"><summary class="think-label">LLM scratchpad (click to see)</summary><div class="think-content">${escaped}</div></details>`;
   });
 
   // Parse remaining content as markdown
