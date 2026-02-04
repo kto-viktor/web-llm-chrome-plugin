@@ -53,7 +53,7 @@ export function DownloadProgress({
       </div>
       <div className="download-note">
         {isFromCache === true
-          ? "Quickly loading from your device — no more internet needed! :)"
+          ? "Loading quickly from your device — no internet needed!"
           : isFromCache === false
           ? "This is a one-time download."
           : "Preparing model..."}

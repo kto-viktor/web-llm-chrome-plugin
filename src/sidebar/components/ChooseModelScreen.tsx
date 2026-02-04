@@ -16,12 +16,12 @@ export function ChooseModelScreen() {
         <div className="model-option">
           <span className="model-option-icon">🦙</span>
           <strong className="model-option-name">Llama 3.2 1B</strong>
-          <p className="model-option-desc">Lightweight&amp;fast. Quick download (700 MB).</p>
+          <p className="model-option-desc">Lightweight and fast. Quick download (700 MB).</p>
         </div>
         <div className="model-option">
           <span className="model-option-icon">🧠</span>
           <strong className="model-option-name">Qwen 2.5 7B</strong>
-          <p className="model-option-desc">Balanced &amp; capable. Great for general tasks.</p>
+          <p className="model-option-desc">Balanced and capable. Great for general tasks.</p>
         </div>
         <div className="model-option">
           <span className="model-option-icon">🔬</span>
@@ -36,7 +36,7 @@ export function ChooseModelScreen() {
       </div>
 
       <p className="choose-model-note">
-        Models run 100% locally on your device. First download may take a few minutes.
+        Models run 100% locally on your device. The first download may take a few minutes.
       </p>
     </div>
   );

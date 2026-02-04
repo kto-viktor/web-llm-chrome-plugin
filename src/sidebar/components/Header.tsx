@@ -64,9 +64,9 @@ export function Header({
             onChange={handleModelChange}
           >
             {!modelName && !previewModel && <option value="">Select a model...</option>}
-            <option value="webllm-llama">Llama 3.2 1B - lightweight model - 700 MB</option>
-            <option value="webllm-qwen">Qwen 2.5 7B - balanced model - 4.3 GB</option>
-            <option value="webllm-deepseek">DeepSeek-R1 - deep thinking model - 4.5 GB</option>
+            <option value="webllm-llama">Llama 3.2 1B - Lightweight model - 700 MB</option>
+            <option value="webllm-qwen">Qwen 2.5 7B - Balanced model - 4.3 GB</option>
+            <option value="webllm-deepseek">DeepSeek-R1 - Deep thinking model - 4.5 GB</option>
             <option value="gemini-nano">Gemini Nano - Chrome embedded model</option>
           </select>
         </div>

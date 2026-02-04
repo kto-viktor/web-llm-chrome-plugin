@@ -104,7 +104,7 @@ export function InputArea({
         </div>
 
         <div className="contact-row">
-          <span className="contact-text">I will be happy to get in touch - </span>
+          <span className="contact-text">I'd be happy to get in touch: </span>
           <span
             className="contact-link"
             title="Click to copy email"

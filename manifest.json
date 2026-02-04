@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Local LLM",
   "version": "1.0.0",
-  "description": "Use Local LLM Chrome Extension: run llm locally (Gemini, DeepSeek, Qwen with WebLLM) and ask ai models about your tabs - private ai",
+  "description": "Use Local LLM Chrome Extension: Run LLM locally and ask AI models about your tabs — private AI",
 
   "permissions": [
     "activeTab",

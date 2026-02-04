@@ -26,7 +26,7 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
 
   return (
     <div className="gemini-setup-section">
-      <div className="gemini-setup-header">You need to turn on Gemini in your Chrome</div>
+      <div className="gemini-setup-header">You need to turn on Gemini in Chrome</div>
       <p className="gemini-setup-intro">
         Gemini Nano is a fast model embedded in Google Chrome. One-time setup required:
       </p>
@@ -56,7 +56,7 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
           and set <strong>Enabled BypassPerfRequirement</strong> for "Optimization guide on device"
         </li>
         <li>
-          Restart your Google Chrome - it will start download Gemini automatically.
+          Restart Google Chrome — it will start downloading Gemini automatically.
         </li>
         <li>
           Go to{' '}
@@ -68,7 +68,7 @@ export function GeminiSetup({ visible, onDismiss }: GeminiSetupProps) {
           >
             chrome://components/
           </a>{' '}
-          and search for <strong>Optimization Guide On Device Model</strong> - wait for downloading, until Status will be "Up-to-date"
+          and search for <strong>Optimization Guide On Device Model</strong> — wait for the download until the status shows "Up-to-date"
         </li>
       </ol>
       <button className="gemini-setup-dismiss" onClick={onDismiss}>

@@ -31,7 +31,7 @@ const MODEL_INFO: Record<string, ModelInfo> = {
   'webllm-deepseek': {
     name: 'DeepSeek-R1',
     tagline: 'Deep Thinking Model',
-    description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems and advanced users, who need to see LLM thinking process.',
+    description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems and advanced users who need to see the LLM thinking process.',
     icon: '🔬',
     benefits: ['Chain-of-thought', 'Complex reasoning', 'Problem solving']
   }
@@ -51,7 +51,7 @@ export function DownloadScreen({ modelKey }: DownloadScreenProps) {
       <p className="download-screen-tagline">{info.tagline}</p>
 
       <div className="download-screen-message">
-        <p><strong>One-time setup</strong> — currently we're downloading LLM directly to your computer.</p>
+        <p><strong>One-time setup</strong> — we're currently downloading the LLM directly to your computer.</p>
         <p>Once complete, it's yours forever. No internet needed, complete privacy.</p>
       </div>
 

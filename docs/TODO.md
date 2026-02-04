@@ -14,11 +14,11 @@
 - **add cancel download button**
 - add steps about enable multilang option - make multilang word bold. Add clickable urls. And in case if component missing, tells that this is experimental feature in Chrome and not available for everyone yet. Actually, first need to check with someone - how to setup it properly.
 - add ability to just copy support email
+- "thinking" scratchpad from deepseek should be under spoiler
+- FIX GRAMMAR
 
 ## Todo
-- "thinking" scratchpad from deepseek should be under spoiler
 - instead of clear, add new chat button. Try to do something similarly to chat gpt
-- FIX GRAMMAR
 
 phase 2:
 - add sentry and analytics
