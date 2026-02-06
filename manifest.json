@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Local LLM",
+  "name": "__MSG_appName__",
+  "description": "__MSG_shortDesc__",
+  "default_locale": "en",
   "version": "1.0.0",
-  "description": "Use Local LLM Chrome Extension: Run LLM locally and ask AI models about your tabs — private AI",
 
   "permissions": [
     "activeTab",
