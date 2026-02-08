@@ -4,10 +4,12 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLLM, usePageAttachment, useCachedModels, useOnboarding } from './hooks';
+import { markModelAsDownloaded } from './hooks/useCachedModels';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
 import { InputArea } from './components/InputArea';
+import { DownloadConfirmScreen } from './components/DownloadConfirmScreen';
 
 // @ts-ignore - JS module
 import { chatService } from '../services/chat-service.js';
@@ -19,18 +21,25 @@ function AppContent() {
   const llm = useLLM();
   const { attachment, clear: clearAttachment, reload: reloadAttachment } = usePageAttachment();
   const chat = useChat();
-  const { cachedModels } = useCachedModels();
+  const { cachedModels, isChecking } = useCachedModels();
   const { showDropdownTooltip, markModelSelected, dismissDropdownTooltip } = useOnboarding();
 
   const [previewModel, setPreviewModel] = useState<string | null>(null);
   const [showGeminiSetup, setShowGeminiSetup] = useState(false);
   const [pendingTooltip, setPendingTooltip] = useState(false);
+  const [pendingDownload, setPendingDownload] = useState<string | null>(null);
 
   const isDownloading = llm.status === 'downloading';
   const isReady = llm.status === 'ready';
 
   // Handle model change from selector
   const handleModelChange = useCallback((modelName: string) => {
+    // Don't allow selection while still checking cache
+    if (isChecking) {
+      console.log('[App] Still checking cache, please wait...');
+      return;
+    }
+
     // Dismiss dropdown tooltip on dropdown use (user already knows about it!)
     if (showDropdownTooltip) {
       dismissDropdownTooltip();
@@ -41,12 +50,25 @@ function AppContent() {
       setPreviewModel(modelName);
       setShowGeminiSetup(modelName === 'gemini-nano');
     } else {
-      // Actually switch the model
-      setPreviewModel(null);
-      llm.switchModel(modelName);
-      setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
+      console.log('[App] Dropdown selected:', modelName, 'Cached models:', Array.from(cachedModels));
+
+      // Check if model is cached
+      const isCached = cachedModels.has(modelName) || modelName === 'gemini-nano';
+      console.log('[App] Is cached?', isCached);
+
+      if (isCached) {
+        // Model cached - load immediately
+        console.log('[App] Loading cached model immediately');
+        setPreviewModel(null);
+        llm.switchModel(modelName);
+        setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
+      } else {
+        // Model not cached - show confirmation
+        console.log('[App] Showing download confirmation');
+        setPendingDownload(modelName);
+      }
     }
-  }, [isDownloading, llm, showDropdownTooltip, dismissDropdownTooltip]);
+  }, [isDownloading, llm, showDropdownTooltip, dismissDropdownTooltip, cachedModels, isChecking]);
 
   // Handle Gemini setup dismiss
   const handleGeminiDismiss = useCallback(() => {
@@ -86,18 +108,57 @@ function AppContent() {
 
   // Handle model bubble click
   const handleBubbleClick = useCallback((modelName: string) => {
-    // Set flag to show tooltip after model loads
-    setPendingTooltip(true);
-    llm.switchModel(modelName);
-  }, [llm]);
+    // Don't allow selection while still checking cache
+    if (isChecking) {
+      console.log('[App] Still checking cache, please wait...');
+      return;
+    }
 
-  // Show tooltip when model becomes ready after selection
+    console.log('[App] Model clicked:', modelName, 'Cached models:', Array.from(cachedModels));
+
+    // Check if model is cached
+    const isCached = cachedModels.has(modelName) || modelName === 'gemini-nano';
+    console.log('[App] Is cached?', isCached);
+
+    if (isCached) {
+      // Model cached - load immediately
+      console.log('[App] Loading cached model immediately');
+      setPendingTooltip(true);
+      llm.switchModel(modelName);
+    } else {
+      // Model not cached - show confirmation
+      console.log('[App] Showing download confirmation');
+      setPendingDownload(modelName);
+    }
+  }, [llm, cachedModels, isChecking]);
+
+  // Show tooltip and mark model as downloaded when it becomes ready
   useEffect(() => {
     if (isReady && pendingTooltip) {
       markModelSelected();
       setPendingTooltip(false);
+
+      // Mark model as downloaded so we don't show confirmation next time
+      if (llm.modelName) {
+        markModelAsDownloaded(llm.modelName);
+        console.log('[App] Marked model as downloaded:', llm.modelName);
+      }
     }
-  }, [isReady, pendingTooltip, markModelSelected]);
+  }, [isReady, pendingTooltip, markModelSelected, llm.modelName]);
+
+  // Handle download confirmation
+  const handleConfirmDownload = useCallback(() => {
+    if (pendingDownload) {
+      setPendingTooltip(true);
+      llm.switchModel(pendingDownload);
+      setPendingDownload(null);
+    }
+  }, [pendingDownload, llm]);
+
+  // Handle download cancellation
+  const handleCancelDownloadConfirm = useCallback(() => {
+    setPendingDownload(null);
+  }, []);
 
   // Clear preview when download completes
   useEffect(() => {
@@ -138,19 +199,27 @@ function AppContent() {
         onDismissDropdownTooltip={dismissDropdownTooltip}
       />
 
-      <MessagesContainer
-        messages={chat.messages}
-        isDownloading={isDownloading}
-        isFromCache={llm.isFromCache}
-        modelName={llm.modelName}
-        previewModelKey={previewModel}
-        isGenerating={chat.isGenerating}
-        currentResponse={chat.currentResponse}
-        showThinking={true}
-        llmStatus={llm.status}
-        cachedModels={cachedModels}
-        onModelSelect={handleBubbleClick}
-      />
+      {pendingDownload ? (
+        <DownloadConfirmScreen
+          modelKey={pendingDownload}
+          onConfirm={handleConfirmDownload}
+          onCancel={handleCancelDownloadConfirm}
+        />
+      ) : (
+        <MessagesContainer
+          messages={chat.messages}
+          isDownloading={isDownloading}
+          isFromCache={llm.isFromCache}
+          modelName={llm.modelName}
+          previewModelKey={previewModel}
+          isGenerating={chat.isGenerating}
+          currentResponse={chat.currentResponse}
+          showThinking={true}
+          llmStatus={llm.status}
+          cachedModels={cachedModels}
+          onModelSelect={handleBubbleClick}
+        />
+      )}
 
       <InputArea
         attachment={attachment}

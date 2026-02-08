@@ -1,5 +1,6 @@
 /**
- * Hook to detect which WebLLM models are already cached.
+ * Hook to detect which WebLLM models are already downloaded.
+ * Uses localStorage to track downloaded models since hasModelInCache is unreliable.
  */
 
 import { useState, useEffect } from 'react';
@@ -8,16 +9,39 @@ import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
 // @ts-ignore - JS module
 import { WEBLLM_MODELS } from '../../core/webllm-adapter.js';
 
+const DOWNLOADED_MODELS_KEY = 'llm-downloaded-models';
+const MIGRATION_DONE_KEY = 'llm-cache-migration-done';
+
 export function useCachedModels() {
-  const [cachedModels, setCachedModels] = useState<Set<string>>(new Set());
+  const [cachedModels, setCachedModels] = useState<Set<string>>(() => {
+    // Load from localStorage on mount
+    try {
+      const stored = localStorage.getItem(DOWNLOADED_MODELS_KEY);
+      if (stored) {
+        const models = JSON.parse(stored);
+        console.log('[useCachedModels] Loaded from localStorage:', models);
+        return new Set(models);
+      }
+    } catch (error) {
+      console.error('[useCachedModels] Error loading from localStorage:', error);
+    }
+    return new Set();
+  });
+
   const [isChecking, setIsChecking] = useState(true);
 
+  // One-time migration: check WebLLM cache and populate localStorage
   useEffect(() => {
-    async function checkCachedModels() {
-      try {
-        const cached = new Set<string>();
+    async function migrateCache() {
+      const migrated = localStorage.getItem(MIGRATION_DONE_KEY);
+      if (migrated === 'true') {
+        console.log('[useCachedModels] Migration already done, skipping');
+        setIsChecking(false);
+        return;
+      }
 
-        // Check each model
+      console.log('[useCachedModels] Running one-time cache migration...');
+      try {
         const [llamaCached, gemmaCached, hermesCached, deepseekCached, llama70bCached] =
           await Promise.all([
             hasModelInCache(WEBLLM_MODELS.llama.id, prebuiltAppConfig),
@@ -27,22 +51,54 @@ export function useCachedModels() {
             hasModelInCache(WEBLLM_MODELS.llama70b.id, prebuiltAppConfig),
           ]);
 
-        if (llamaCached) cached.add('webllm-llama');
-        if (gemmaCached) cached.add('webllm-gemma');
-        if (hermesCached) cached.add('webllm-hermes');
-        if (deepseekCached) cached.add('webllm-deepseek');
-        if (llama70bCached) cached.add('webllm-llama70b');
+        console.log('[useCachedModels] Migration cache results:', {
+          llama: llamaCached,
+          gemma: gemmaCached,
+          hermes: hermesCached,
+          deepseek: deepseekCached,
+          llama70b: llama70bCached
+        });
 
-        setCachedModels(cached);
+        const models: string[] = [];
+        if (llamaCached) models.push('webllm-llama');
+        if (gemmaCached) models.push('webllm-gemma');
+        if (hermesCached) models.push('webllm-hermes');
+        if (deepseekCached) models.push('webllm-deepseek');
+        if (llama70bCached) models.push('webllm-llama70b');
+
+        if (models.length > 0) {
+          localStorage.setItem(DOWNLOADED_MODELS_KEY, JSON.stringify(models));
+          setCachedModels(new Set(models));
+          console.log('[useCachedModels] Migrated models to localStorage:', models);
+        }
+
+        localStorage.setItem(MIGRATION_DONE_KEY, 'true');
       } catch (error) {
-        console.error('[useCachedModels] Error checking cached models:', error);
+        console.error('[useCachedModels] Migration error:', error);
       } finally {
         setIsChecking(false);
       }
     }
 
-    checkCachedModels();
+    migrateCache();
   }, []);
 
   return { cachedModels, isChecking };
+}
+
+/**
+ * Mark a model as downloaded and save to localStorage.
+ */
+export function markModelAsDownloaded(modelKey: string) {
+  try {
+    const stored = localStorage.getItem(DOWNLOADED_MODELS_KEY);
+    const models = stored ? JSON.parse(stored) : [];
+    if (!models.includes(modelKey)) {
+      models.push(modelKey);
+      localStorage.setItem(DOWNLOADED_MODELS_KEY, JSON.stringify(models));
+      console.log('[useCachedModels] Marked as downloaded:', modelKey);
+    }
+  } catch (error) {
+    console.error('[useCachedModels] Error saving to localStorage:', error);
+  }
 }
