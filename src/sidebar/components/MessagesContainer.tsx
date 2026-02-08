@@ -22,6 +22,7 @@ interface MessagesContainerProps {
   currentResponse: string;
   showThinking: boolean;
   llmStatus: string;
+  cachedModels?: Set<string>;
 }
 
 export function MessagesContainer({
@@ -34,6 +35,7 @@ export function MessagesContainer({
   currentResponse,
   showThinking,
   llmStatus,
+  cachedModels,
 }: MessagesContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +49,7 @@ export function MessagesContainer({
   const renderContent = () => {
     // Show choose model screen when awaiting user selection
     if (llmStatus === 'awaiting-selection') {
-      return <ChooseModelScreen />;
+      return <ChooseModelScreen cachedModels={cachedModels} />;
     }
 
     // Show loading screen during download

@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLLM, usePageAttachment } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
@@ -19,6 +19,7 @@ function AppContent() {
   const llm = useLLM();
   const { attachment, clear: clearAttachment, reload: reloadAttachment } = usePageAttachment();
   const chat = useChat();
+  const { cachedModels } = useCachedModels();
 
   const [previewModel, setPreviewModel] = useState<string | null>(null);
   const [showGeminiSetup, setShowGeminiSetup] = useState(false);
@@ -123,6 +124,7 @@ function AppContent() {
         currentResponse={chat.currentResponse}
         showThinking={true}
         llmStatus={llm.status}
+        cachedModels={cachedModels}
       />
 
       <InputArea

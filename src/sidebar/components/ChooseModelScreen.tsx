@@ -5,38 +5,55 @@
 
 import React from 'react';
 
-export function ChooseModelScreen() {
+interface ChooseModelScreenProps {
+  cachedModels?: Set<string>;
+}
+
+export function ChooseModelScreen({ cachedModels = new Set() }: ChooseModelScreenProps) {
+  const getModelClass = (modelKey: string, isRecommended: boolean = false) => {
+    const classes = ['model-option'];
+    if (cachedModels.has(modelKey)) {
+      classes.push('model-option-cached');
+    } else if (isRecommended) {
+      classes.push('model-option-recommended');
+    }
+    return classes.join(' ');
+  };
+
   return (
     <div className="choose-model-screen">
-      <div className="choose-model-arrow">↗</div>
-      <h2 className="choose-model-title">Choose Your AI Model</h2>
-      <p className="choose-model-subtitle">Select a model from the dropdown above to get started.</p>
+      <h2 className="choose-model-title">Choose Your LLM:</h2>
 
       <div className="model-options">
-        <div className="model-option">
+        <div className={getModelClass('webllm-llama', true)}>
+          {cachedModels.has('webllm-llama') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🦙</span>
           <strong className="model-option-name">Llama 3.2 (1B params)</strong>
           <p className="model-option-desc">Lightweight and fast<br/>Size: <b>700 mb</b> to download</p>
         </div>
-        <div className="model-option">
+        <div className={getModelClass('webllm-gemma')}>
+          {cachedModels.has('webllm-gemma') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">💎</span>
-          <strong className="model-option-name">Gemma 2 2B</strong>
-          <p className="model-option-desc">Compact and capable. Great quality (2.5 GB).</p>
+          <strong className="model-option-name">Gemma 2 (2B params)</strong>
+          <p className="model-option-desc">Balanced and smart<br/>Size: <b>2.5 Gb</b> to download</p>
         </div>
-        <div className="model-option">
+        <div className={getModelClass('webllm-hermes', true)}>
+          {cachedModels.has('webllm-hermes') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🎯</span>
-          <strong className="model-option-name">Hermes 3 3B</strong>
-          <p className="model-option-desc">Balanced and smart. Excellent all-rounder (2.9 GB).</p>
+          <strong className="model-option-name">Hermes 3 (3B params)</strong>
+          <p className="model-option-desc">Excellent instruction-following<br/>Size: <b>2.9 Gb</b> to download</p>
         </div>
-        <div className="model-option">
+        <div className={getModelClass('webllm-deepseek')}>
+          {cachedModels.has('webllm-deepseek') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🔬</span>
-          <strong className="model-option-name">DeepSeek-R1</strong>
-          <p className="model-option-desc">Deep thinking. Best for complex reasoning (4.5 GB).</p>
+          <strong className="model-option-name">DeepSeek-R1 (8B params)</strong>
+          <p className="model-option-desc">Reasoning, but experimental model<br/>Size: <b>4.5 Gb</b> to download</p>
         </div>
-        <div className="model-option">
+        <div className={getModelClass('webllm-llama70b')}>
+          {cachedModels.has('webllm-llama70b') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🦕</span>
-          <strong className="model-option-name">Llama 3.1 70B</strong>
-          <p className="model-option-desc">Most powerful. Requires high-end GPU (31 GB).</p>
+          <strong className="model-option-name">Llama 3.1 (70B params)</strong>
+          <p className="model-option-desc">Super heavy. Requires 30Gb GPU - runs on latest Macbooks or gaming PC's.<br/>Size: <b className="model-option-red">32 Gb</b> to download</p>
         </div>
         <div className="model-option model-option-muted">
           <span className="model-option-icon">✨</span>
