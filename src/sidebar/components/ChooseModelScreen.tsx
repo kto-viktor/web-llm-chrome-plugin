@@ -15,18 +15,28 @@ export function ChooseModelScreen() {
       <div className="model-options">
         <div className="model-option">
           <span className="model-option-icon">🦙</span>
-          <strong className="model-option-name">Llama 3.2 1B</strong>
-          <p className="model-option-desc">Lightweight and fast. Quick download (700 MB).</p>
+          <strong className="model-option-name">Llama 3.2 (1B params)</strong>
+          <p className="model-option-desc">Lightweight and fast<br/>Size: <b>700 mb</b> to download</p>
         </div>
         <div className="model-option">
-          <span className="model-option-icon">🧠</span>
-          <strong className="model-option-name">Qwen 2.5 7B</strong>
-          <p className="model-option-desc">Balanced and capable. Great for general tasks.</p>
+          <span className="model-option-icon">💎</span>
+          <strong className="model-option-name">Gemma 2 2B</strong>
+          <p className="model-option-desc">Compact and capable. Great quality (2.5 GB).</p>
+        </div>
+        <div className="model-option">
+          <span className="model-option-icon">🎯</span>
+          <strong className="model-option-name">Hermes 3 3B</strong>
+          <p className="model-option-desc">Balanced and smart. Excellent all-rounder (2.9 GB).</p>
         </div>
         <div className="model-option">
           <span className="model-option-icon">🔬</span>
           <strong className="model-option-name">DeepSeek-R1</strong>
-          <p className="model-option-desc">Deep thinking. Best for complex reasoning.</p>
+          <p className="model-option-desc">Deep thinking. Best for complex reasoning (4.5 GB).</p>
+        </div>
+        <div className="model-option">
+          <span className="model-option-icon">🦕</span>
+          <strong className="model-option-name">Llama 3.1 70B</strong>
+          <p className="model-option-desc">Most powerful. Requires high-end GPU (31 GB).</p>
         </div>
         <div className="model-option model-option-muted">
           <span className="model-option-icon">✨</span>

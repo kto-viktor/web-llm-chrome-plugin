@@ -52,7 +52,7 @@ export function MessagesContainer({
 
     // Show loading screen during download
     if (isDownloading) {
-      const displayModelKey = previewModelKey || modelName || 'webllm-qwen';
+      const displayModelKey = previewModelKey || modelName || 'webllm-hermes';
       if (isFromCache) {
         return <CacheLoadingScreen />;
       }

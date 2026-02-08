@@ -21,12 +21,19 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     icon: '🦙',
     benefits: ['Fast download', 'Low memory', 'Great for basics']
   },
-  'webllm-qwen': {
-    name: 'Qwen 2.5 7B',
-    tagline: 'Balanced & Capable',
-    description: "Alibaba's powerful 7 billion parameter model. Excellent for general tasks, summary, and creative writing.",
-    icon: '🧠',
-    benefits: ['Great all-rounder', 'Strong reasoning', 'Multilingual']
+  'webllm-gemma': {
+    name: 'Gemma 2 2B',
+    tagline: 'Compact & Capable',
+    description: "Google's efficient 2 billion parameter model. Excellent balance of size and capability for everyday tasks.",
+    icon: '💎',
+    benefits: ['Fast responses', 'Low resource usage', 'Great quality']
+  },
+  'webllm-hermes': {
+    name: 'Hermes 3 3B',
+    tagline: 'Balanced & Smart',
+    description: "NousResearch's instruction-following 3 billion parameter model. Excellent all-rounder for most tasks.",
+    icon: '🎯',
+    benefits: ['Great all-rounder', 'Strong reasoning', 'Versatile']
   },
   'webllm-deepseek': {
     name: 'DeepSeek-R1',
@@ -34,6 +41,13 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems and advanced users who need to see the LLM thinking process.',
     icon: '🔬',
     benefits: ['Chain-of-thought', 'Complex reasoning', 'Problem solving']
+  },
+  'webllm-llama70b': {
+    name: 'Llama 3.1 70B',
+    tagline: 'Most Powerful',
+    description: "Meta's flagship 70 billion parameter model. Industry-leading performance for the most demanding tasks. Requires high-end GPU with 31GB+ VRAM.",
+    icon: '🚀',
+    benefits: ['Best quality', 'Advanced reasoning', 'Professional-grade']
   }
 };
 
@@ -42,7 +56,7 @@ interface DownloadScreenProps {
 }
 
 export function DownloadScreen({ modelKey }: DownloadScreenProps) {
-  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-qwen'];
+  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-hermes'];
 
   return (
     <div className="download-screen">

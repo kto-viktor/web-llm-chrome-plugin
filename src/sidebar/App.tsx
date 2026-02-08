@@ -47,8 +47,8 @@ function AppContent() {
       // Revert to downloading model
       setPreviewModel(null);
     } else {
-      // Switch to Qwen
-      llm.switchModel('webllm-qwen');
+      // Switch to Hermes
+      llm.switchModel('webllm-hermes');
     }
   }, [isDownloading, llm]);
 

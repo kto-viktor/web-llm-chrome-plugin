@@ -1,6 +1,6 @@
 /**
  * WebLLM adapter for running LLM models locally via WebGPU.
- * Supports Qwen (default) and DeepSeek models.
+ * Supports 5 models: Llama 1B, Gemma 2B, Hermes 3B (default), DeepSeek 8B, Llama 70B.
  * @module core/webllm-adapter
  */
 
@@ -10,9 +10,12 @@ import * as webllm from '@mlc-ai/web-llm';
  * Available WebLLM models configuration.
  * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
  *
- * Default HuggingFace URLs:
- * - Qwen: https://huggingface.co/mlc-ai/Qwen2.5-7B-Instruct-q4f16_1-MLC/resolve/main/
- * - DeepSeek: https://huggingface.co/mlc-ai/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/resolve/main/
+ * Models (ordered by size):
+ * - Llama 3.2 1B: Lightweight, fast (700 MB)
+ * - Gemma 2 2B: Compact, capable (2.5 GB)
+ * - Hermes 3 3B: Balanced, smart - default (2.9 GB)
+ * - DeepSeek-R1 8B: Deep thinking (4.5 GB)
+ * - Llama 3.1 70B: Most powerful (31 GB)
  */
 export const WEBLLM_MODELS = {
   llama: {
@@ -21,17 +24,29 @@ export const WEBLLM_MODELS = {
     displayName: 'Llama 3.2 1B (WebLLM)',
     modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Llama-3.2-1B-Instruct-q4f16_1-MLC/'
   },
-  qwen: {
-    id: 'Qwen2.5-7B-Instruct-q4f16_1-MLC',
-    name: 'webllm-qwen',
-    displayName: 'Qwen 2.5 7B (WebLLM)',
-    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Qwen2.5-7B-Instruct-q4f16_1-MLC/'
+  gemma: {
+    id: 'gemma-2-2b-it-q4f32_1-MLC',
+    name: 'webllm-gemma',
+    displayName: 'Gemma 2 2B (WebLLM)',
+    //modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/gemma-2-2b-it-q4f32_1-MLC/'
+  },
+  hermes: {
+    id: 'Hermes-3-Llama-3.2-3B-q4f32_1-MLC',
+    name: 'webllm-hermes',
+    displayName: 'Hermes 3 3B (WebLLM)',
+    //modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Hermes-3-Llama-3.2-3B-q4f32_1-MLC/'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
     displayName: 'DeepSeek-R1 (WebLLM)',
     modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
+  },
+  llama70b: {
+    id: 'Llama-3.1-70B-Instruct-q3f16_1-MLC',
+    name: 'webllm-llama70b',
+    displayName: 'Llama 3.1 70B (WebLLM)',
+    //modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Llama-3.1-70B-Instruct-q3f16_1-MLC/'
   }
 };
 
@@ -41,9 +56,9 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'llama'|'qwen'|'deepseek'} [modelKey='qwen'] - The model key to use
+   * @param {'llama'|'gemma'|'hermes'|'deepseek'|'llama70b'} [modelKey='hermes'] - The model key to use
    */
-  constructor(modelKey = 'qwen') {
+  constructor(modelKey = 'hermes') {
     const config = WEBLLM_MODELS[modelKey];
     if (!config) {
       throw new Error(`Unknown WebLLM model: ${modelKey}`);
