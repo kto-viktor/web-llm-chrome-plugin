@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLLM, usePageAttachment, useCachedModels } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
@@ -20,15 +20,22 @@ function AppContent() {
   const { attachment, clear: clearAttachment, reload: reloadAttachment } = usePageAttachment();
   const chat = useChat();
   const { cachedModels } = useCachedModels();
+  const { showDropdownTooltip, markModelSelected, dismissDropdownTooltip } = useOnboarding();
 
   const [previewModel, setPreviewModel] = useState<string | null>(null);
   const [showGeminiSetup, setShowGeminiSetup] = useState(false);
+  const [pendingTooltip, setPendingTooltip] = useState(false);
 
   const isDownloading = llm.status === 'downloading';
   const isReady = llm.status === 'ready';
 
   // Handle model change from selector
   const handleModelChange = useCallback((modelName: string) => {
+    // Dismiss dropdown tooltip on dropdown use (user already knows about it!)
+    if (showDropdownTooltip) {
+      dismissDropdownTooltip();
+    }
+
     if (isDownloading) {
       // During download, just show preview info
       setPreviewModel(modelName);
@@ -39,7 +46,7 @@ function AppContent() {
       llm.switchModel(modelName);
       setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
     }
-  }, [isDownloading, llm]);
+  }, [isDownloading, llm, showDropdownTooltip, dismissDropdownTooltip]);
 
   // Handle Gemini setup dismiss
   const handleGeminiDismiss = useCallback(() => {
@@ -77,6 +84,21 @@ function AppContent() {
     setShowGeminiSetup(false);
   }, [llm]);
 
+  // Handle model bubble click
+  const handleBubbleClick = useCallback((modelName: string) => {
+    // Set flag to show tooltip after model loads
+    setPendingTooltip(true);
+    llm.switchModel(modelName);
+  }, [llm]);
+
+  // Show tooltip when model becomes ready after selection
+  useEffect(() => {
+    if (isReady && pendingTooltip) {
+      markModelSelected();
+      setPendingTooltip(false);
+    }
+  }, [isReady, pendingTooltip, markModelSelected]);
+
   // Clear preview when download completes
   useEffect(() => {
     if (!isDownloading && previewModel) {
@@ -112,6 +134,8 @@ function AppContent() {
         onGeminiDismiss={handleGeminiDismiss}
         onCancelDownload={handleCancelDownload}
         showGeminiSetup={shouldShowGeminiSetup}
+        showDropdownTooltip={showDropdownTooltip && isReady}
+        onDismissDropdownTooltip={dismissDropdownTooltip}
       />
 
       <MessagesContainer
@@ -125,6 +149,7 @@ function AppContent() {
         showThinking={true}
         llmStatus={llm.status}
         cachedModels={cachedModels}
+        onModelSelect={handleBubbleClick}
       />
 
       <InputArea

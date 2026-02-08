@@ -7,9 +7,13 @@ import React from 'react';
 
 interface ChooseModelScreenProps {
   cachedModels?: Set<string>;
+  onModelSelect?: (modelKey: string) => void;
 }
 
-export function ChooseModelScreen({ cachedModels = new Set() }: ChooseModelScreenProps) {
+export function ChooseModelScreen({
+  cachedModels = new Set(),
+  onModelSelect
+}: ChooseModelScreenProps) {
   const getModelClass = (modelKey: string, isRecommended: boolean = false) => {
     const classes = ['model-option'];
     if (cachedModels.has(modelKey)) {
@@ -25,31 +29,51 @@ export function ChooseModelScreen({ cachedModels = new Set() }: ChooseModelScree
       <h2 className="choose-model-title">Choose Your LLM:</h2>
 
       <div className="model-options">
-        <div className={getModelClass('webllm-llama', true)}>
+        <div
+          className={getModelClass('webllm-llama', true)}
+          onClick={() => onModelSelect?.('webllm-llama')}
+          style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
+        >
           {cachedModels.has('webllm-llama') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🦙</span>
           <strong className="model-option-name">Llama 3.2 (1B params)</strong>
           <p className="model-option-desc">Lightweight and fast<br/>Size: <b>700 mb</b> to download</p>
         </div>
-        <div className={getModelClass('webllm-gemma')}>
+        <div
+          className={getModelClass('webllm-gemma')}
+          onClick={() => onModelSelect?.('webllm-gemma')}
+          style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
+        >
           {cachedModels.has('webllm-gemma') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">💎</span>
           <strong className="model-option-name">Gemma 2 (2B params)</strong>
           <p className="model-option-desc">Balanced and smart<br/>Size: <b>2.5 Gb</b> to download</p>
         </div>
-        <div className={getModelClass('webllm-hermes', true)}>
+        <div
+          className={getModelClass('webllm-hermes', true)}
+          onClick={() => onModelSelect?.('webllm-hermes')}
+          style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
+        >
           {cachedModels.has('webllm-hermes') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🎯</span>
           <strong className="model-option-name">Hermes 3 (3B params)</strong>
           <p className="model-option-desc">Excellent instruction-following<br/>Size: <b>2.9 Gb</b> to download</p>
         </div>
-        <div className={getModelClass('webllm-deepseek')}>
+        <div
+          className={getModelClass('webllm-deepseek')}
+          onClick={() => onModelSelect?.('webllm-deepseek')}
+          style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
+        >
           {cachedModels.has('webllm-deepseek') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🔬</span>
           <strong className="model-option-name">DeepSeek-R1 (8B params)</strong>
           <p className="model-option-desc">Reasoning, but experimental model<br/>Size: <b>4.5 Gb</b> to download</p>
         </div>
-        <div className={getModelClass('webllm-llama70b')}>
+        <div
+          className={getModelClass('webllm-llama70b')}
+          onClick={() => onModelSelect?.('webllm-llama70b')}
+          style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
+        >
           {cachedModels.has('webllm-llama70b') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🦕</span>
           <strong className="model-option-name">Llama 3.1 (70B params)</strong>

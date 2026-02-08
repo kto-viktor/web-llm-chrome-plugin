@@ -7,3 +7,4 @@ export { useHistory } from './useHistory';
 export { usePageAttachment } from './usePageAttachment';
 export { useAutoResize } from './useAutoResize';
 export { useCachedModels } from './useCachedModels';
+export { useOnboarding } from './useOnboarding';
