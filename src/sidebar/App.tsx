@@ -121,21 +121,21 @@ function AppContent() {
     console.log('[App] Is cached?', isCached);
 
     if (isCached) {
-      // Model cached - load immediately
+      // Model cached - load immediately and show tooltip
       console.log('[App] Loading cached model immediately');
       setPendingTooltip(true);
+      markModelSelected();
       llm.switchModel(modelName);
     } else {
       // Model not cached - show confirmation
       console.log('[App] Showing download confirmation');
       setPendingDownload(modelName);
     }
-  }, [llm, cachedModels, isChecking]);
+  }, [llm, cachedModels, isChecking, markModelSelected]);
 
-  // Show tooltip and mark model as downloaded when it becomes ready
+  // Mark model as downloaded when it becomes ready
   useEffect(() => {
     if (isReady && pendingTooltip) {
-      markModelSelected();
       setPendingTooltip(false);
 
       // Mark model as downloaded so we don't show confirmation next time
@@ -144,16 +144,18 @@ function AppContent() {
         console.log('[App] Marked model as downloaded:', llm.modelName);
       }
     }
-  }, [isReady, pendingTooltip, markModelSelected, llm.modelName]);
+  }, [isReady, pendingTooltip, llm.modelName]);
 
   // Handle download confirmation
   const handleConfirmDownload = useCallback(() => {
     if (pendingDownload) {
       setPendingTooltip(true);
+      // Show tooltip immediately when download starts
+      markModelSelected();
       llm.switchModel(pendingDownload);
       setPendingDownload(null);
     }
-  }, [pendingDownload, llm]);
+  }, [pendingDownload, llm, markModelSelected]);
 
   // Handle download cancellation
   const handleCancelDownloadConfirm = useCallback(() => {
@@ -195,7 +197,7 @@ function AppContent() {
         onGeminiDismiss={handleGeminiDismiss}
         onCancelDownload={handleCancelDownload}
         showGeminiSetup={shouldShowGeminiSetup}
-        showDropdownTooltip={showDropdownTooltip && isReady}
+        showDropdownTooltip={showDropdownTooltip && (isReady || isDownloading)}
         onDismissDropdownTooltip={dismissDropdownTooltip}
       />
 
