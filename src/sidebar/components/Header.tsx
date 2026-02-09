@@ -5,30 +5,27 @@
 import React, { useCallback } from 'react';
 import { StatusIndicator } from './StatusIndicator';
 import { DownloadProgress } from './DownloadProgress';
-import { GeminiSetup } from './GeminiSetup';
 import { BackgroundDownloads } from './BackgroundDownloads';
 import type { LLMState } from '../types';
 
 interface HeaderProps {
   llmState: LLMState;
-  previewModel: string | null;
+  selectedModel: string | null;
+  cachedModels: Set<string>;
   onModelChange: (modelName: string) => void;
-  onGeminiDismiss: () => void;
   onCancelDownload: () => void;
   onCancelBackgroundDownload: (modelName: string) => void;
-  showGeminiSetup: boolean;
   showDropdownTooltip?: boolean;
   onDismissDropdownTooltip?: () => void;
 }
 
 export function Header({
   llmState,
-  previewModel,
+  selectedModel,
+  cachedModels,
   onModelChange,
-  onGeminiDismiss,
   onCancelDownload,
   onCancelBackgroundDownload,
-  showGeminiSetup,
   showDropdownTooltip = false,
   onDismissDropdownTooltip,
 }: HeaderProps) {
@@ -58,7 +55,8 @@ export function Header({
   };
 
   // Determine which value to show in selector
-  const selectorValue = previewModel || modelName || '';
+  // Use selectedModel (the model user has chosen)
+  const selectorValue = selectedModel || '';
 
   return (
     <>
@@ -71,12 +69,22 @@ export function Header({
               value={selectorValue}
               onChange={handleModelChange}
             >
-              {!modelName && !previewModel && <option value="">Select a model...</option>}
-              <option value="webllm-llama">Llama - <b className="green">700 Mb</b> - Lightweight</option>
-              <option value="webllm-gemma">Gemma 2 - 2.5 Gb - Balanced</option>
-              <option value="webllm-hermes">Hermes 3 - 2.9 Gb - Following instructions</option>
-              <option value="webllm-deepseek">DeepSeek-R1 - 4.5 Gb - Reasoning model</option>
-              <option value="webllm-llama70b">Llama 3.1 70B - <b>31 GB</b> - Most Powerful</option>
+              {!modelName && <option value="">Select a model...</option>}
+              <option value="webllm-llama">
+                {cachedModels.has('webllm-llama') ? '✓ ' : ''}Llama - 700 Mb - Lightweight
+              </option>
+              <option value="webllm-gemma">
+                {cachedModels.has('webllm-gemma') ? '✓ ' : ''}Gemma 2 - 2.5 Gb - Balanced
+              </option>
+              <option value="webllm-hermes">
+                {cachedModels.has('webllm-hermes') ? '✓ ' : ''}Hermes 3 - 2.9 Gb - Following instructions
+              </option>
+              <option value="webllm-deepseek">
+                {cachedModels.has('webllm-deepseek') ? '✓ ' : ''}DeepSeek-R1 - 4.5 Gb - Reasoning model
+              </option>
+              <option value="webllm-llama70b">
+                {cachedModels.has('webllm-llama70b') ? '✓ ' : ''}Llama 3.1 70B - 31 GB - Most Powerful
+              </option>
               <option value="gemini-nano">Gemini Nano - Chrome embedded model</option>
             </select>
             {showDropdownTooltip && (
@@ -114,8 +122,6 @@ export function Header({
           <div className="error-message">{llmState.error}</div>
         </div>
       )}
-
-      <GeminiSetup visible={showGeminiSetup} onDismiss={onGeminiDismiss} />
 
       <BackgroundDownloads
         downloads={backgroundDownloads}

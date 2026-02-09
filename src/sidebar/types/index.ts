@@ -74,3 +74,11 @@ export interface ChatActions {
 
 /** Combined chat context */
 export interface ChatContextValue extends ChatState, ChatActions {}
+
+/** View state for the application */
+export type ViewState =
+  | { screen: 'welcome' }
+  | { screen: 'download-confirm'; modelKey: string }
+  | { screen: 'downloading'; modelKey: string }
+  | { screen: 'chat' }
+  | { screen: 'gemini-setup' };

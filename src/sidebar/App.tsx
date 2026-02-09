@@ -10,6 +10,9 @@ import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
 import { InputArea } from './components/InputArea';
 import { DownloadConfirmScreen } from './components/DownloadConfirmScreen';
+import { GeminiSetup } from './components/GeminiSetup';
+import { computeViewState } from './utils/viewState';
+import { getModelState } from './utils/modelState';
 
 // @ts-ignore - JS module
 import { chatService } from '../services/chat-service.js';
@@ -24,73 +27,53 @@ function AppContent() {
   const { cachedModels, isChecking } = useCachedModels();
   const { showDropdownTooltip, markModelSelected, dismissDropdownTooltip } = useOnboarding();
 
-  const [previewModel, setPreviewModel] = useState<string | null>(null);
-  const [showGeminiSetup, setShowGeminiSetup] = useState(false);
-  const [pendingTooltip, setPendingTooltip] = useState(false);
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
-  const isDownloading = llm.status === 'downloading';
   const isReady = llm.status === 'ready';
+
+  // Compute view state from selected model
+  const modelState = selectedModel
+    ? getModelState(selectedModel, llm, cachedModels)
+    : null;
+  const viewState = computeViewState(selectedModel, pendingDownload, modelState);
 
   // Handle model change from selector
   const handleModelChange = useCallback(async (modelName: string) => {
-    // Don't allow selection while still checking cache
-    if (isChecking) {
-      console.log('[App] Still checking cache, please wait...');
-      return;
-    }
+    if (isChecking) return;
 
-    // Dismiss dropdown tooltip on dropdown use (user already knows about it!)
     if (showDropdownTooltip) {
       dismissDropdownTooltip();
     }
 
-    // Dismiss Gemini setup when switching to a different model
-    if (modelName !== 'gemini-nano' && showGeminiSetup) {
-      setShowGeminiSetup(false);
+    // KEY CHANGE: Set selected model FIRST, before any async operations
+    setSelectedModel(modelName);
+
+    const modelState = getModelState(modelName, llm, cachedModels);
+
+    if (modelState.type === 'ready') {
+      // Already active, nothing to do
+      return;
     }
 
-    console.log('[App] Dropdown selected:', modelName, 'Cached models:', Array.from(cachedModels));
-
-    // Check if model is cached
-    const isCached = cachedModels.has(modelName) || modelName === 'gemini-nano';
-    console.log('[App] Is cached?', isCached);
-
-    if (isCached) {
-      // Model cached - load immediately
-      // If currently downloading, it will be moved to background automatically
-      console.log('[App] Loading cached model immediately');
-      setPreviewModel(null);
-      try {
-        await llm.switchModel(modelName);
-      } catch (error: unknown) {
-        // Ignore errors from cancelled downloads
-        if (error instanceof Error && error.message?.includes('cancelled')) {
-          console.log('[App] Ignoring cancelled download error');
-        } else {
-          console.error('[App] Model switch error:', error);
-        }
-      }
-      setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
-    } else {
-      // Model not cached - show confirmation
-      // If currently downloading, it will be moved to background when new download starts
-      console.log('[App] Showing download confirmation');
+    if (modelState.type === 'cached') {
+      // Load cached model
+      await llm.switchModel(modelName);
+    } else if (modelState.type === 'not-downloaded') {
+      // Show download confirmation
       setPendingDownload(modelName);
+    } else if (modelState.type === 'downloading' || modelState.type === 'downloading-background') {
+      // Already downloading, just show its progress
+      // UI will update via viewState
+    } else if (modelState.type === 'gemini-unavailable') {
+      // UI will show setup screen
     }
-  }, [llm, showDropdownTooltip, dismissDropdownTooltip, cachedModels, isChecking, showGeminiSetup]);
+  }, [llm, cachedModels, isChecking, showDropdownTooltip, dismissDropdownTooltip]);
 
   // Handle Gemini setup dismiss
   const handleGeminiDismiss = useCallback(() => {
-    setShowGeminiSetup(false);
-    if (isDownloading) {
-      // Revert to downloading model
-      setPreviewModel(null);
-    } else {
-      // Switch to Hermes
-      llm.switchModel('webllm-hermes');
-    }
-  }, [isDownloading, llm]);
+    llm.switchModel('webllm-hermes');
+  }, [llm]);
 
   // Handle send message
   const handleSend = useCallback((message: string) => {
@@ -111,16 +94,9 @@ function AppContent() {
 
   // Handle cancel download
   const handleCancelDownload = useCallback(() => {
-    console.log('[App] Cancel clicked, status before:', llm.status);
     llm.cancelDownload();
-    setPreviewModel(null);
-    setShowGeminiSetup(false);
     setPendingDownload(null);
-    setPendingTooltip(false);
-    // Force check status after a brief delay to see if it updated
-    setTimeout(() => {
-      console.log('[App] Status after cancel:', llm.status);
-    }, 100);
+    setSelectedModel(null);  // Back to welcome
   }, [llm]);
 
   // Handle cancel background download
@@ -131,76 +107,54 @@ function AppContent() {
 
   // Handle model bubble click
   const handleBubbleClick = useCallback(async (modelName: string) => {
-    // Don't allow selection while still checking cache
-    if (isChecking) {
-      console.log('[App] Still checking cache, please wait...');
+    if (isChecking) return;
+
+    // KEY CHANGE: Set selected model FIRST
+    setSelectedModel(modelName);
+
+    const modelState = getModelState(modelName, llm, cachedModels);
+
+    if (modelState.type === 'ready') {
+      // Already active
       return;
     }
 
-    // Dismiss Gemini setup when switching to a different model
-    if (modelName !== 'gemini-nano' && showGeminiSetup) {
-      setShowGeminiSetup(false);
-    }
-
-    console.log('[App] Model clicked:', modelName, 'Cached models:', Array.from(cachedModels));
-
-    // Check if model is cached
-    const isCached = cachedModels.has(modelName) || modelName === 'gemini-nano';
-    console.log('[App] Is cached?', isCached);
-
-    if (isCached) {
-      // Model cached - load immediately and show tooltip
-      console.log('[App] Loading cached model immediately');
-      setPendingTooltip(true);
+    if (modelState.type === 'cached') {
+      // Load cached model, show tooltip
       markModelSelected();
-      try {
-        await llm.switchModel(modelName);
-      } catch (error: unknown) {
-        // Ignore errors from cancelled downloads
-        if (error instanceof Error && error.message?.includes('cancelled')) {
-          console.log('[App] Ignoring cancelled download error');
-        } else {
-          console.error('[App] Model switch error:', error);
-        }
-      }
-      // Update Gemini setup state after switch
-      setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
-    } else {
-      // Model not cached - show confirmation
-      console.log('[App] Showing download confirmation');
+      await llm.switchModel(modelName);
+    } else if (modelState.type === 'not-downloaded') {
+      // Show download confirmation
       setPendingDownload(modelName);
+    } else if (modelState.type === 'downloading' || modelState.type === 'downloading-background') {
+      // Already downloading, show its progress
+    } else if (modelState.type === 'gemini-unavailable') {
+      // UI will show setup screen
     }
-  }, [llm, cachedModels, isChecking, markModelSelected, showGeminiSetup]);
+  }, [llm, cachedModels, isChecking, markModelSelected]);
 
   // Mark model as downloaded when it becomes ready
   useEffect(() => {
-    if (isReady && pendingTooltip) {
-      setPendingTooltip(false);
+    if (llm.status === 'ready' && llm.modelName) {
+      markModelAsDownloaded(llm.modelName);
+    }
+  }, [llm.status, llm.modelName]);
 
-      // Mark model as downloaded so we don't show confirmation next time
-      if (llm.modelName) {
-        markModelAsDownloaded(llm.modelName);
-        console.log('[App] Marked model as downloaded:', llm.modelName);
+  // When a model becomes ready, update selectedModel if appropriate
+  useEffect(() => {
+    if (llm.status === 'ready' && llm.modelName) {
+      // Auto-select if no model selected, or if this is the model we're waiting for
+      if (!selectedModel || selectedModel === llm.modelName) {
+        setSelectedModel(llm.modelName);
       }
     }
-  }, [isReady, pendingTooltip, llm.modelName]);
+  }, [llm.status, llm.modelName, selectedModel]);
 
   // Handle download confirmation
   const handleConfirmDownload = useCallback(async () => {
     if (pendingDownload) {
-      setPendingTooltip(true);
-      // Show tooltip immediately when download starts
       markModelSelected();
-      try {
-        await llm.switchModel(pendingDownload);
-      } catch (error: unknown) {
-        // Ignore errors from cancelled downloads
-        if (error instanceof Error && error.message?.includes('cancelled')) {
-          console.log('[App] Ignoring cancelled download error');
-        } else {
-          console.error('[App] Model switch error:', error);
-        }
-      }
+      await llm.switchModel(pendingDownload);
       setPendingDownload(null);
     }
   }, [pendingDownload, llm, markModelSelected]);
@@ -208,21 +162,8 @@ function AppContent() {
   // Handle download cancellation
   const handleCancelDownloadConfirm = useCallback(() => {
     setPendingDownload(null);
+    setSelectedModel(null);  // Back to welcome
   }, []);
-
-  // Clear preview when download completes
-  useEffect(() => {
-    if (!isDownloading && previewModel) {
-      setPreviewModel(null);
-    }
-  }, [isDownloading, previewModel]);
-
-  // Show gemini setup if status is gemini-unavailable
-  useEffect(() => {
-    if (llm.status === 'gemini-unavailable') {
-      setShowGeminiSetup(true);
-    }
-  }, [llm.status]);
 
   // Reload attachment after message is sent
   useEffect(() => {
@@ -231,43 +172,36 @@ function AppContent() {
     }
   }, [chat.isGenerating, chat.messages.length, reloadAttachment]);
 
-  // Determine if showing Gemini setup
-  // Only show if explicitly set, or if currently viewing/loading Gemini and it's unavailable
-  const shouldShowGeminiSetup = showGeminiSetup ||
-    (previewModel === 'gemini-nano' && llm.status === 'gemini-unavailable') ||
-    (llm.status === 'gemini-unavailable' && llm.modelName === 'gemini-nano');
-
   return (
     <div className="container">
       <Header
         llmState={llm}
-        previewModel={previewModel}
+        selectedModel={selectedModel}
+        cachedModels={cachedModels}
         onModelChange={handleModelChange}
-        onGeminiDismiss={handleGeminiDismiss}
         onCancelDownload={handleCancelDownload}
         onCancelBackgroundDownload={handleCancelBackgroundDownload}
-        showGeminiSetup={shouldShowGeminiSetup}
-        showDropdownTooltip={showDropdownTooltip && (isReady || isDownloading)}
+        showDropdownTooltip={showDropdownTooltip && isReady}
         onDismissDropdownTooltip={dismissDropdownTooltip}
       />
 
-      {pendingDownload ? (
+      {viewState.screen === 'download-confirm' ? (
         <DownloadConfirmScreen
-          modelKey={pendingDownload}
+          modelKey={viewState.modelKey}
           onConfirm={handleConfirmDownload}
           onCancel={handleCancelDownloadConfirm}
+        />
+      ) : viewState.screen === 'gemini-setup' ? (
+        <GeminiSetup
+          visible={true}
+          onDismiss={handleGeminiDismiss}
         />
       ) : (
         <MessagesContainer
           messages={chat.messages}
-          isDownloading={isDownloading}
-          isFromCache={llm.isFromCache ?? false}
-          modelName={llm.modelName}
-          previewModelKey={previewModel}
+          viewState={viewState}
           isGenerating={chat.isGenerating}
           currentResponse={chat.currentResponse}
-          showThinking={true}
-          llmStatus={llm.status}
           cachedModels={cachedModels}
           onModelSelect={handleBubbleClick}
         />

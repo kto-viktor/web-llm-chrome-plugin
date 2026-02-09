@@ -212,6 +212,12 @@ export class LLMInterface {
     // Remove from cancelled list if starting fresh
     this.cancelledModels.delete(modelName);
 
+    // If currently downloading, move to background FIRST (before any checks that might return early)
+    if (this.state.status === 'downloading') {
+      console.log('[LLM Interface] Moving current download to background');
+      this.moveToBackground();
+    }
+
     // Check Gemini Nano availability before attempting to switch
     if (modelName === 'gemini-nano') {
       const detection = await detectModels();
@@ -219,6 +225,8 @@ export class LLMInterface {
         console.log('[LLM Interface] Gemini Nano not available');
         this.updateState({
           status: 'gemini-unavailable',
+          modelName: 'gemini-nano',
+          displayName: 'Gemini Nano',
           geminiNanoAvailable: false,
           error: 'Gemini Nano requires setup in Chrome flags'
         });
@@ -226,12 +234,8 @@ export class LLMInterface {
       }
     }
 
-    // If currently downloading, move to background instead of destroying
-    if (this.state.status === 'downloading') {
-      console.log('[LLM Interface] Moving current download to background');
-      this.moveToBackground();
-    } else {
-      // Clean up current adapter if not downloading
+    // Clean up current adapter if we weren't downloading
+    if (this.state.status !== 'downloading') {
       await this.destroy();
     }
 
@@ -524,6 +528,16 @@ export class LLMInterface {
 
     // Clear current adapter reference (it's now in background)
     this.adapter = null;
+
+    // Clear foreground download state
+    this.updateState({
+      status: 'idle',
+      modelName: null,
+      displayName: null,
+      downloadProgress: 0,
+      downloadText: '',
+      isFromCache: null
+    });
   }
 
   /**

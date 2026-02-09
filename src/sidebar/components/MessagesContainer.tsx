@@ -4,38 +4,27 @@
  */
 
 import React, { useRef, useEffect } from 'react';
-import type { Message as MessageType } from '../types';
+import type { Message as MessageType, ViewState } from '../types';
 import { Message } from './Message';
 import { EmptyState } from './EmptyState';
 import { DownloadScreen } from './DownloadScreen';
-import { CacheLoadingScreen } from './CacheLoadingScreen';
 import { ChooseModelScreen } from './ChooseModelScreen';
 import { ThinkingIndicator } from './ThinkingIndicator';
 
 interface MessagesContainerProps {
   messages: MessageType[];
-  isDownloading: boolean;
-  isFromCache: boolean;
-  modelName: string | null;
-  previewModelKey: string | null;
+  viewState: ViewState;
   isGenerating: boolean;
   currentResponse: string;
-  showThinking: boolean;
-  llmStatus: string;
   cachedModels?: Set<string>;
   onModelSelect?: (modelKey: string) => void;
 }
 
 export function MessagesContainer({
   messages,
-  isDownloading,
-  isFromCache,
-  modelName,
-  previewModelKey,
+  viewState,
   isGenerating,
   currentResponse,
-  showThinking,
-  llmStatus,
   cachedModels,
   onModelSelect,
 }: MessagesContainerProps) {
@@ -49,11 +38,8 @@ export function MessagesContainer({
   }, [messages, currentResponse, isGenerating]);
 
   const renderContent = () => {
-    console.log('[MessagesContainer] Rendering, llmStatus:', llmStatus, 'isDownloading:', isDownloading);
-
-    // Show choose model screen when awaiting user selection
-    if (llmStatus === 'awaiting-selection') {
-      console.log('[MessagesContainer] Showing ChooseModelScreen');
+    // Show welcome screen
+    if (viewState.screen === 'welcome') {
       return (
         <ChooseModelScreen
           cachedModels={cachedModels}
@@ -62,37 +48,35 @@ export function MessagesContainer({
       );
     }
 
-    // Show loading screen during download
-    if (isDownloading) {
-      const displayModelKey = previewModelKey || modelName || 'webllm-hermes';
-      if (isFromCache) {
-        return <CacheLoadingScreen />;
+    // Show download in progress
+    if (viewState.screen === 'downloading') {
+      return <DownloadScreen modelKey={viewState.modelKey} />;
+    }
+
+    // Show chat screen (empty or with messages)
+    if (viewState.screen === 'chat') {
+      if (messages.length === 0 && !isGenerating) {
+        return <EmptyState />;
       }
-      return <DownloadScreen modelKey={displayModelKey} />;
+
+      return (
+        <>
+          {messages.map((msg, index) => (
+            <Message key={index} message={msg} />
+          ))}
+          {isGenerating && currentResponse && (
+            <Message
+              message={{ role: 'assistant', content: '' }}
+              isGenerating={true}
+              streamingContent={currentResponse}
+            />
+          )}
+        </>
+      );
     }
 
-    // Show empty state if no messages
-    if (messages.length === 0 && !isGenerating) {
-      return <EmptyState />;
-    }
-
-    // Render messages
-    return (
-      <>
-        {messages.map((msg, index) => (
-          <Message key={index} message={msg} />
-        ))}
-
-        {/* Show streaming message if generating */}
-        {isGenerating && currentResponse && (
-          <Message
-            message={{ role: 'assistant', content: '' }}
-            isGenerating={true}
-            streamingContent={currentResponse}
-          />
-        )}
-      </>
-    );
+    // Fallback: empty
+    return null;
   };
 
   return (
@@ -100,7 +84,7 @@ export function MessagesContainer({
       <div className="messages" id="messages">
         {renderContent()}
       </div>
-      <ThinkingIndicator visible={showThinking && isGenerating && !currentResponse} />
+      <ThinkingIndicator visible={isGenerating && !currentResponse} />
     </div>
   );
 }

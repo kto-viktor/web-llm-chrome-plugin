@@ -23,11 +23,11 @@
 - Сделать кнопку скачать Х гб (не качать автоматом)
 - LLama 70B - красным написать размер и системные требования (или упомянуть про маки)
 - Доресерчить модели, возможно, выбрать побольше
+- **model selection refactor**: Refactored to state machine architecture with ViewState as single source of truth. Eliminated `previewModel` and `showGeminiSetup` state variables. Dropdown now shows checkmarks (✓) for cached models. Simplified App.tsx from ~330 lines to ~260 lines. All model selection flows (cached, uncached, Gemini, switching during download) now work reliably.
 
 ## Todo
 
 feedback:
-- в дропдауне дать понять, какие модели уже скачаны, какие нет
 - Вместо автоаттача контекста, сделать это в явном виде (скрепкой или как)
 - Не блочить экран при стриминге, дать скроллить наверх и т д, дать возможность отменить
 - Стоит Добавить «tip» о том, что ответ у deepseek может быть медленнее, но и чо
