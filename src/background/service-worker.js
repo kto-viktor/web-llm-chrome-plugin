@@ -35,7 +35,7 @@ chrome.runtime.onInstalled.addListener((details) => {
     // Code to be executed on first install
     // eg. open a tab with a url
     chrome.tabs.create({
-      url: "https://staging.d1b4q74qfasigt.amplifyapp.com/",
+      url: "https://local-llm-run.github.io/",
     });
   } else if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
     // When extension is updated
