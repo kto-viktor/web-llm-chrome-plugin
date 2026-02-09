@@ -45,6 +45,11 @@ function AppContent() {
       dismissDropdownTooltip();
     }
 
+    // Dismiss Gemini setup when switching to a different model
+    if (modelName !== 'gemini-nano' && showGeminiSetup) {
+      setShowGeminiSetup(false);
+    }
+
     console.log('[App] Dropdown selected:', modelName, 'Cached models:', Array.from(cachedModels));
 
     // Check if model is cached
@@ -73,7 +78,7 @@ function AppContent() {
       console.log('[App] Showing download confirmation');
       setPendingDownload(modelName);
     }
-  }, [llm, showDropdownTooltip, dismissDropdownTooltip, cachedModels, isChecking]);
+  }, [llm, showDropdownTooltip, dismissDropdownTooltip, cachedModels, isChecking, showGeminiSetup]);
 
   // Handle Gemini setup dismiss
   const handleGeminiDismiss = useCallback(() => {
@@ -132,6 +137,11 @@ function AppContent() {
       return;
     }
 
+    // Dismiss Gemini setup when switching to a different model
+    if (modelName !== 'gemini-nano' && showGeminiSetup) {
+      setShowGeminiSetup(false);
+    }
+
     console.log('[App] Model clicked:', modelName, 'Cached models:', Array.from(cachedModels));
 
     // Check if model is cached
@@ -153,12 +163,14 @@ function AppContent() {
           console.error('[App] Model switch error:', error);
         }
       }
+      // Update Gemini setup state after switch
+      setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
     } else {
       // Model not cached - show confirmation
       console.log('[App] Showing download confirmation');
       setPendingDownload(modelName);
     }
-  }, [llm, cachedModels, isChecking, markModelSelected]);
+  }, [llm, cachedModels, isChecking, markModelSelected, showGeminiSetup]);
 
   // Mark model as downloaded when it becomes ready
   useEffect(() => {
@@ -220,9 +232,10 @@ function AppContent() {
   }, [chat.isGenerating, chat.messages.length, reloadAttachment]);
 
   // Determine if showing Gemini setup
+  // Only show if explicitly set, or if currently viewing/loading Gemini and it's unavailable
   const shouldShowGeminiSetup = showGeminiSetup ||
-    (previewModel === 'gemini-nano') ||
-    (llm.status === 'gemini-unavailable');
+    (previewModel === 'gemini-nano' && llm.status === 'gemini-unavailable') ||
+    (llm.status === 'gemini-unavailable' && llm.modelName === 'gemini-nano');
 
   return (
     <div className="container">

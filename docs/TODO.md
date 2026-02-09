@@ -13,6 +13,7 @@
 - there is a blinking bug - when first time downloading, for a few seconds it show like "loading from cache"
 - **add cancel download button**
 - **background downloads**: Downloads moved to compact progress bars when user switches models. Users can explore other models, start new downloads, and manage multiple downloads simultaneously. Background progress bars show at top with model name, progress, and cancel button.
+- **dismiss Gemini setup on model switch**: Gemini setup instructions now automatically close when user switches to a different model from the dropdown or model bubbles.
 - add steps about enable multilang option - make multilang word bold. Add clickable urls. And in case if component missing, tells that this is experimental feature in Chrome and not available for everyone yet. Actually, first need to check with someone - how to setup it properly.
 - add ability to just copy support email
 - "thinking" scratchpad from deepseek should be under spoiler
@@ -27,7 +28,6 @@
 
 feedback:
 - в дропдауне дать понять, какие модели уже скачаны, какие нет
-- Убрать плашку с Gemini при переключении на другую модель
 - Вместо автоаттача контекста, сделать это в явном виде (скрепкой или как)
 - Не блочить экран при стриминге, дать скроллить наверх и т д, дать возможность отменить
 - Стоит Добавить «tip» о том, что ответ у deepseek может быть медленнее, но и чо
