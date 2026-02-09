@@ -51,8 +51,8 @@ export class LLMInterface {
     /** @type {Set<Function>} */
     this.listeners = new Set();
 
-    /** @type {boolean} */
-    this.isCancelling = false;
+    /** @type {Set<string>} */
+    this.cancelledModels = new Set();
   }
 
   /**
@@ -192,6 +192,9 @@ export class LLMInterface {
    */
   async switchModel(modelName) {
     console.log(`[LLM Interface] Switching to model: ${modelName}`);
+
+    // Remove from cancelled list if starting fresh
+    this.cancelledModels.delete(modelName);
 
     // Check Gemini Nano availability before attempting to switch
     if (modelName === 'gemini-nano') {
@@ -354,14 +357,16 @@ export class LLMInterface {
     } catch (error) {
       console.error('[LLM Interface] Switch failed:', error);
 
-      // Don't set error state if we're intentionally cancelling
-      if (!this.isCancelling) {
+      // Don't set error state if this model was cancelled
+      const wasCancelled = this.cancelledModels.has(modelName);
+      if (!wasCancelled) {
         this.updateState({
           status: 'error',
           error: error.message
         });
       } else {
-        console.log('[LLM Interface] Error ignored due to cancellation');
+        console.log('[LLM Interface] Error ignored - model was cancelled:', modelName);
+        this.cancelledModels.delete(modelName); // Clean up
       }
 
       throw error;
@@ -375,8 +380,11 @@ export class LLMInterface {
   async cancelDownload() {
     console.log('[LLM Interface] Cancelling download...');
 
-    // Set flag to prevent error state from overriding awaiting-selection
-    this.isCancelling = true;
+    // Track the cancelled model to prevent error state later
+    if (this.state.modelName) {
+      this.cancelledModels.add(this.state.modelName);
+      console.log('[LLM Interface] Marked as cancelled:', this.state.modelName);
+    }
 
     // Signal adapter to cancel (stops progress callbacks from continuing)
     if (this.adapter && typeof this.adapter.cancel === 'function') {
@@ -391,11 +399,6 @@ export class LLMInterface {
       error: null
     });
     console.log('[LLM Interface] Download cancelled, returning to model selection');
-
-    // Reset flag after a short delay to allow pending promises to settle
-    setTimeout(() => {
-      this.isCancelling = false;
-    }, 500);
   }
 
   /**

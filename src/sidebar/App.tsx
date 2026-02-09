@@ -33,7 +33,7 @@ function AppContent() {
   const isReady = llm.status === 'ready';
 
   // Handle model change from selector
-  const handleModelChange = useCallback((modelName: string) => {
+  const handleModelChange = useCallback(async (modelName: string) => {
     // Don't allow selection while still checking cache
     if (isChecking) {
       console.log('[App] Still checking cache, please wait...');
@@ -60,7 +60,16 @@ function AppContent() {
         // Model cached - load immediately
         console.log('[App] Loading cached model immediately');
         setPreviewModel(null);
-        llm.switchModel(modelName);
+        try {
+          await llm.switchModel(modelName);
+        } catch (error) {
+          // Ignore errors from cancelled downloads
+          if (error.message?.includes('cancelled')) {
+            console.log('[App] Ignoring cancelled download error');
+          } else {
+            console.error('[App] Model switch error:', error);
+          }
+        }
         setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
       } else {
         // Model not cached - show confirmation
@@ -114,7 +123,7 @@ function AppContent() {
   }, [llm]);
 
   // Handle model bubble click
-  const handleBubbleClick = useCallback((modelName: string) => {
+  const handleBubbleClick = useCallback(async (modelName: string) => {
     // Don't allow selection while still checking cache
     if (isChecking) {
       console.log('[App] Still checking cache, please wait...');
@@ -132,7 +141,16 @@ function AppContent() {
       console.log('[App] Loading cached model immediately');
       setPendingTooltip(true);
       markModelSelected();
-      llm.switchModel(modelName);
+      try {
+        await llm.switchModel(modelName);
+      } catch (error) {
+        // Ignore errors from cancelled downloads
+        if (error.message?.includes('cancelled')) {
+          console.log('[App] Ignoring cancelled download error');
+        } else {
+          console.error('[App] Model switch error:', error);
+        }
+      }
     } else {
       // Model not cached - show confirmation
       console.log('[App] Showing download confirmation');
@@ -154,12 +172,21 @@ function AppContent() {
   }, [isReady, pendingTooltip, llm.modelName]);
 
   // Handle download confirmation
-  const handleConfirmDownload = useCallback(() => {
+  const handleConfirmDownload = useCallback(async () => {
     if (pendingDownload) {
       setPendingTooltip(true);
       // Show tooltip immediately when download starts
       markModelSelected();
-      llm.switchModel(pendingDownload);
+      try {
+        await llm.switchModel(pendingDownload);
+      } catch (error) {
+        // Ignore errors from cancelled downloads
+        if (error.message?.includes('cancelled')) {
+          console.log('[App] Ignoring cancelled download error');
+        } else {
+          console.error('[App] Model switch error:', error);
+        }
+      }
       setPendingDownload(null);
     }
   }, [pendingDownload, llm, markModelSelected]);
