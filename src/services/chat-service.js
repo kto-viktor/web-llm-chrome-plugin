@@ -191,25 +191,43 @@ export class ChatService {
 
   /**
    * Cancels the current generation if one is in progress.
-   * Immediately stops the UI state, even if the background stream is still cleaning up.
+   * Immediately stops the UI state and discards partial response.
    */
-  cancelGeneration() {
-    if (this.abortController && this.state.isGenerating) {
-      console.log('[Chat Service] Cancelling generation immediately...');
-
-      // Send abort signal to background stream
-      this.abortController.abort();
-      this.abortController = null;
-
-      // Immediately update UI state - don't wait for stream to finish
-      this.updateState({
-        isGenerating: false,
-        currentResponse: null,
-        error: null
-      });
-
-      console.log('[Chat Service] Generation cancelled (UI reset immediately)');
+  async cancelGeneration() {
+    if (!this.state.isGenerating) {
+      console.log('[Chat Service] Not generating, ignoring cancel');
+      return;
     }
+
+    console.log('[Chat Service] Cancelling generation immediately...');
+
+    // Store reference before it might be cleared
+    const controller = this.abortController;
+
+    // DON'T save partial response - user cancelled, so they don't want it
+    // Keeping partial responses creates noise in history and confuses the model
+
+    // Immediately update UI state - clear everything (do this FIRST for instant feedback)
+    this.updateState({
+      isGenerating: false,
+      currentResponse: null,
+      error: null
+    });
+
+    // Clear abort controller reference so sendMessage knows we cancelled
+    this.abortController = null;
+
+    // Send abort signal for streaming loop (Gemini Nano compatibility)
+    if (controller) {
+      controller.abort();
+    }
+
+    // Interrupt the engine directly (WebLLM way) - don't await, let it run async
+    llm.interrupt().catch(err => {
+      console.error('[Chat Service] Interrupt error:', err.message);
+    });
+
+    console.log('[Chat Service] Generation cancelled (UI reset immediately)');
   }
 
   /**

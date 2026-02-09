@@ -80,6 +80,8 @@ export class WebLLMAdapter {
     this.downloading = false;
     /** @type {boolean} */
     this.cancelled = false;
+    /** @type {boolean} */
+    this.generating = false;
   }
 
   /**
@@ -199,6 +201,15 @@ export class WebLLMAdapter {
       throw new Error('WebLLM not initialized. Call initialize() first.');
     }
 
+    if (this.generating) {
+      console.warn('[WebLLM] Already generating, waiting for completion...');
+      // Wait a bit for previous generation to finish
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (this.generating) {
+        throw new Error('Previous generation still in progress');
+      }
+    }
+
     const { onToken, signal } = options;
 
     const messages = [
@@ -209,16 +220,22 @@ export class WebLLMAdapter {
       return this.generateStreaming(messages, onToken, signal);
     }
 
+    this.generating = true;
     try {
+      console.log('[WebLLM] Starting non-streaming generation...');
       const response = await this.engine.chat.completions.create({
         messages,
         temperature: 0.7,
         max_tokens: 2048
       });
 
+      console.log('[WebLLM] Non-streaming generation completed');
       return response.choices[0]?.message?.content || '';
     } catch (error) {
+      console.log('[WebLLM] Non-streaming generation error:', error.message);
       throw new Error(`Generation failed: ${error.message}`);
+    } finally {
+      this.generating = false;
     }
   }
 
@@ -236,6 +253,9 @@ export class WebLLMAdapter {
       throw new Error('Generation cancelled');
     }
 
+    this.generating = true;
+    console.log('[WebLLM] Set generating=true');
+
     let aborted = false;
     const abortHandler = () => {
       console.log('[WebLLM] Abort signal received');
@@ -248,6 +268,7 @@ export class WebLLMAdapter {
     }
 
     try {
+      console.log('[WebLLM] Starting streaming generation...');
       const stream = await this.engine.chat.completions.create({
         messages,
         temperature: 0.7,
@@ -256,24 +277,31 @@ export class WebLLMAdapter {
       });
 
       let fullResponse = '';
+      let chunkCount = 0;
 
       for await (const chunk of stream) {
         // Check if generation was cancelled
         if (aborted) {
-          console.log('[WebLLM] Generation cancelled during streaming');
+          console.log('[WebLLM] Generation cancelled during streaming (chunk: ' + chunkCount + ')');
           throw new Error('Generation cancelled');
         }
 
         const delta = chunk.choices[0]?.delta?.content || '';
         if (delta) {
           fullResponse += delta;
+          chunkCount++;
           onToken(delta);
         }
       }
 
+      console.log('[WebLLM] Streaming completed (' + chunkCount + ' chunks, ' + fullResponse.length + ' chars)');
       return fullResponse;
     } catch (error) {
+      console.log('[WebLLM] Streaming error:', error.message);
       if (error.message === 'Generation cancelled') {
+        // Don't reset chat state - it causes the engine to hang on next request
+        // Just throw the error and let the engine recover naturally
+        console.log('[WebLLM] Cancelled, letting engine recover naturally (no resetChat)');
         throw error;
       }
       throw new Error(`Streaming generation failed: ${error.message}`);
@@ -282,6 +310,8 @@ export class WebLLMAdapter {
       if (signal) {
         signal.removeEventListener('abort', abortHandler);
       }
+      this.generating = false;
+      console.log('[WebLLM] Set generating=false');
     }
   }
 
@@ -296,6 +326,27 @@ export class WebLLMAdapter {
   async summarize(text, options = {}) {
     const prompt = `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}`;
     return this.generate(prompt, options);
+  }
+
+  /**
+   * Interrupts the current generation.
+   * This is the official WebLLM way to cancel generation.
+   * @returns {Promise<void>}
+   */
+  async interrupt() {
+    if (this.engine && this.generating) {
+      console.log('[WebLLM] Calling interruptGenerate() (generating=' + this.generating + ')...');
+      try {
+        // Just call interrupt and return immediately - don't wait
+        // The streaming loop will detect the interruption and exit
+        await this.engine.interruptGenerate();
+        console.log('[WebLLM] interruptGenerate() call completed');
+      } catch (error) {
+        console.error('[WebLLM] Interrupt error:', error.message);
+      }
+    } else {
+      console.log('[WebLLM] Interrupt called but not generating (generating=' + this.generating + ')');
+    }
   }
 
   /**

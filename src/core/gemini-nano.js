@@ -189,6 +189,18 @@ export class GeminiNanoAdapter {
   }
 
   /**
+   * Interrupts the current generation.
+   * Note: Gemini Nano doesn't have a native interrupt method.
+   * Cancellation is handled via AbortSignal in the streaming methods.
+   * @returns {Promise<void>}
+   */
+  async interrupt() {
+    console.log('[Gemini Nano] Interrupt called (no native support - use AbortSignal)');
+    // Gemini Nano doesn't have a native interrupt method
+    // Cancellation is handled via AbortSignal passed to generate/generateStreaming
+  }
+
+  /**
    * Checks if the model is ready to use.
    * @returns {boolean} Whether the model is initialized
    */

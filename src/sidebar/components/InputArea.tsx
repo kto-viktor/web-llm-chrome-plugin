@@ -105,7 +105,7 @@ export function InputArea({
           <textarea
             ref={textareaRef}
             className="message-input"
-            placeholder="Ask about this page..."
+            placeholder="Type here..."
             rows={1}
             value={message}
             onChange={handleChange}

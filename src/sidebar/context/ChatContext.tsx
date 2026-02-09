@@ -67,14 +67,17 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
           setCurrentResponse(prev => prev + token);
         }
       });
+
+      // Clear currentResponse after successful completion
+      setCurrentResponse('');
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[ChatContext] Error sending message:', errorMsg);
       // Add error message to history
       await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
+      setCurrentResponse('');
     } finally {
       setIsGenerating(false);
-      setCurrentResponse('');
       // Keep attachment for subsequent messages on same page
       // User can manually clear via X button if needed
     }
@@ -96,14 +99,14 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
 
   /**
    * Cancel the current generation.
-   * Immediately updates local state for instant UI response.
+   * Immediately updates local state and clears partial response.
    */
   const cancelGeneration = useCallback(() => {
     // Immediately update local state for instant UI feedback
     setIsGenerating(false);
-    setCurrentResponse('');
+    setCurrentResponse('');  // Clear partial response immediately
 
-    // Tell the service to cancel (will clean up in background)
+    // Tell the service to cancel
     chatService.cancelGeneration();
   }, []);
 

@@ -178,6 +178,18 @@ export class LLMInterface {
   }
 
   /**
+   * Interrupts the current generation.
+   * Uses the adapter's interrupt method if available.
+   * @returns {Promise<void>}
+   */
+  async interrupt() {
+    if (this.adapter && typeof this.adapter.interrupt === 'function') {
+      console.log('[LLM Interface] Interrupting generation...');
+      await this.adapter.interrupt();
+    }
+  }
+
+  /**
    * Checks if native Summarizer API is available.
    * @returns {boolean} Whether native Summarizer is ready
    */
