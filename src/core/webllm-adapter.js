@@ -28,13 +28,13 @@ export const WEBLLM_MODELS = {
     id: 'gemma-2-2b-it-q4f32_1-MLC',
     name: 'webllm-gemma',
     displayName: 'Gemma 2 2B (WebLLM)',
-    //modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/gemma-2-2b-it-q4f32_1-MLC/'
+    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/gemma-2-2b-it-q4f32_1-MLC/'
   },
   hermes: {
     id: 'Hermes-3-Llama-3.2-3B-q4f32_1-MLC',
     name: 'webllm-hermes',
     displayName: 'Hermes 3 3B (WebLLM)',
-    //modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Hermes-3-Llama-3.2-3B-q4f32_1-MLC/'
+    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Hermes-3-Llama-3.2-3B-q4f32_1-MLC/'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
