@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLLM, usePageAttachment, useCachedModels, useOnboarding } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip } from './hooks';
 import { markModelAsDownloaded } from './hooks/useCachedModels';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
@@ -11,6 +11,7 @@ import { MessagesContainer } from './components/MessagesContainer';
 import { InputArea } from './components/InputArea';
 import { DownloadConfirmScreen } from './components/DownloadConfirmScreen';
 import { GeminiSetup } from './components/GeminiSetup';
+import { PerformanceTip } from './components/PerformanceTip';
 import { computeViewState } from './utils/viewState';
 import { getModelState } from './utils/modelState';
 
@@ -26,6 +27,7 @@ function AppContent() {
   const chat = useChat();
   const { cachedModels, isChecking } = useCachedModels();
   const { showDropdownTooltip, markModelSelected, dismissDropdownTooltip } = useOnboarding();
+  const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating);
 
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
@@ -215,6 +217,9 @@ function AppContent() {
           onModelSelect={handleBubbleClick}
         />
       )}
+
+      {/* Performance tip (shown after 10s of generation) */}
+      {showTip && <PerformanceTip onClose={dismissTip} />}
 
       <InputArea
         attachment={attachment}

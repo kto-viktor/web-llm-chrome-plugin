@@ -3,13 +3,14 @@
  * Handles different states: loading, download, empty, messages.
  */
 
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 import type { Message as MessageType, ViewState } from '../types';
 import { Message } from './Message';
 import { EmptyState } from './EmptyState';
 import { DownloadScreen } from './DownloadScreen';
 import { ChooseModelScreen } from './ChooseModelScreen';
 import { ThinkingIndicator } from './ThinkingIndicator';
+import { useScrollAnchor } from '../hooks/useScrollAnchor';
 
 interface MessagesContainerProps {
   messages: MessageType[];
@@ -28,14 +29,12 @@ export function MessagesContainer({
   cachedModels,
   onModelSelect,
 }: MessagesContainerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to bottom when messages change or during streaming
-  useEffect(() => {
-    if (containerRef.current) {
-      containerRef.current.scrollTop = containerRef.current.scrollHeight;
-    }
-  }, [messages, currentResponse, isGenerating]);
+  // Use smart auto-scroll that respects user intent
+  const { containerRef } = useScrollAnchor({
+    enabled: true,
+    threshold: 100,
+    dependencies: [messages, currentResponse, isGenerating]
+  });
 
   const renderContent = () => {
     // Show welcome screen
