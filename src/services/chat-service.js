@@ -63,15 +63,25 @@ export class ChatService {
 
   /**
    * Builds the full prompt with context using the template.
-   * Filters history to only include messages from the current page.
+   * Filters history based on attachment mode:
+   * - When attached: only messages from current page
+   * - When not attached: all messages (general conversation)
    * @param {string} userMessage - The user's message
    * @param {Object|null} pageContent - The page content
+   * @param {boolean} isAttached - Whether page is attached
    * @returns {string} The complete prompt
    */
-  buildPrompt(userMessage, pageContent) {
-    const pageUrl = pageContent?.url || null;
-    const messages = historyManager.getMessagesByPage(pageUrl);
-    return buildChatPrompt(userMessage, pageContent, messages);
+  buildPrompt(userMessage, pageContent, isAttached) {
+    let messages;
+    if (isAttached && pageContent) {
+      // When attached, filter to current page only
+      const pageUrl = pageContent.url;
+      messages = historyManager.getMessagesByPage(pageUrl);
+    } else {
+      // When not attached, use all messages
+      messages = historyManager.getMessages();
+    }
+    return buildChatPrompt(userMessage, pageContent, messages, isAttached);
   }
 
   /**
@@ -85,9 +95,14 @@ export class ChatService {
   async sendMessage(message, options = {}) {
     const { attachment, onToken } = options;
 
+    // If attachment is null, treat as not attached
+    const isAttached = attachment !== null;
+
     console.log(`[Chat Service] Sending message: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`);
     if (attachment) {
       console.log(`[Chat Service] With attachment: "${attachment.title}"`);
+    } else {
+      console.log('[Chat Service] No attachment (general assistant mode)');
     }
 
     if (this.state.isGenerating) {
@@ -117,7 +132,7 @@ export class ChatService {
         await historyManager.trimToLimit();
       }
 
-      const prompt = this.buildPrompt(message, attachment);
+      const prompt = this.buildPrompt(message, attachment, isAttached);
       console.log(`[Chat Service] Built prompt (${prompt.length} chars)`);
 
       console.log('[Chat Service] Generating response...');
@@ -147,54 +162,6 @@ export class ChatService {
       });
       throw error;
     }
-  }
-
-  /**
-   * Sends a page summary request.
-   * Uses native Summarizer API if available, otherwise uses chat.
-   * @param {Object} [attachment] - Page attachment
-   * @param {Function} [onToken] - Streaming token callback
-   * @returns {Promise<string>} The summary
-   */
-  async requestPageSummary(attachment, onToken) {
-    // Determine page URL for history filtering
-    const pageUrl = attachment?.url || null;
-
-    // If we have attachment content and Summarizer is available, use it directly
-    if (attachment?.content && llm.isSummarizerAvailable()) {
-      console.log('[Chat Service] Using Summarizer API for page summary');
-
-      this.updateState({ isGenerating: true, currentResponse: '', error: null });
-
-      try {
-        // Add user message to history with attachment
-        await historyManager.addMessage('user', 'Give a summary of this page.', attachment, pageUrl);
-
-        // Use Summarizer API
-        const summary = await llm.summarize(attachment.content, {
-          onToken: (token) => {
-            this.updateState({
-              currentResponse: (this.state.currentResponse || '') + token
-            });
-            if (onToken) onToken(token);
-          }
-        });
-
-        // Add assistant response to history
-        await historyManager.addMessage('assistant', summary, null, pageUrl);
-
-        this.updateState({ isGenerating: false, currentResponse: null });
-        return summary;
-      } catch (error) {
-        console.warn('[Chat Service] Summarizer failed, falling back to chat:', error.message);
-        this.updateState({ isGenerating: false, currentResponse: null });
-        // Fall through to chat-based summary
-      }
-    }
-
-    // Fallback to chat-based summary
-    console.log('[Chat Service] Using chat for page summary');
-    return this.sendMessage('Give a summary of this page.', { attachment, onToken });
   }
 
 

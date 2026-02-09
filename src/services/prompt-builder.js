@@ -6,6 +6,7 @@
 
 import systemPromptTemplate from '../prompts/system-prompt.txt';
 import chatTemplate from '../prompts/chat-template.txt';
+import generalAssistantTemplate from '../prompts/general-assistant-template.txt';
 
 /**
  * Replaces all {{placeholder}} tokens in a template with values.
@@ -93,12 +94,29 @@ function formatHistory(messages) {
  * @param {string} userMessage - The current user message
  * @param {Object} [pageContent] - The page content object (optional)
  * @param {Array} [messages] - Conversation history (optional)
+ * @param {boolean} [isAttached] - Whether page is attached (optional)
  * @returns {string} The complete prompt
  */
-export function buildChatPrompt(userMessage, pageContent = null, messages = []) {
-  const pageValues = formatPageContent(pageContent);
+export function buildChatPrompt(userMessage, pageContent = null, messages = [], isAttached = false) {
   const historyText = formatHistory(messages);
 
+  // Use general assistant template when not attached
+  if (!isAttached) {
+    const values = {
+      history: historyText,
+      user_message: userMessage
+    };
+
+    const prompt = replacePlaceholders(generalAssistantTemplate, values);
+
+    console.log('[Prompt Builder] Built general assistant prompt (no page attachment)');
+    console.log(`[Prompt Builder] Final prompt length: ${prompt.length} chars`);
+
+    return prompt;
+  }
+
+  // Use page-specific template when attached
+  const pageValues = formatPageContent(pageContent);
   const values = {
     system_prompt: systemPromptTemplate.trim(),
     page_title: pageValues.page_title,
@@ -110,7 +128,7 @@ export function buildChatPrompt(userMessage, pageContent = null, messages = []) 
 
   const prompt = replacePlaceholders(chatTemplate, values);
 
-  console.log('[Prompt Builder] Built prompt with placeholders:', Object.keys(values).join(', '));
+  console.log('[Prompt Builder] Built page-specific prompt with placeholders:', Object.keys(values).join(', '));
   console.log(`[Prompt Builder] Final prompt length: ${prompt.length} chars`);
 
   return prompt;

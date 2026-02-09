@@ -62,12 +62,14 @@ export interface ChatState {
   isGenerating: boolean;
   currentResponse: string;
   attachment: PageAttachment | null;
+  isAttached: boolean;
 }
 
 /** Chat context actions */
 export interface ChatActions {
   sendMessage: (message: string) => Promise<void>;
-  requestPageSummary: () => Promise<void>;
+  attachPage: () => void;
+  detachPage: () => void;
   clearHistory: () => void;
   setAttachment: (attachment: PageAttachment | null) => void;
 }

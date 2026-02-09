@@ -1,0 +1,16 @@
+You are a helpful AI assistant. Answer the user's questions to the best of your ability.
+
+This is conversation history:
+<conversation_history>
+{{history}}
+</conversation_history>
+
+Guidelines:
+- Be helpful, accurate, and concise
+- If you don't know something, say so
+- Provide clear explanations when needed
+
+This is user's question:
+<user_question>
+{{user_message}}
+</user_question>

@@ -16,16 +16,18 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 interface ChatProviderProps {
   children: ReactNode;
   attachment: PageAttachment | null;
+  isAttached: boolean;
 }
 
 /**
  * Chat context provider.
  * Manages chat state and provides streaming via React state updates.
  */
-export function ChatProvider({ children, attachment }: ChatProviderProps) {
+export function ChatProvider({ children, attachment, isAttached: propsIsAttached }: ChatProviderProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
+  const [isAttached, setIsAttached] = useState<boolean>(propsIsAttached);
 
   // Subscribe to history changes
   useEffect(() => {
@@ -34,6 +36,16 @@ export function ChatProvider({ children, attachment }: ChatProviderProps) {
     });
     return unsubscribe;
   }, []);
+
+  // Update isAttached when prop changes
+  useEffect(() => {
+    setIsAttached(propsIsAttached);
+  }, [propsIsAttached]);
+
+  // Reset isAttached when attachment URL changes (tab switch)
+  useEffect(() => {
+    setIsAttached(false);
+  }, [attachment?.url]);
 
   /**
    * Send a message and stream the response.
@@ -45,8 +57,11 @@ export function ChatProvider({ children, attachment }: ChatProviderProps) {
     setCurrentResponse('');
 
     try {
+      // Only pass attachment if page is attached
+      const effectiveAttachment = isAttached ? attachment : null;
+
       await chatService.sendMessage(message, {
-        attachment,
+        attachment: effectiveAttachment,
         onToken: (token: string) => {
           // React state update triggers repaint - this is the key to streaming!
           setCurrentResponse(prev => prev + token);
@@ -63,33 +78,21 @@ export function ChatProvider({ children, attachment }: ChatProviderProps) {
       // Keep attachment for subsequent messages on same page
       // User can manually clear via X button if needed
     }
-  }, [isGenerating, attachment]);
+  }, [isGenerating, attachment, isAttached]);
 
   /**
-   * Request a page summary.
+   * Attach the current page.
    */
-  const requestPageSummary = useCallback(async () => {
-    if (isGenerating) return;
+  const attachPage = useCallback(() => {
+    setIsAttached(true);
+  }, []);
 
-    setIsGenerating(true);
-    setCurrentResponse('');
-
-    try {
-      await chatService.requestPageSummary(attachment, (token: string) => {
-        // React state update triggers repaint
-        setCurrentResponse(prev => prev + token);
-      });
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error('[ChatContext] Error requesting summary:', errorMsg);
-      await historyManager.addMessage('assistant', `Error: ${errorMsg}`);
-    } finally {
-      setIsGenerating(false);
-      setCurrentResponse('');
-      // Keep attachment for subsequent messages on same page
-      // User can manually clear via X button if needed
-    }
-  }, [isGenerating, attachment]);
+  /**
+   * Detach the current page.
+   */
+  const detachPage = useCallback(() => {
+    setIsAttached(false);
+  }, []);
 
   /**
    * Clear chat history.
@@ -110,8 +113,10 @@ export function ChatProvider({ children, attachment }: ChatProviderProps) {
     isGenerating,
     currentResponse,
     attachment,
+    isAttached,
     sendMessage,
-    requestPageSummary,
+    attachPage,
+    detachPage,
     clearHistory,
     setAttachment,
   };

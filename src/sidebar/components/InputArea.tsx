@@ -9,18 +9,20 @@ import type { PageAttachment } from '../types';
 
 interface InputAreaProps {
   attachment: PageAttachment | null;
+  isAttached: boolean;
   onRemoveAttachment: () => void;
   onSend: (message: string) => void;
-  onSummary: () => void;
+  onAttachPage: () => void;
   onClear: () => void;
   disabled: boolean;
 }
 
 export function InputArea({
   attachment,
+  isAttached,
   onRemoveAttachment,
   onSend,
-  onSummary,
+  onAttachPage,
   onClear,
   disabled,
 }: InputAreaProps) {
@@ -56,20 +58,30 @@ export function InputArea({
     handleInput();
   }, [handleInput]);
 
+  // Helper function to truncate page title
+  const getTruncatedTitle = (title: string, maxLength: number = 30): string => {
+    if (title.length <= maxLength) return title;
+    return title.substring(0, maxLength) + '...';
+  };
+
   return (
     <>
-      <AttachmentChip attachment={attachment} onRemove={onRemoveAttachment} />
+      {isAttached && attachment && (
+        <AttachmentChip attachment={attachment} onRemove={onRemoveAttachment} />
+      )}
 
       <div className="input-area">
         <div className="quick-actions">
-          <button
-            className="action-btn"
-            onClick={onSummary}
-            disabled={disabled}
-            title="Get page summary"
-          >
-            Page Summary
-          </button>
+          {!isAttached && attachment ? (
+            <button
+              className="action-btn secondary"
+              onClick={onAttachPage}
+              disabled={disabled}
+              title={`Attach ${attachment.title}`}
+            >
+              📎 Attach page: {getTruncatedTitle(attachment.title)}
+            </button>
+          ) : null}
           <button
             className="action-btn secondary"
             onClick={onClear}

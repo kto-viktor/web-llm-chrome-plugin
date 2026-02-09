@@ -24,11 +24,11 @@
 - LLama 70B - красным написать размер и системные требования (или упомянуть про маки)
 - Доресерчить модели, возможно, выбрать побольше
 - **model selection refactor**: Refactored to state machine architecture with ViewState as single source of truth. Eliminated `previewModel` and `showGeminiSetup` state variables. Dropdown now shows checkmarks (✓) for cached models. Simplified App.tsx from ~330 lines to ~260 lines. All model selection flows (cached, uncached, Gemini, switching during download) now work reliably.
+- **page attachment opt-in system**: Replaced auto-attachment with explicit opt-in. Pages are NOT attached by default. Added "📎 Attach page" button (replaces "Page Summary"). Two modes: (1) General AI assistant (no page context) using new general-assistant-template.txt, (2) Page-specific assistant when explicitly attached. History shows all messages, but prompt only includes relevant context based on current mode. Auto-detaches when switching tabs.
 
 ## Todo
 
 feedback:
-- Вместо автоаттача контекста, сделать это в явном виде (скрепкой или как)
 - Не блочить экран при стриминге, дать скроллить наверх и т д, дать возможность отменить
 - Стоит Добавить «tip» о том, что ответ у deepseek может быть медленнее, но и чо
 - Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)

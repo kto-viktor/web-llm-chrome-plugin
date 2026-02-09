@@ -81,11 +81,15 @@ function AppContent() {
     chat.sendMessage(message);
   }, [isReady, chat]);
 
-  // Handle page summary
-  const handleSummary = useCallback(() => {
-    if (!isReady) return;
-    chat.requestPageSummary();
-  }, [isReady, chat]);
+  // Handle attach page
+  const handleAttachPage = useCallback(() => {
+    chat.attachPage();
+  }, [chat]);
+
+  // Handle detach page
+  const handleDetachPage = useCallback(() => {
+    chat.detachPage();
+  }, [chat]);
 
   // Handle clear history
   const handleClear = useCallback(() => {
@@ -209,9 +213,10 @@ function AppContent() {
 
       <InputArea
         attachment={attachment}
-        onRemoveAttachment={clearAttachment}
+        isAttached={chat.isAttached}
+        onRemoveAttachment={handleDetachPage}
         onSend={handleSend}
-        onSummary={handleSummary}
+        onAttachPage={handleAttachPage}
         onClear={handleClear}
         disabled={!isReady || chat.isGenerating}
       />
@@ -247,7 +252,7 @@ export function App() {
   }
 
   return (
-    <ChatProvider attachment={attachment}>
+    <ChatProvider attachment={attachment} isAttached={false}>
       <AppContent />
     </ChatProvider>
   );
