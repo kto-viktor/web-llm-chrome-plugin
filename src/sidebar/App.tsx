@@ -183,6 +183,12 @@ function AppContent() {
     }
   }, [chat.isGenerating, chat.messages.length, reloadAttachment]);
 
+  // Handle performance tip model switch
+  const handlePerformanceTipModelSwitch = useCallback(() => {
+    handleModelChange('webllm-llama');
+    dismissTip();
+  }, [handleModelChange, dismissTip]);
+
   return (
     <div className="container">
       <Header
@@ -195,6 +201,14 @@ function AppContent() {
         showDropdownTooltip={showDropdownTooltip && isReady}
         onDismissDropdownTooltip={dismissDropdownTooltip}
       />
+
+      {/* Performance tip (shown after 10s of generation) */}
+      {showTip && (
+        <PerformanceTip
+          onClose={dismissTip}
+          onModelClick={handlePerformanceTipModelSwitch}
+        />
+      )}
 
       {viewState.screen === 'download-confirm' ? (
         <DownloadConfirmScreen
@@ -217,9 +231,6 @@ function AppContent() {
           onModelSelect={handleBubbleClick}
         />
       )}
-
-      {/* Performance tip (shown after 10s of generation) */}
-      {showTip && <PerformanceTip onClose={dismissTip} />}
 
       <InputArea
         attachment={attachment}

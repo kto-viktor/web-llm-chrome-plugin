@@ -83,7 +83,7 @@ export function InputArea({
               disabled={disabled}
               title={`Attach ${attachment.title}`}
             >
-              📎 Attach page: {getTruncatedTitle(attachment.title)}
+              📎 Attach current page
             </button>
           ) : null}
           <button
