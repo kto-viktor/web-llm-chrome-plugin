@@ -101,9 +101,16 @@ function AppContent() {
 
   // Handle cancel download
   const handleCancelDownload = useCallback(() => {
+    console.log('[App] Cancel clicked, status before:', llm.status);
     llm.cancelDownload();
     setPreviewModel(null);
     setShowGeminiSetup(false);
+    setPendingDownload(null);
+    setPendingTooltip(false);
+    // Force check status after a brief delay to see if it updated
+    setTimeout(() => {
+      console.log('[App] Status after cancel:', llm.status);
+    }, 100);
   }, [llm]);
 
   // Handle model bubble click

@@ -50,6 +50,9 @@ export class LLMInterface {
 
     /** @type {Set<Function>} */
     this.listeners = new Set();
+
+    /** @type {boolean} */
+    this.isCancelling = false;
   }
 
   /**
@@ -350,10 +353,17 @@ export class LLMInterface {
       }
     } catch (error) {
       console.error('[LLM Interface] Switch failed:', error);
-      this.updateState({
-        status: 'error',
-        error: error.message
-      });
+
+      // Don't set error state if we're intentionally cancelling
+      if (!this.isCancelling) {
+        this.updateState({
+          status: 'error',
+          error: error.message
+        });
+      } else {
+        console.log('[LLM Interface] Error ignored due to cancellation');
+      }
+
       throw error;
     }
   }
@@ -365,6 +375,9 @@ export class LLMInterface {
   async cancelDownload() {
     console.log('[LLM Interface] Cancelling download...');
 
+    // Set flag to prevent error state from overriding awaiting-selection
+    this.isCancelling = true;
+
     // Signal adapter to cancel (stops progress callbacks from continuing)
     if (this.adapter && typeof this.adapter.cancel === 'function') {
       this.adapter.cancel();
@@ -374,9 +387,15 @@ export class LLMInterface {
     this.updateState({
       status: 'awaiting-selection',
       downloadProgress: 0,
-      downloadText: ''
+      downloadText: '',
+      error: null
     });
     console.log('[LLM Interface] Download cancelled, returning to model selection');
+
+    // Reset flag after a short delay to allow pending promises to settle
+    setTimeout(() => {
+      this.isCancelling = false;
+    }, 500);
   }
 
   /**

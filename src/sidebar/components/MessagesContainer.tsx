@@ -49,8 +49,11 @@ export function MessagesContainer({
   }, [messages, currentResponse, isGenerating]);
 
   const renderContent = () => {
+    console.log('[MessagesContainer] Rendering, llmStatus:', llmStatus, 'isDownloading:', isDownloading);
+
     // Show choose model screen when awaiting user selection
     if (llmStatus === 'awaiting-selection') {
+      console.log('[MessagesContainer] Showing ChooseModelScreen');
       return (
         <ChooseModelScreen
           cachedModels={cachedModels}
