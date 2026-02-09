@@ -69,11 +69,11 @@ export function Header({
               onChange={handleModelChange}
             >
               {!modelName && !previewModel && <option value="">Select a model...</option>}
-              <option value="webllm-llama">Llama 3.2 1B - Lightweight & Fast - 700 MB</option>
-              <option value="webllm-gemma">Gemma 2 2B - Compact & Capable - 2.5 GB</option>
-              <option value="webllm-hermes">Hermes 3 3B - Balanced & Smart - 2.9 GB</option>
-              <option value="webllm-deepseek">DeepSeek-R1 - Deep Thinking - 4.5 GB</option>
-              <option value="webllm-llama70b">Llama 3.1 70B - Most Powerful - 31 GB</option>
+              <option value="webllm-llama">Llama - <b className="green">700 Mb</b> - Lightweight</option>
+              <option value="webllm-gemma">Gemma 2 - 2.5 Gb - Balanced</option>
+              <option value="webllm-hermes">Hermes 3 - 2.9 Gb - Following instructions</option>
+              <option value="webllm-deepseek">DeepSeek-R1 - 4.5 Gb - Reasoning model</option>
+              <option value="webllm-llama70b">Llama 3.1 70B - <b>31 GB</b> - Most Powerful</option>
               <option value="gemini-nano">Gemini Nano - Chrome embedded model</option>
             </select>
             {showDropdownTooltip && (

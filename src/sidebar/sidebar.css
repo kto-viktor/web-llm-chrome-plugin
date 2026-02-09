@@ -79,6 +79,10 @@ body {
   outline: none;
 }
 
+.green {
+  color: #0f9d58;
+}
+
 .model-selector:focus {
   border-color: var(--accent-color);
 }
