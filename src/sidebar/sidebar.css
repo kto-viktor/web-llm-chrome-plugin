@@ -1015,23 +1015,41 @@ body {
 }
 
 .model-option.model-option-recommended {
-  background: #e8f5e9;
-  border: 2px solid #66bb6a;
-  box-shadow: 0 2px 4px rgba(102, 187, 106, 0.2);
+  /* Subtle highlighting instead of bright green background */
+  border: 1px solid #81c784;
 }
 
 .model-option.model-option-cached {
+  /* Clear visual indicator for downloaded models */
   background: #f0f7ff;
   border: 2px solid var(--accent-color);
   box-shadow: var(--shadow-sm);
   position: relative;
 }
 
-.model-option-status {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 16px;
+/* Badge styles */
+.model-option-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.model-option-badge-downloaded {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #66bb6a;
+}
+
+.model-option-badge-recommended {
+  background: #fff8e1;
+  color: #f57c00;
+  border: 1px solid #ffb74d;
 }
 
 .choose-model-note {

@@ -30,33 +30,41 @@ export function ChooseModelScreen({
 
       <div className="model-options">
         <div
-          className={getModelClass('webllm-llama', true)}
+          className={getModelClass('webllm-llama')}
           onClick={() => onModelSelect?.('webllm-llama')}
           style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
         >
-          {cachedModels.has('webllm-llama') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🦙</span>
           <strong className="model-option-name">Llama 3.2 (1B params)</strong>
+          {cachedModels.has('webllm-llama') && (
+            <span className="model-option-badge model-option-badge-downloaded">Downloaded</span>
+          )}
           <p className="model-option-desc">Lightweight and fast<br/>Size: <b>700 mb</b> to download</p>
         </div>
         <div
-          className={getModelClass('webllm-gemma')}
+          className={getModelClass('webllm-gemma', true)}
           onClick={() => onModelSelect?.('webllm-gemma')}
           style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
         >
-          {cachedModels.has('webllm-gemma') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">💎</span>
           <strong className="model-option-name">Gemma 2 (2B params)</strong>
+          {cachedModels.has('webllm-gemma') ? (
+            <span className="model-option-badge model-option-badge-downloaded">Downloaded</span>
+          ) : (
+            <span className="model-option-badge model-option-badge-recommended">Recommended</span>
+          )}
           <p className="model-option-desc">Balanced and smart<br/>Size: <b>2.5 Gb</b> to download</p>
         </div>
         <div
-          className={getModelClass('webllm-hermes', true)}
+          className={getModelClass('webllm-hermes')}
           onClick={() => onModelSelect?.('webllm-hermes')}
           style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
         >
-          {cachedModels.has('webllm-hermes') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🎯</span>
           <strong className="model-option-name">Hermes 3 (3B params)</strong>
+          {cachedModels.has('webllm-hermes') && (
+            <span className="model-option-badge model-option-badge-downloaded">Downloaded</span>
+          )}
           <p className="model-option-desc">Excellent instruction-following<br/>Size: <b>2.9 Gb</b> to download</p>
         </div>
         <div
@@ -64,9 +72,11 @@ export function ChooseModelScreen({
           onClick={() => onModelSelect?.('webllm-deepseek')}
           style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
         >
-          {cachedModels.has('webllm-deepseek') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🔬</span>
           <strong className="model-option-name">DeepSeek-R1 (8B params)</strong>
+          {cachedModels.has('webllm-deepseek') && (
+            <span className="model-option-badge model-option-badge-downloaded">Downloaded</span>
+          )}
           <p className="model-option-desc">Reasoning, but experimental model<br/>Size: <b>4.5 Gb</b> to download</p>
         </div>
         <div
@@ -74,9 +84,11 @@ export function ChooseModelScreen({
           onClick={() => onModelSelect?.('webllm-llama70b')}
           style={{ cursor: onModelSelect ? 'pointer' : 'default' }}
         >
-          {cachedModels.has('webllm-llama70b') && <span className="model-option-status">✅</span>}
           <span className="model-option-icon">🦕</span>
           <strong className="model-option-name">Llama 3.1 (70B params)</strong>
+          {cachedModels.has('webllm-llama70b') && (
+            <span className="model-option-badge model-option-badge-downloaded">Downloaded</span>
+          )}
           <p className="model-option-desc">Super heavy. Requires 30Gb GPU - runs on latest Macbooks or gaming PC's.<br/>Size: <b className="model-option-red">32 Gb</b> to download</p>
         </div>
         <div className="model-option model-option-muted">
