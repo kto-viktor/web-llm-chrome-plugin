@@ -25,6 +25,7 @@
 - Доресерчить модели, возможно, выбрать побольше
 - **model selection refactor**: Refactored to state machine architecture with ViewState as single source of truth. Eliminated `previewModel` and `showGeminiSetup` state variables. Dropdown now shows checkmarks (✓) for cached models. Simplified App.tsx from ~330 lines to ~260 lines. All model selection flows (cached, uncached, Gemini, switching during download) now work reliably.
 - **page attachment opt-in system**: Replaced auto-attachment with explicit opt-in. Pages are NOT attached by default. Added "📎 Attach page" button (replaces "Page Summary"). Two modes: (1) General AI assistant (no page context) using new general-assistant-template.txt, (2) Page-specific assistant when explicitly attached. History shows all messages, but prompt only includes relevant context based on current mode. Auto-detaches when switching tabs.
+- **generation cancellation**: Added stop button to cancel LLM generation mid-stream. Button appears in place of send button during generation. Uses AbortController for clean cancellation. Partial responses are saved to history with "[Generation stopped]" marker. Works with both WebLLM and Gemini Nano adapters.
 
 ## Todo
 

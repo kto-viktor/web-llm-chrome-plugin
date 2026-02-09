@@ -10,9 +10,11 @@ import type { PageAttachment } from '../types';
 interface InputAreaProps {
   attachment: PageAttachment | null;
   isAttached: boolean;
+  isGenerating: boolean;
   onRemoveAttachment: () => void;
   onSend: (message: string) => void;
   onAttachPage: () => void;
+  onCancel: () => void;
   onClear: () => void;
   disabled: boolean;
 }
@@ -20,9 +22,11 @@ interface InputAreaProps {
 export function InputArea({
   attachment,
   isAttached,
+  isGenerating,
   onRemoveAttachment,
   onSend,
   onAttachPage,
+  onCancel,
   onClear,
   disabled,
 }: InputAreaProps) {
@@ -108,16 +112,28 @@ export function InputArea({
             onKeyDown={handleKeyDown}
             disabled={disabled}
           />
-          <button
-            className="send-btn"
-            onClick={handleSend}
-            disabled={disabled || !message.trim()}
-            title="Send message"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-            </svg>
-          </button>
+          {isGenerating ? (
+            <button
+              className="send-btn cancel-btn"
+              onClick={onCancel}
+              title="Stop generating"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="1"/>
+              </svg>
+            </button>
+          ) : (
+            <button
+              className="send-btn"
+              onClick={handleSend}
+              disabled={disabled || !message.trim()}
+              title="Send message"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+              </svg>
+            </button>
+          )}
         </div>
 
         <div className="contact-row">

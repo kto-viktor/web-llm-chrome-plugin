@@ -29,6 +29,9 @@ export class ChatService {
 
     /** @type {Set<Function>} */
     this.listeners = new Set();
+
+    /** @type {AbortController|null} */
+    this.abortController = null;
   }
 
   /**
@@ -119,6 +122,9 @@ export class ChatService {
 
     this.updateState({ isGenerating: true, currentResponse: '', error: null });
 
+    // Create abort controller for this generation
+    this.abortController = new AbortController();
+
     // Determine page URL for history filtering
     const pageUrl = attachment?.url || null;
 
@@ -142,7 +148,8 @@ export class ChatService {
             currentResponse: (this.state.currentResponse || '') + token
           });
           if (onToken) onToken(token);
-        }
+        },
+        signal: this.abortController.signal
       });
 
       console.log(`[Chat Service] Response received (${response.length} chars)`);
@@ -150,20 +157,60 @@ export class ChatService {
       await historyManager.addMessage('assistant', response, null, pageUrl);
 
       this.updateState({ isGenerating: false, currentResponse: null });
+      this.abortController = null;
       console.log('[Chat Service] Message exchange complete');
 
       return response;
     } catch (error) {
+      // If abort controller is null, user already cancelled - exit immediately
+      if (!this.abortController) {
+        console.log('[Chat Service] Already cancelled, ignoring error');
+        return '';
+      }
+
       console.error('[Chat Service] Message failed:', error.message);
+
+      // Clean up state for real errors only
       this.updateState({
         isGenerating: false,
         currentResponse: null,
-        error: error.message
+        error: error.message === 'Generation cancelled' ? null : error.message
       });
+      this.abortController = null;
+
+      // Don't throw error for cancellation (it's expected behavior)
+      if (error.message === 'Generation cancelled') {
+        console.log('[Chat Service] Generation cancelled by user');
+        return '';
+      }
+
       throw error;
     }
   }
 
+
+  /**
+   * Cancels the current generation if one is in progress.
+   * Immediately stops the UI state, even if the background stream is still cleaning up.
+   */
+  cancelGeneration() {
+    if (this.abortController && this.state.isGenerating) {
+      console.log('[Chat Service] Cancelling generation immediately...');
+
+      // Send abort signal to background stream
+      this.abortController.abort();
+      this.abortController = null;
+
+      // Immediately update UI state - don't wait for stream to finish
+      this.updateState({
+        isGenerating: false,
+        currentResponse: null,
+        error: null
+      });
+
+      console.log('[Chat Service] Generation cancelled (UI reset immediately)');
+    }
+  }
 
   /**
    * Clears conversation history.

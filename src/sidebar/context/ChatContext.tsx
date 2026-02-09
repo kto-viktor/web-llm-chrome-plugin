@@ -95,6 +95,19 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
   }, []);
 
   /**
+   * Cancel the current generation.
+   * Immediately updates local state for instant UI response.
+   */
+  const cancelGeneration = useCallback(() => {
+    // Immediately update local state for instant UI feedback
+    setIsGenerating(false);
+    setCurrentResponse('');
+
+    // Tell the service to cancel (will clean up in background)
+    chatService.cancelGeneration();
+  }, []);
+
+  /**
    * Clear chat history.
    */
   const clearHistory = useCallback(() => {
@@ -117,6 +130,7 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
     sendMessage,
     attachPage,
     detachPage,
+    cancelGeneration,
     clearHistory,
     setAttachment,
   };

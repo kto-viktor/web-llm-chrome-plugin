@@ -98,10 +98,10 @@ export class GeminiNanoAdapter {
       await this.initialize();
     }
 
-    const { onToken } = options;
+    const { onToken, signal } = options;
 
     if (onToken) {
-      return this.generateStreaming(prompt, onToken);
+      return this.generateStreaming(prompt, onToken, signal);
     }
 
     try {
@@ -116,11 +116,29 @@ export class GeminiNanoAdapter {
    * Generates a streaming response.
    * @param {string} prompt - The user prompt
    * @param {Function} onToken - Callback for each token
+   * @param {AbortSignal} [signal] - Optional abort signal
    * @returns {Promise<string>} The complete response
    */
-  async generateStreaming(prompt, onToken) {
+  async generateStreaming(prompt, onToken, signal) {
     if (!this.initialized || !this.session) {
       await this.initialize();
+    }
+
+    // Check if already aborted before starting
+    if (signal?.aborted) {
+      console.log('[Gemini Nano] Generation aborted before start');
+      throw new Error('Generation cancelled');
+    }
+
+    let aborted = false;
+    const abortHandler = () => {
+      console.log('[Gemini Nano] Abort signal received');
+      aborted = true;
+    };
+
+    // Listen for abort events
+    if (signal) {
+      signal.addEventListener('abort', abortHandler);
     }
 
     try {
@@ -129,6 +147,12 @@ export class GeminiNanoAdapter {
       let previousLength = 0;
 
       for await (const chunk of stream) {
+        // Check if generation was cancelled
+        if (aborted) {
+          console.log('[Gemini Nano] Generation cancelled during streaming');
+          throw new Error('Generation cancelled');
+        }
+
         const newContent = chunk.slice(previousLength);
         previousLength = chunk.length;
         fullResponse += chunk;
@@ -140,7 +164,15 @@ export class GeminiNanoAdapter {
 
       return fullResponse;
     } catch (error) {
+      if (error.message === 'Generation cancelled') {
+        throw error;
+      }
       throw new Error(`Streaming generation failed: ${error.message}`);
+    } finally {
+      // Clean up abort listener
+      if (signal) {
+        signal.removeEventListener('abort', abortHandler);
+      }
     }
   }
 

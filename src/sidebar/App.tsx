@@ -91,6 +91,11 @@ function AppContent() {
     chat.detachPage();
   }, [chat]);
 
+  // Handle cancel generation
+  const handleCancel = useCallback(() => {
+    chat.cancelGeneration();
+  }, [chat]);
+
   // Handle clear history
   const handleClear = useCallback(() => {
     chat.clearHistory();
@@ -214,9 +219,11 @@ function AppContent() {
       <InputArea
         attachment={attachment}
         isAttached={chat.isAttached}
+        isGenerating={chat.isGenerating}
         onRemoveAttachment={handleDetachPage}
         onSend={handleSend}
         onAttachPage={handleAttachPage}
+        onCancel={handleCancel}
         onClear={handleClear}
         disabled={!isReady || chat.isGenerating}
       />

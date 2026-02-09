@@ -199,14 +199,14 @@ export class WebLLMAdapter {
       throw new Error('WebLLM not initialized. Call initialize() first.');
     }
 
-    const { onToken } = options;
+    const { onToken, signal } = options;
 
     const messages = [
       { role: 'user', content: prompt }
     ];
 
     if (onToken) {
-      return this.generateStreaming(messages, onToken);
+      return this.generateStreaming(messages, onToken, signal);
     }
 
     try {
@@ -226,9 +226,27 @@ export class WebLLMAdapter {
    * Generates a streaming response.
    * @param {Array} messages - The chat messages
    * @param {Function} onToken - Callback for each token
+   * @param {AbortSignal} [signal] - Optional abort signal
    * @returns {Promise<string>} The complete response
    */
-  async generateStreaming(messages, onToken) {
+  async generateStreaming(messages, onToken, signal) {
+    // Check if already aborted before starting
+    if (signal?.aborted) {
+      console.log('[WebLLM] Generation aborted before start');
+      throw new Error('Generation cancelled');
+    }
+
+    let aborted = false;
+    const abortHandler = () => {
+      console.log('[WebLLM] Abort signal received');
+      aborted = true;
+    };
+
+    // Listen for abort events
+    if (signal) {
+      signal.addEventListener('abort', abortHandler);
+    }
+
     try {
       const stream = await this.engine.chat.completions.create({
         messages,
@@ -240,6 +258,12 @@ export class WebLLMAdapter {
       let fullResponse = '';
 
       for await (const chunk of stream) {
+        // Check if generation was cancelled
+        if (aborted) {
+          console.log('[WebLLM] Generation cancelled during streaming');
+          throw new Error('Generation cancelled');
+        }
+
         const delta = chunk.choices[0]?.delta?.content || '';
         if (delta) {
           fullResponse += delta;
@@ -249,7 +273,15 @@ export class WebLLMAdapter {
 
       return fullResponse;
     } catch (error) {
+      if (error.message === 'Generation cancelled') {
+        throw error;
+      }
       throw new Error(`Streaming generation failed: ${error.message}`);
+    } finally {
+      // Clean up abort listener
+      if (signal) {
+        signal.removeEventListener('abort', abortHandler);
+      }
     }
   }
 

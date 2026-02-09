@@ -70,6 +70,7 @@ export interface ChatActions {
   sendMessage: (message: string) => Promise<void>;
   attachPage: () => void;
   detachPage: () => void;
+  cancelGeneration: () => void;
   clearHistory: () => void;
   setAttachment: (attachment: PageAttachment | null) => void;
 }
