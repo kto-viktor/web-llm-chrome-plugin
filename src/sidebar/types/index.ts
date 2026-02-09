@@ -20,9 +20,18 @@ export interface Message {
   pageUrl?: string | null;
 }
 
+/** Background download info */
+export interface BackgroundDownload {
+  modelName: string;
+  displayName: string;
+  progress: number;
+  text: string;
+  isFromCache: boolean | null;
+}
+
 /** LLM state from llm-interface */
 export interface LLMState {
-  status: 'detecting' | 'initializing' | 'downloading' | 'ready' | 'error' | 'gemini-unavailable' | 'awaiting-selection';
+  status: 'idle' | 'detecting' | 'initializing' | 'downloading' | 'ready' | 'error' | 'gemini-unavailable' | 'awaiting-selection';
   modelName: string | null;
   displayName: string | null;
   error: string | null;
@@ -32,6 +41,7 @@ export interface LLMState {
   summarizerAvailable: boolean;
   geminiNanoAvailable: boolean;
   geminiNanoReason?: string;
+  backgroundDownloads: BackgroundDownload[];
 }
 
 /** Model information for display */

@@ -12,6 +12,7 @@
 - **migrate to amazon CDN**
 - there is a blinking bug - when first time downloading, for a few seconds it show like "loading from cache"
 - **add cancel download button**
+- **background downloads**: Downloads moved to compact progress bars when user switches models. Users can explore other models, start new downloads, and manage multiple downloads simultaneously. Background progress bars show at top with model name, progress, and cancel button.
 - add steps about enable multilang option - make multilang word bold. Add clickable urls. And in case if component missing, tells that this is experimental feature in Chrome and not available for everyone yet. Actually, first need to check with someone - how to setup it properly.
 - add ability to just copy support email
 - "thinking" scratchpad from deepseek should be under spoiler
@@ -25,7 +26,6 @@
 ## Todo
 
 feedback:
-- само скачивание отобразить где-то в бэкграунде. Ref: Maps.me
 - в дропдауне дать понять, какие модели уже скачаны, какие нет
 - Убрать плашку с Gemini при переключении на другую модель
 - Вместо автоаттача контекста, сделать это в явном виде (скрепкой или как)

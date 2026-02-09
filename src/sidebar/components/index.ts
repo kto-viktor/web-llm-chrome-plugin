@@ -15,3 +15,4 @@ export { InputArea } from './InputArea';
 export { GeminiSetup } from './GeminiSetup';
 export { DownloadProgress } from './DownloadProgress';
 export { Header } from './Header';
+export { BackgroundDownloads } from './BackgroundDownloads';

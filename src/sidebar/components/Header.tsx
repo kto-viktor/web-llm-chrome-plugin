@@ -6,6 +6,7 @@ import React, { useCallback } from 'react';
 import { StatusIndicator } from './StatusIndicator';
 import { DownloadProgress } from './DownloadProgress';
 import { GeminiSetup } from './GeminiSetup';
+import { BackgroundDownloads } from './BackgroundDownloads';
 import type { LLMState } from '../types';
 
 interface HeaderProps {
@@ -14,6 +15,7 @@ interface HeaderProps {
   onModelChange: (modelName: string) => void;
   onGeminiDismiss: () => void;
   onCancelDownload: () => void;
+  onCancelBackgroundDownload: (modelName: string) => void;
   showGeminiSetup: boolean;
   showDropdownTooltip?: boolean;
   onDismissDropdownTooltip?: () => void;
@@ -25,11 +27,12 @@ export function Header({
   onModelChange,
   onGeminiDismiss,
   onCancelDownload,
+  onCancelBackgroundDownload,
   showGeminiSetup,
   showDropdownTooltip = false,
   onDismissDropdownTooltip,
 }: HeaderProps) {
-  const { status, displayName, modelName, downloadProgress, downloadText, isFromCache } = llmState;
+  const { status, displayName, modelName, downloadProgress, downloadText, isFromCache, backgroundDownloads } = llmState;
 
   const handleModelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     onModelChange(e.target.value);
@@ -113,6 +116,11 @@ export function Header({
       )}
 
       <GeminiSetup visible={showGeminiSetup} onDismiss={onGeminiDismiss} />
+
+      <BackgroundDownloads
+        downloads={backgroundDownloads}
+        onCancel={onCancelBackgroundDownload}
+      />
     </>
   );
 }

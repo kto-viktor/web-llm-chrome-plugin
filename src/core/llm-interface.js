@@ -11,6 +11,17 @@ import { SummarizerAdapter } from './summarizer.js';
 import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
 
 /**
+ * Background download info.
+ * @typedef {Object} BackgroundDownload
+ * @property {string} modelName - Model identifier
+ * @property {string} displayName - Display name
+ * @property {number} progress - Download progress 0 to 1
+ * @property {string} text - Progress text
+ * @property {boolean|null} isFromCache - Whether loading from cache
+ * @property {Object} adapter - The adapter handling this download
+ */
+
+/**
  * LLM state.
  * @typedef {Object} LLMState
  * @property {'idle'|'detecting'|'downloading'|'ready'|'error'|'gemini-unavailable'|'awaiting-selection'} status
@@ -22,6 +33,7 @@ import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
  * @property {boolean|null} isFromCache - Whether loading from cache (true), downloading (false), or unknown (null)
  * @property {boolean} summarizerAvailable - Whether native Summarizer is available
  * @property {boolean} geminiNanoAvailable - Whether Gemini Nano is available
+ * @property {Array<BackgroundDownload>} backgroundDownloads - Active background downloads
  */
 
 /**
@@ -45,7 +57,8 @@ export class LLMInterface {
       downloadText: '',
       isFromCache: null,
       summarizerAvailable: false,
-      geminiNanoAvailable: false
+      geminiNanoAvailable: false,
+      backgroundDownloads: []
     };
 
     /** @type {Set<Function>} */
@@ -53,6 +66,9 @@ export class LLMInterface {
 
     /** @type {Set<string>} */
     this.cancelledModels = new Set();
+
+    /** @type {Map<string, BackgroundDownload>} */
+    this.backgroundDownloadsMap = new Map();
   }
 
   /**
@@ -210,8 +226,14 @@ export class LLMInterface {
       }
     }
 
-    // Clean up current adapter
-    await this.destroy();
+    // If currently downloading, move to background instead of destroying
+    if (this.state.status === 'downloading') {
+      console.log('[LLM Interface] Moving current download to background');
+      this.moveToBackground();
+    } else {
+      // Clean up current adapter if not downloading
+      await this.destroy();
+    }
 
     this.updateState({ status: 'detecting' });
 
@@ -219,20 +241,37 @@ export class LLMInterface {
       if (modelName === 'gemini-nano') {
         console.log('[LLM Interface] Loading Gemini Nano...');
         this.adapter = new GeminiNanoAdapter();
+        const currentModelName = this.adapter.getName();
         this.updateState({
-          modelName: this.adapter.getName(),
+          modelName: currentModelName,
           displayName: this.adapter.getDisplayName(),
           geminiNanoAvailable: true
         });
 
+        const progressCallback = this.createProgressCallback(currentModelName);
         await this.adapter.initialize((progress) => {
-          this.updateState({
-            status: 'downloading',
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache ?? null
-          });
+          // First update sets status to downloading
+          if (this.state.status !== 'downloading' && !this.backgroundDownloadsMap.has(currentModelName)) {
+            this.updateState({ status: 'downloading' });
+          }
+          progressCallback(progress);
         });
+
+        // Check if this download was moved to background or cancelled
+        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
+        const wasCancelled = this.cancelledModels.has(currentModelName);
+
+        if (wasMovedToBackground) {
+          console.log('[LLM Interface] Gemini Nano completed in background');
+          this.removeBackgroundDownload(currentModelName);
+          // Don't change status - another model is active
+          return;
+        }
+
+        if (wasCancelled) {
+          console.log('[LLM Interface] Gemini Nano was cancelled, ignoring completion');
+          return;
+        }
 
         // Try to initialize Summarizer
         try {
@@ -249,20 +288,31 @@ export class LLMInterface {
       } else if (modelName === 'webllm-llama') {
         console.log('[LLM Interface] Loading WebLLM Llama...');
         this.adapter = new WebLLMAdapter('llama');
+        const currentModelName = this.adapter.getName();
         this.updateState({
           status: 'downloading',
-          modelName: this.adapter.getName(),
+          modelName: currentModelName,
           displayName: this.adapter.getDisplayName(),
           downloadText: 'Getting LLM for you...'
         });
 
-        await this.adapter.initialize((progress) => {
-          this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache ?? null
-          });
-        });
+        const progressCallback = this.createProgressCallback(currentModelName);
+        await this.adapter.initialize(progressCallback);
+
+        // Check if moved to background or cancelled
+        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
+        const wasCancelled = this.cancelledModels.has(currentModelName);
+
+        if (wasMovedToBackground) {
+          console.log('[LLM Interface] WebLLM Llama completed in background');
+          this.removeBackgroundDownload(currentModelName);
+          return;
+        }
+
+        if (wasCancelled) {
+          console.log('[LLM Interface] WebLLM Llama was cancelled');
+          return;
+        }
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
         console.log('[LLM Interface] WebLLM Llama ready');
@@ -270,20 +320,31 @@ export class LLMInterface {
       } else if (modelName === 'webllm-gemma') {
         console.log('[LLM Interface] Loading WebLLM Gemma...');
         this.adapter = new WebLLMAdapter('gemma');
+        const currentModelName = this.adapter.getName();
         this.updateState({
           status: 'downloading',
-          modelName: this.adapter.getName(),
+          modelName: currentModelName,
           displayName: this.adapter.getDisplayName(),
           downloadText: 'Getting LLM for you...'
         });
 
-        await this.adapter.initialize((progress) => {
-          this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache ?? null
-          });
-        });
+        const progressCallback = this.createProgressCallback(currentModelName);
+        await this.adapter.initialize(progressCallback);
+
+        // Check if moved to background or cancelled
+        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
+        const wasCancelled = this.cancelledModels.has(currentModelName);
+
+        if (wasMovedToBackground) {
+          console.log('[LLM Interface] WebLLM Gemma completed in background');
+          this.removeBackgroundDownload(currentModelName);
+          return;
+        }
+
+        if (wasCancelled) {
+          console.log('[LLM Interface] WebLLM Gemma was cancelled');
+          return;
+        }
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
         console.log('[LLM Interface] WebLLM Gemma ready');
@@ -291,20 +352,31 @@ export class LLMInterface {
       } else if (modelName === 'webllm-hermes') {
         console.log('[LLM Interface] Loading WebLLM Hermes...');
         this.adapter = new WebLLMAdapter('hermes');
+        const currentModelName = this.adapter.getName();
         this.updateState({
           status: 'downloading',
-          modelName: this.adapter.getName(),
+          modelName: currentModelName,
           displayName: this.adapter.getDisplayName(),
           downloadText: 'Getting LLM for you...'
         });
 
-        await this.adapter.initialize((progress) => {
-          this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache ?? null
-          });
-        });
+        const progressCallback = this.createProgressCallback(currentModelName);
+        await this.adapter.initialize(progressCallback);
+
+        // Check if moved to background or cancelled
+        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
+        const wasCancelled = this.cancelledModels.has(currentModelName);
+
+        if (wasMovedToBackground) {
+          console.log('[LLM Interface] WebLLM Hermes completed in background');
+          this.removeBackgroundDownload(currentModelName);
+          return;
+        }
+
+        if (wasCancelled) {
+          console.log('[LLM Interface] WebLLM Hermes was cancelled');
+          return;
+        }
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
         console.log('[LLM Interface] WebLLM Hermes ready');
@@ -312,20 +384,31 @@ export class LLMInterface {
       } else if (modelName === 'webllm-deepseek') {
         console.log('[LLM Interface] Loading WebLLM DeepSeek...');
         this.adapter = new WebLLMAdapter('deepseek');
+        const currentModelName = this.adapter.getName();
         this.updateState({
           status: 'downloading',
-          modelName: this.adapter.getName(),
+          modelName: currentModelName,
           displayName: this.adapter.getDisplayName(),
           downloadText: 'Getting LLM for you...'
         });
 
-        await this.adapter.initialize((progress) => {
-          this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache ?? null
-          });
-        });
+        const progressCallback = this.createProgressCallback(currentModelName);
+        await this.adapter.initialize(progressCallback);
+
+        // Check if moved to background or cancelled
+        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
+        const wasCancelled = this.cancelledModels.has(currentModelName);
+
+        if (wasMovedToBackground) {
+          console.log('[LLM Interface] WebLLM DeepSeek completed in background');
+          this.removeBackgroundDownload(currentModelName);
+          return;
+        }
+
+        if (wasCancelled) {
+          console.log('[LLM Interface] WebLLM DeepSeek was cancelled');
+          return;
+        }
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
         console.log('[LLM Interface] WebLLM DeepSeek ready');
@@ -333,20 +416,31 @@ export class LLMInterface {
       } else if (modelName === 'webllm-llama70b') {
         console.log('[LLM Interface] Loading WebLLM Llama 70B...');
         this.adapter = new WebLLMAdapter('llama70b');
+        const currentModelName = this.adapter.getName();
         this.updateState({
           status: 'downloading',
-          modelName: this.adapter.getName(),
+          modelName: currentModelName,
           displayName: this.adapter.getDisplayName(),
           downloadText: 'Getting LLM for you...'
         });
 
-        await this.adapter.initialize((progress) => {
-          this.updateState({
-            downloadProgress: progress.progress,
-            downloadText: progress.text,
-            isFromCache: progress.isFromCache ?? null
-          });
-        });
+        const progressCallback = this.createProgressCallback(currentModelName);
+        await this.adapter.initialize(progressCallback);
+
+        // Check if moved to background or cancelled
+        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
+        const wasCancelled = this.cancelledModels.has(currentModelName);
+
+        if (wasMovedToBackground) {
+          console.log('[LLM Interface] WebLLM Llama 70B completed in background');
+          this.removeBackgroundDownload(currentModelName);
+          return;
+        }
+
+        if (wasCancelled) {
+          console.log('[LLM Interface] WebLLM Llama 70B was cancelled');
+          return;
+        }
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
         console.log('[LLM Interface] WebLLM Llama 70B ready');
@@ -371,6 +465,122 @@ export class LLMInterface {
 
       throw error;
     }
+  }
+
+  /**
+   * Creates a progress callback that updates foreground or background state.
+   * @param {string} modelName - The model being downloaded
+   * @returns {Function} Progress callback function
+   * @private
+   */
+  createProgressCallback(modelName) {
+    return (progress) => {
+      // Check if this download is in background
+      const bgDownload = this.backgroundDownloadsMap.get(modelName);
+
+      if (bgDownload) {
+        // Update background download
+        bgDownload.progress = progress.progress;
+        bgDownload.text = progress.text;
+        bgDownload.isFromCache = progress.isFromCache ?? null;
+        this.updateBackgroundDownloadsState();
+      } else if (this.state.modelName === modelName) {
+        // Update foreground download
+        this.updateState({
+          downloadProgress: progress.progress,
+          downloadText: progress.text,
+          isFromCache: progress.isFromCache ?? null
+        });
+      }
+    };
+  }
+
+  /**
+   * Moves current download to background and starts tracking it.
+   * @private
+   */
+  moveToBackground() {
+    if (!this.adapter || this.state.status !== 'downloading') {
+      return;
+    }
+
+    const modelName = this.state.modelName;
+    if (!modelName) return;
+
+    console.log('[LLM Interface] Moving download to background:', modelName);
+
+    // Create background download entry
+    const bgDownload = {
+      modelName,
+      displayName: this.state.displayName,
+      progress: this.state.downloadProgress,
+      text: this.state.downloadText,
+      isFromCache: this.state.isFromCache,
+      adapter: this.adapter
+    };
+
+    this.backgroundDownloadsMap.set(modelName, bgDownload);
+    this.updateBackgroundDownloadsState();
+
+    // Clear current adapter reference (it's now in background)
+    this.adapter = null;
+  }
+
+  /**
+   * Updates the state with current background downloads.
+   * @private
+   */
+  updateBackgroundDownloadsState() {
+    const backgroundDownloads = Array.from(this.backgroundDownloadsMap.values()).map(bg => ({
+      modelName: bg.modelName,
+      displayName: bg.displayName,
+      progress: bg.progress,
+      text: bg.text,
+      isFromCache: bg.isFromCache
+    }));
+
+    this.updateState({ backgroundDownloads });
+  }
+
+  /**
+   * Cancels a background download.
+   * @param {string} modelName - The model to cancel
+   */
+  cancelBackgroundDownload(modelName) {
+    console.log('[LLM Interface] Cancelling background download:', modelName);
+
+    const bgDownload = this.backgroundDownloadsMap.get(modelName);
+    if (!bgDownload) return;
+
+    // Mark as cancelled
+    this.cancelledModels.add(modelName);
+
+    // Cancel the adapter
+    if (bgDownload.adapter && typeof bgDownload.adapter.cancel === 'function') {
+      bgDownload.adapter.cancel();
+    }
+
+    // Clean up the adapter
+    if (bgDownload.adapter && typeof bgDownload.adapter.destroy === 'function') {
+      bgDownload.adapter.destroy().catch(err =>
+        console.error('[LLM Interface] Error destroying background adapter:', err)
+      );
+    }
+
+    // Remove from map
+    this.backgroundDownloadsMap.delete(modelName);
+    this.updateBackgroundDownloadsState();
+  }
+
+  /**
+   * Removes a completed background download from tracking.
+   * @param {string} modelName - The model that completed
+   * @private
+   */
+  removeBackgroundDownload(modelName) {
+    console.log('[LLM Interface] Removing completed background download:', modelName);
+    this.backgroundDownloadsMap.delete(modelName);
+    this.updateBackgroundDownloadsState();
   }
 
   /**
@@ -403,6 +613,7 @@ export class LLMInterface {
 
   /**
    * Destroys the adapter and cleans up resources.
+   * Note: Does not touch background downloads.
    */
   async destroy() {
     if (this.summarizer) {
@@ -421,7 +632,8 @@ export class LLMInterface {
       downloadProgress: 0,
       downloadText: '',
       summarizerAvailable: false,
-      geminiNanoAvailable: this.state.geminiNanoAvailable // Preserve detection result
+      geminiNanoAvailable: this.state.geminiNanoAvailable, // Preserve detection result
+      backgroundDownloads: this.state.backgroundDownloads // Preserve background downloads
     });
   }
 }

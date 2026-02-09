@@ -45,39 +45,35 @@ function AppContent() {
       dismissDropdownTooltip();
     }
 
-    if (isDownloading) {
-      // During download, just show preview info
-      setPreviewModel(modelName);
-      setShowGeminiSetup(modelName === 'gemini-nano');
-    } else {
-      console.log('[App] Dropdown selected:', modelName, 'Cached models:', Array.from(cachedModels));
+    console.log('[App] Dropdown selected:', modelName, 'Cached models:', Array.from(cachedModels));
 
-      // Check if model is cached
-      const isCached = cachedModels.has(modelName) || modelName === 'gemini-nano';
-      console.log('[App] Is cached?', isCached);
+    // Check if model is cached
+    const isCached = cachedModels.has(modelName) || modelName === 'gemini-nano';
+    console.log('[App] Is cached?', isCached);
 
-      if (isCached) {
-        // Model cached - load immediately
-        console.log('[App] Loading cached model immediately');
-        setPreviewModel(null);
-        try {
-          await llm.switchModel(modelName);
-        } catch (error) {
-          // Ignore errors from cancelled downloads
-          if (error.message?.includes('cancelled')) {
-            console.log('[App] Ignoring cancelled download error');
-          } else {
-            console.error('[App] Model switch error:', error);
-          }
+    if (isCached) {
+      // Model cached - load immediately
+      // If currently downloading, it will be moved to background automatically
+      console.log('[App] Loading cached model immediately');
+      setPreviewModel(null);
+      try {
+        await llm.switchModel(modelName);
+      } catch (error: unknown) {
+        // Ignore errors from cancelled downloads
+        if (error instanceof Error && error.message?.includes('cancelled')) {
+          console.log('[App] Ignoring cancelled download error');
+        } else {
+          console.error('[App] Model switch error:', error);
         }
-        setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
-      } else {
-        // Model not cached - show confirmation
-        console.log('[App] Showing download confirmation');
-        setPendingDownload(modelName);
       }
+      setShowGeminiSetup(modelName === 'gemini-nano' && !llm.geminiNanoAvailable);
+    } else {
+      // Model not cached - show confirmation
+      // If currently downloading, it will be moved to background when new download starts
+      console.log('[App] Showing download confirmation');
+      setPendingDownload(modelName);
     }
-  }, [isDownloading, llm, showDropdownTooltip, dismissDropdownTooltip, cachedModels, isChecking]);
+  }, [llm, showDropdownTooltip, dismissDropdownTooltip, cachedModels, isChecking]);
 
   // Handle Gemini setup dismiss
   const handleGeminiDismiss = useCallback(() => {
@@ -122,6 +118,12 @@ function AppContent() {
     }, 100);
   }, [llm]);
 
+  // Handle cancel background download
+  const handleCancelBackgroundDownload = useCallback((modelName: string) => {
+    console.log('[App] Cancelling background download:', modelName);
+    llm.cancelBackgroundDownload(modelName);
+  }, [llm]);
+
   // Handle model bubble click
   const handleBubbleClick = useCallback(async (modelName: string) => {
     // Don't allow selection while still checking cache
@@ -143,9 +145,9 @@ function AppContent() {
       markModelSelected();
       try {
         await llm.switchModel(modelName);
-      } catch (error) {
+      } catch (error: unknown) {
         // Ignore errors from cancelled downloads
-        if (error.message?.includes('cancelled')) {
+        if (error instanceof Error && error.message?.includes('cancelled')) {
           console.log('[App] Ignoring cancelled download error');
         } else {
           console.error('[App] Model switch error:', error);
@@ -179,9 +181,9 @@ function AppContent() {
       markModelSelected();
       try {
         await llm.switchModel(pendingDownload);
-      } catch (error) {
+      } catch (error: unknown) {
         // Ignore errors from cancelled downloads
-        if (error.message?.includes('cancelled')) {
+        if (error instanceof Error && error.message?.includes('cancelled')) {
           console.log('[App] Ignoring cancelled download error');
         } else {
           console.error('[App] Model switch error:', error);
@@ -230,6 +232,7 @@ function AppContent() {
         onModelChange={handleModelChange}
         onGeminiDismiss={handleGeminiDismiss}
         onCancelDownload={handleCancelDownload}
+        onCancelBackgroundDownload={handleCancelBackgroundDownload}
         showGeminiSetup={shouldShowGeminiSetup}
         showDropdownTooltip={showDropdownTooltip && (isReady || isDownloading)}
         onDismissDropdownTooltip={dismissDropdownTooltip}
@@ -245,7 +248,7 @@ function AppContent() {
         <MessagesContainer
           messages={chat.messages}
           isDownloading={isDownloading}
-          isFromCache={llm.isFromCache}
+          isFromCache={llm.isFromCache ?? false}
           modelName={llm.modelName}
           previewModelKey={previewModel}
           isGenerating={chat.isGenerating}
