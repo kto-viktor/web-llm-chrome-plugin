@@ -135,6 +135,46 @@ export function buildChatPrompt(userMessage, pageContent = null, messages = [], 
 }
 
 /**
+ * Builds the system message content for the messages array.
+ * Includes the system prompt, page context, and guidelines.
+ * @param {Object|null} pageContent - The page content object (title, url, content)
+ * @returns {string} The system message content
+ */
+export function buildSystemMessage(pageContent) {
+  if (!pageContent) {
+    return [
+      'You are a helpful AI assistant. Answer the user\'s questions to the best of your ability.',
+      '',
+      'Guidelines:',
+      '- Be helpful, accurate, and concise',
+      '- If you don\'t know something, say so',
+      '- Provide clear explanations when needed'
+    ].join('\n');
+  }
+
+  const pageValues = formatPageContent(pageContent);
+
+  return [
+    systemPromptTemplate.trim(),
+    '',
+    'This is current active page content in user\'s browser:',
+    '<page_content>',
+    `     <title>${pageValues.page_title}</title>`,
+    `     <url>${pageValues.page_url}</url>`,
+    pageValues.page_content,
+    '</page_content>',
+    '',
+    'Guidelines:',
+    '- Be concise and helpful in your responses',
+    '- Reference specific parts of the <page_content> when relevant',
+    '- If it\'s a general question, try to answer based on your general knowledge (no need for <page_content> then)',
+    '- If the history is related to a different page, don\'t refer to it.',
+    '- Keep responses focused and to the point',
+    '- When summarizing, highlight the most important information first'
+  ].join('\n');
+}
+
+/**
  * Gets the raw system prompt template.
  * @returns {string} The system prompt
  */

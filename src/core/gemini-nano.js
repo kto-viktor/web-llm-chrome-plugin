@@ -87,16 +87,26 @@ export class GeminiNanoAdapter {
   }
 
   /**
-   * Generates a response for the given prompt.
-   * @param {string} prompt - The user prompt
+   * Generates a response for the given messages array.
+   * Flattens the messages into a single prompt string for Gemini Nano's API.
+   * @param {Array<{role: string, content: string}>} messages - OpenAI-style messages array
    * @param {Object} [options] - Generation options
    * @param {Function} [options.onToken] - Callback for streaming tokens
+   * @param {AbortSignal} [options.signal] - Optional abort signal
    * @returns {Promise<string>} The generated response
    */
-  async generate(prompt, options = {}) {
+  async generate(messages, options = {}) {
     if (!this.initialized || !this.session) {
       await this.initialize();
     }
+
+    // Flatten messages array to a prompt string for Gemini Nano
+    const prompt = messages.map(m => {
+      if (m.role === 'system') return m.content;
+      if (m.role === 'user') return `User: ${m.content}`;
+      if (m.role === 'assistant') return `Assistant: ${m.content}`;
+      return m.content;
+    }).join('\n\n');
 
     const { onToken, signal } = options;
 
@@ -184,8 +194,10 @@ export class GeminiNanoAdapter {
    * @returns {Promise<string>} The summary
    */
   async summarize(text, options = {}) {
-    const prompt = `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}`;
-    return this.generate(prompt, options);
+    const messages = [
+      { role: 'user', content: `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}` }
+    ];
+    return this.generate(messages, options);
   }
 
   /**

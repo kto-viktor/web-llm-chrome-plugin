@@ -136,18 +136,19 @@ export class LLMInterface {
   }
 
   /**
-   * Generates a response for the given prompt.
-   * @param {string} prompt - The user prompt
+   * Generates a response for the given messages array.
+   * @param {Array<{role: string, content: string}>} messages - OpenAI-style messages array
    * @param {Object} [options] - Generation options
    * @param {Function} [options.onToken] - Callback for streaming tokens
+   * @param {AbortSignal} [options.signal] - Optional abort signal
    * @returns {Promise<string>} The generated response
    */
-  async generate(prompt, options = {}) {
+  async generate(messages, options = {}) {
     if (!this.adapter || this.state.status !== 'ready') {
       throw new Error('LLM not ready. Call initialize() first.');
     }
 
-    return this.adapter.generate(prompt, options);
+    return this.adapter.generate(messages, options);
   }
 
   /**

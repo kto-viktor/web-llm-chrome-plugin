@@ -5,7 +5,7 @@
 
 import { llm } from '../core/llm-interface.js';
 import { historyManager } from './history-manager.js';
-import { buildChatPrompt } from './prompt-builder.js';
+import { buildSystemMessage } from './prompt-builder.js';
 
 /**
  * Chat state.
@@ -65,26 +65,32 @@ export class ChatService {
   }
 
   /**
-   * Builds the full prompt with context using the template.
-   * Filters history based on attachment mode:
-   * - When attached: only messages from current page
-   * - When not attached: all messages (general conversation)
+   * Builds an OpenAI-style messages array with system prompt, history, and user message.
+   * Uses contiguous tail filtering for relevant history.
    * @param {string} userMessage - The user's message
-   * @param {Object|null} pageContent - The page content
+   * @param {Object|null} pageContent - The page content (attachment)
    * @param {boolean} isAttached - Whether page is attached
-   * @returns {string} The complete prompt
+   * @returns {Array<{role: string, content: string}>} Messages array
    */
-  buildPrompt(userMessage, pageContent, isAttached) {
-    let messages;
-    if (isAttached && pageContent) {
-      // When attached, filter to current page only
-      const pageUrl = pageContent.url;
-      messages = historyManager.getMessagesByPage(pageUrl);
-    } else {
-      // When not attached, use all messages
-      messages = historyManager.getMessages();
-    }
-    return buildChatPrompt(userMessage, pageContent, messages, isAttached);
+  buildMessages(userMessage, pageContent, isAttached) {
+    const pageUrl = isAttached && pageContent ? pageContent.url : null;
+
+    // Build system message with page context and guidelines
+    const systemContent = isAttached
+      ? buildSystemMessage(pageContent)
+      : buildSystemMessage(null);
+
+    // Get contiguous tail of messages matching current context
+    const historyMessages = historyManager.getRecentContextMessages(pageUrl);
+
+    const messages = [
+      { role: 'system', content: systemContent },
+      ...historyMessages.map(m => ({ role: m.role, content: m.content })),
+      { role: 'user', content: userMessage }
+    ];
+
+    console.log(`[Chat Service] Built messages array: ${messages.length} messages (1 system + ${historyMessages.length} history + 1 user)`);
+    return messages;
   }
 
   /**
@@ -138,11 +144,10 @@ export class ChatService {
         await historyManager.trimToLimit();
       }
 
-      const prompt = this.buildPrompt(message, attachment, isAttached);
-      console.log(`[Chat Service] Built prompt (${prompt.length} chars)`);
+      const messages = this.buildMessages(message, attachment, isAttached);
 
       console.log('[Chat Service] Generating response...');
-      const response = await llm.generate(prompt, {
+      const response = await llm.generate(messages, {
         onToken: (token) => {
           this.updateState({
             currentResponse: (this.state.currentResponse || '') + token

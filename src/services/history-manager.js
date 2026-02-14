@@ -168,6 +168,34 @@ export class HistoryManager {
   }
 
   /**
+   * Gets the contiguous tail of messages matching the current context.
+   * Walks from the end and stops at the first message that doesn't match.
+   * @param {string|null} pageUrl - The page URL (null for no-page mode)
+   * @returns {ChatMessage[]} Contiguous tail of matching messages
+   */
+  getRecentContextMessages(pageUrl = null) {
+    const normalizedTarget = pageUrl ? normalizePageUrl(pageUrl) : null;
+    const result = [];
+
+    for (let i = this.messages.length - 1; i >= 0; i--) {
+      const msg = this.messages[i];
+      const msgPageUrl = msg.pageUrl || null;
+
+      if (normalizedTarget) {
+        // Attached mode: message must match this page
+        if (msgPageUrl !== normalizedTarget) break;
+      } else {
+        // No-page mode: message must have no pageUrl
+        if (msgPageUrl !== null) break;
+      }
+
+      result.unshift(msg);
+    }
+
+    return result;
+  }
+
+  /**
    * Gets messages filtered by page URL.
    * Includes orphan messages (no pageUrl) for backward compatibility.
    * @param {string} pageUrl - The page URL to filter by

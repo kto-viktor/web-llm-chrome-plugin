@@ -190,20 +190,20 @@ export class WebLLMAdapter {
   }
 
   /**
-   * Generates a response for the given prompt.
-   * @param {string} prompt - The user prompt
+   * Generates a response for the given messages array.
+   * @param {Array<{role: string, content: string}>} messages - OpenAI-style messages array
    * @param {Object} [options] - Generation options
    * @param {Function} [options.onToken] - Callback for streaming tokens
+   * @param {AbortSignal} [options.signal] - Optional abort signal
    * @returns {Promise<string>} The generated response
    */
-  async generate(prompt, options = {}) {
+  async generate(messages, options = {}) {
     if (!this.initialized || !this.engine) {
       throw new Error('WebLLM not initialized. Call initialize() first.');
     }
 
     if (this.generating) {
       console.warn('[WebLLM] Already generating, waiting for completion...');
-      // Wait a bit for previous generation to finish
       await new Promise(resolve => setTimeout(resolve, 100));
       if (this.generating) {
         throw new Error('Previous generation still in progress');
@@ -211,10 +211,6 @@ export class WebLLMAdapter {
     }
 
     const { onToken, signal } = options;
-
-    const messages = [
-      { role: 'user', content: prompt }
-    ];
 
     if (onToken) {
       return this.generateStreaming(messages, onToken, signal);
@@ -324,8 +320,10 @@ export class WebLLMAdapter {
    * @returns {Promise<string>} The summary
    */
   async summarize(text, options = {}) {
-    const prompt = `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}`;
-    return this.generate(prompt, options);
+    const messages = [
+      { role: 'user', content: `Summarize the following text concisely, preserving key facts and context. Keep it under 200 words:\n\n${text}` }
+    ];
+    return this.generate(messages, options);
   }
 
   /**

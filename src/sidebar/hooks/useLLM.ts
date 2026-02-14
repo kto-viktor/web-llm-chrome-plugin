@@ -15,7 +15,7 @@ interface UseLLMResult extends LLMState {
   switchModel: (modelName: string) => Promise<void>;
   cancelDownload: () => Promise<void>;
   cancelBackgroundDownload: (modelName: string) => void;
-  generate: (prompt: string, options?: { onToken?: (token: string) => void }) => Promise<string>;
+  generate: (messages: Array<{role: string, content: string}>, options?: { onToken?: (token: string) => void }) => Promise<string>;
   isReady: () => boolean;
   isSummarizerAvailable: () => boolean;
 }
@@ -52,8 +52,8 @@ export function useLLM(): UseLLMResult {
     llm.cancelBackgroundDownload(modelName);
   }, []);
 
-  const generate = useCallback(async (prompt: string, options?: { onToken?: (token: string) => void }) => {
-    return llm.generate(prompt, options);
+  const generate = useCallback(async (messages: Array<{role: string, content: string}>, options?: { onToken?: (token: string) => void }) => {
+    return llm.generate(messages, options);
   }, []);
 
   const isReady = useCallback(() => {
