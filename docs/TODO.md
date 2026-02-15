@@ -1,6 +1,4 @@
 ## Todo
-- ~~сделать понятнее эти галочки в дропдауне~~ DONE: replaced native select with custom dropdown showing Active/Downloaded badges
-- когда контекст зааттачен, добавить кнопку "Page summary"
 - потестить фидбек Игоря по части скачивания
 - потестить, что больше не нужно: "Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)"
 
@@ -12,6 +10,8 @@
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- когда контекст зааттачен, добавить кнопку "Page summary"
+- сделать понятнее эти галочки в дропдауне
 - fix page context injection into prompt - now fetches fresh page content on each message
 - attach current tab content to history explicitly for user - it should look like file attachment with page title; should be attached by default; agent also see it as part of user query
 - model selection with multiple options: Gemini Nano (default when available), Qwen 2.5 7B (fallback), DeepSeek-R1 (optional)

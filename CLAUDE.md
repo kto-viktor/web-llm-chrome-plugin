@@ -1,6 +1,6 @@
 ### Todo file
-1. Remaining work in _internal-claude-prompts/TODO.md file
-2. once you finished it, change todo.md file
+1. Remaining work in docs/TODO.md file
+2. once you finished it, move task from Todo section to Completed section
 
 ### Code style
 1. Write modular code, divided into atomic files and atomic functions. Write documentation to code.
