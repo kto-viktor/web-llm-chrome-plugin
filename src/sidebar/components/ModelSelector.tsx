@@ -47,7 +47,7 @@ export function ModelSelector({
     <div className="model-selector-container" ref={containerRef}>
       <button className="model-selector-trigger" onClick={handleToggle}>
         <span className="model-selector-trigger-text">
-          {selectedDef ? `${selectedDef.icon} ${selectedDef.name}` : 'Select a model...'}
+          {selectedDef ? `Switch model: ${selectedDef.icon} ${selectedDef.name}` : 'Switch model...'}
         </span>
         <span className={`model-selector-chevron ${isOpen ? 'open' : ''}`}>&#9662;</span>
       </button>
@@ -56,7 +56,7 @@ export function ModelSelector({
         <div className="model-selector-dropdown">
           {MODELS.map(model => {
             const isSelected = model.key === selectedModel;
-            const isDownloaded = cachedModels.has(model.key) && !isSelected;
+            const isDownloaded = cachedModels.has(model.key);
 
             return (
               <button

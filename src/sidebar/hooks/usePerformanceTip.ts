@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'llm-performance-tip-dismissed';
-const SHOW_DELAY_MS = 10000; // 10 seconds
+const SHOW_DELAY_MS = 20000; // 20 seconds
 
 export function usePerformanceTip(isGenerating: boolean, modelName: string | null) {
   const [showTip, setShowTip] = useState(false);
