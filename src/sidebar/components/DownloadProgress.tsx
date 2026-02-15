@@ -11,7 +11,7 @@ interface DownloadProgressProps {
   modelName: string | null;
   progress: number;
   text: string;
-  isFromCache: boolean | null;
+  isFromCache: boolean;
   onCancel?: () => void;
 }
 
@@ -52,11 +52,9 @@ export function DownloadProgress({
         )}
       </div>
       <div className="download-note">
-        {isFromCache === true
+        {isFromCache
           ? "Loading quickly from your device — no internet needed!"
-          : isFromCache === false
-          ? "This is a one-time download."
-          : "Preparing model..."}
+          : "This is a one-time download."}
       </div>
     </div>
   );

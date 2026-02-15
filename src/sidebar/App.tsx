@@ -4,7 +4,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip } from './hooks';
-import { markModelAsDownloaded } from './hooks/useCachedModels';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
@@ -25,7 +24,7 @@ function AppContent() {
   const llm = useLLM();
   const { attachment, clear: clearAttachment, reload: reloadAttachment } = usePageAttachment();
   const chat = useChat();
-  const { cachedModels, isChecking } = useCachedModels();
+  const { cachedModels, isChecking, markDownloaded } = useCachedModels();
   const { showDropdownTooltip, markModelSelected, dismissDropdownTooltip } = useOnboarding();
   const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating);
 
@@ -147,9 +146,16 @@ function AppContent() {
   // Mark model as downloaded when it becomes ready
   useEffect(() => {
     if (llm.status === 'ready' && llm.modelName) {
-      markModelAsDownloaded(llm.modelName);
+      markDownloaded(llm.modelName);
     }
-  }, [llm.status, llm.modelName]);
+  }, [llm.status, llm.modelName, markDownloaded]);
+
+  // Mark background-completed models as downloaded
+  useEffect(() => {
+    if (llm.completedBackgroundModels?.length) {
+      llm.completedBackgroundModels.forEach(m => markDownloaded(m));
+    }
+  }, [llm.completedBackgroundModels, markDownloaded]);
 
   // When a model becomes ready, update selectedModel if appropriate
   useEffect(() => {

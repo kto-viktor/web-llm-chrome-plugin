@@ -10,8 +10,8 @@ import type { LLMState } from '../types';
  */
 export type ModelState =
   | { type: 'ready' }
-  | { type: 'downloading'; isFromCache: boolean | null }
-  | { type: 'downloading-background'; isFromCache: boolean | null }
+  | { type: 'downloading'; isFromCache: boolean }
+  | { type: 'downloading-background'; isFromCache: boolean }
   | { type: 'cached' }
   | { type: 'gemini-unavailable' }
   | { type: 'not-downloaded' };
@@ -36,14 +36,15 @@ export function getModelState(
   }
 
   // Is it actively downloading in foreground?
+  // Use cachedModels as source of truth for isFromCache (not LLM progress callbacks)
   if (llmState.status === 'downloading' && llmState.modelName === modelKey) {
-    return { type: 'downloading', isFromCache: llmState.isFromCache };
+    return { type: 'downloading', isFromCache: cachedModels.has(modelKey) };
   }
 
   // Is it downloading in background?
   const bgDownload = llmState.backgroundDownloads.find(d => d.modelName === modelKey);
   if (bgDownload) {
-    return { type: 'downloading-background', isFromCache: bgDownload.isFromCache };
+    return { type: 'downloading-background', isFromCache: cachedModels.has(modelKey) };
   }
 
   // Is it cached on disk?

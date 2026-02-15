@@ -29,7 +29,7 @@ export function Header({
   showDropdownTooltip = false,
   onDismissDropdownTooltip,
 }: HeaderProps) {
-  const { status, displayName, modelName, downloadProgress, downloadText, isFromCache, backgroundDownloads } = llmState;
+  const { status, displayName, modelName, downloadProgress, downloadText, backgroundDownloads } = llmState;
 
   const handleModelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     onModelChange(e.target.value);
@@ -113,7 +113,7 @@ export function Header({
         modelName={modelName}
         progress={downloadProgress}
         text={downloadText}
-        isFromCache={isFromCache}
+        isFromCache={modelName ? cachedModels.has(modelName) : false}
         onCancel={onCancelDownload}
       />
 
@@ -125,6 +125,7 @@ export function Header({
 
       <BackgroundDownloads
         downloads={backgroundDownloads}
+        cachedModels={cachedModels}
         onCancel={onCancelBackgroundDownload}
       />
     </>

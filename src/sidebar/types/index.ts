@@ -26,7 +26,6 @@ export interface BackgroundDownload {
   displayName: string;
   progress: number;
   text: string;
-  isFromCache: boolean | null;
 }
 
 /** LLM state from llm-interface */
@@ -37,11 +36,11 @@ export interface LLMState {
   error: string | null;
   downloadProgress: number;
   downloadText: string;
-  isFromCache: boolean | null;
   summarizerAvailable: boolean;
   geminiNanoAvailable: boolean;
   geminiNanoReason?: string;
   backgroundDownloads: BackgroundDownload[];
+  completedBackgroundModels: string[];
 }
 
 /** Model information for display */

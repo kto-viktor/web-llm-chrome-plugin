@@ -8,10 +8,11 @@ import type { BackgroundDownload } from '../types';
 
 interface BackgroundDownloadsProps {
   downloads: BackgroundDownload[];
+  cachedModels: Set<string>;
   onCancel?: (modelName: string) => void;
 }
 
-export function BackgroundDownloads({ downloads, onCancel }: BackgroundDownloadsProps) {
+export function BackgroundDownloads({ downloads, cachedModels, onCancel }: BackgroundDownloadsProps) {
   if (downloads.length === 0) return null;
 
   return (
@@ -43,11 +44,9 @@ export function BackgroundDownloads({ downloads, onCancel }: BackgroundDownloads
             />
           </div>
           <div className="background-download-status">
-            {download.isFromCache === true
+            {cachedModels.has(download.modelName)
               ? 'Loading from cache...'
-              : download.isFromCache === false
-              ? 'Downloading...'
-              : download.text || 'Preparing...'}
+              : 'Downloading...'}
           </div>
         </div>
       ))}

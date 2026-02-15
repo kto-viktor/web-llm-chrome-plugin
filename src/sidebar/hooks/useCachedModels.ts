@@ -3,7 +3,7 @@
  * Uses localStorage to track downloaded models since hasModelInCache is unreliable.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 // @ts-ignore - JS module
 import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
 // @ts-ignore - JS module
@@ -83,7 +83,18 @@ export function useCachedModels() {
     migrateCache();
   }, []);
 
-  return { cachedModels, isChecking };
+  /**
+   * Marks a model as downloaded in both React state and localStorage.
+   */
+  const markDownloaded = useCallback((modelKey: string) => {
+    markModelAsDownloaded(modelKey);
+    setCachedModels(prev => {
+      if (prev.has(modelKey)) return prev;
+      return new Set([...prev, modelKey]);
+    });
+  }, []);
+
+  return { cachedModels, isChecking, markDownloaded };
 }
 
 /**

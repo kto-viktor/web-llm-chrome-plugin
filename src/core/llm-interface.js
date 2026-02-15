@@ -17,7 +17,6 @@ import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
  * @property {string} displayName - Display name
  * @property {number} progress - Download progress 0 to 1
  * @property {string} text - Progress text
- * @property {boolean|null} isFromCache - Whether loading from cache
  * @property {Object} adapter - The adapter handling this download
  */
 
@@ -30,7 +29,6 @@ import { hasModelInCache, prebuiltAppConfig } from '@mlc-ai/web-llm';
  * @property {string|null} error
  * @property {number} downloadProgress - 0 to 1
  * @property {string} downloadText
- * @property {boolean|null} isFromCache - Whether loading from cache (true), downloading (false), or unknown (null)
  * @property {boolean} summarizerAvailable - Whether native Summarizer is available
  * @property {boolean} geminiNanoAvailable - Whether Gemini Nano is available
  * @property {Array<BackgroundDownload>} backgroundDownloads - Active background downloads
@@ -55,10 +53,10 @@ export class LLMInterface {
       error: null,
       downloadProgress: 0,
       downloadText: '',
-      isFromCache: null,
       summarizerAvailable: false,
       geminiNanoAvailable: false,
-      backgroundDownloads: []
+      backgroundDownloads: [],
+      completedBackgroundModels: []
     };
 
     /** @type {Set<Function>} */
@@ -281,7 +279,7 @@ export class LLMInterface {
         if (wasMovedToBackground) {
           console.log('[LLM Interface] Gemini Nano completed in background');
           this.removeBackgroundDownload(currentModelName);
-          // Don't change status - another model is active
+          this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
@@ -323,6 +321,7 @@ export class LLMInterface {
         if (wasMovedToBackground) {
           console.log('[LLM Interface] WebLLM Llama completed in background');
           this.removeBackgroundDownload(currentModelName);
+          this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
@@ -355,6 +354,7 @@ export class LLMInterface {
         if (wasMovedToBackground) {
           console.log('[LLM Interface] WebLLM Gemma completed in background');
           this.removeBackgroundDownload(currentModelName);
+          this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
@@ -387,6 +387,7 @@ export class LLMInterface {
         if (wasMovedToBackground) {
           console.log('[LLM Interface] WebLLM Hermes completed in background');
           this.removeBackgroundDownload(currentModelName);
+          this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
@@ -419,6 +420,7 @@ export class LLMInterface {
         if (wasMovedToBackground) {
           console.log('[LLM Interface] WebLLM DeepSeek completed in background');
           this.removeBackgroundDownload(currentModelName);
+          this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
@@ -451,6 +453,7 @@ export class LLMInterface {
         if (wasMovedToBackground) {
           console.log('[LLM Interface] WebLLM Llama 70B completed in background');
           this.removeBackgroundDownload(currentModelName);
+          this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
@@ -499,14 +502,12 @@ export class LLMInterface {
         // Update background download
         bgDownload.progress = progress.progress;
         bgDownload.text = progress.text;
-        bgDownload.isFromCache = progress.isFromCache ?? null;
         this.updateBackgroundDownloadsState();
       } else if (this.state.modelName === modelName) {
         // Update foreground download
         this.updateState({
           downloadProgress: progress.progress,
-          downloadText: progress.text,
-          isFromCache: progress.isFromCache ?? null
+          downloadText: progress.text
         });
       }
     };
@@ -532,7 +533,6 @@ export class LLMInterface {
       displayName: this.state.displayName,
       progress: this.state.downloadProgress,
       text: this.state.downloadText,
-      isFromCache: this.state.isFromCache,
       adapter: this.adapter
     };
 
@@ -548,8 +548,7 @@ export class LLMInterface {
       modelName: null,
       displayName: null,
       downloadProgress: 0,
-      downloadText: '',
-      isFromCache: null
+      downloadText: ''
     });
   }
 
@@ -562,8 +561,7 @@ export class LLMInterface {
       modelName: bg.modelName,
       displayName: bg.displayName,
       progress: bg.progress,
-      text: bg.text,
-      isFromCache: bg.isFromCache
+      text: bg.text
     }));
 
     this.updateState({ backgroundDownloads });
@@ -597,6 +595,16 @@ export class LLMInterface {
     // Remove from map
     this.backgroundDownloadsMap.delete(modelName);
     this.updateBackgroundDownloadsState();
+  }
+
+  /**
+   * Notifies that a background download has completed by adding it to completedBackgroundModels.
+   * @param {string} modelName - The model that completed in background
+   * @private
+   */
+  notifyBackgroundComplete(modelName) {
+    const completed = [...(this.state.completedBackgroundModels || []), modelName];
+    this.updateState({ completedBackgroundModels: completed });
   }
 
   /**

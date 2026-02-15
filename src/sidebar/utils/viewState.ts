@@ -40,13 +40,13 @@ export function computeViewState(
     return { screen: 'gemini-setup' };
   }
 
-  // Downloading from network (not cache) - show full download screen
-  if (modelState.type === 'downloading' && !modelState.isFromCache) {
+  // Downloading from network (not cached locally) - show full download screen
+  if (modelState.type === 'downloading' && modelState.isFromCache === false) {
     return { screen: 'downloading', modelKey: selectedModel };
   }
 
-  // Downloading in background (not cache) - show download screen for this model
-  if (modelState.type === 'downloading-background' && !modelState.isFromCache) {
+  // Downloading in background (not cached locally) - show download screen for this model
+  if (modelState.type === 'downloading-background' && modelState.isFromCache === false) {
     return { screen: 'downloading', modelKey: selectedModel };
   }
 
