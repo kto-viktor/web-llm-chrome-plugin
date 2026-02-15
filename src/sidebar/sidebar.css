@@ -81,8 +81,9 @@ body {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 8px;
-  font-size: 12px;
+  padding: 4px 10px;
+  min-width: 140px;
+  font-size: 13px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--bg-primary);
@@ -155,7 +156,8 @@ body {
 }
 
 .model-selector-item.selected {
-  background: rgba(66, 133, 244, 0.08);
+  background: rgba(66, 133, 244, 0.12);
+  border-left: 3px solid var(--accent-color);
 }
 
 .model-selector-item.muted {
@@ -210,12 +212,6 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-}
-
-.badge-active {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #66bb6a;
 }
 
 .badge-downloaded {

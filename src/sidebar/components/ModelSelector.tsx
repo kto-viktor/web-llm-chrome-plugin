@@ -8,27 +8,12 @@ import { MODELS } from '../constants/models';
 
 interface ModelSelectorProps {
   selectedModel: string | null;
-  activeModel: string | null;
   cachedModels: Set<string>;
   onModelChange: (modelName: string) => void;
 }
 
-/**
- * Returns the badge type for a model based on its status.
- */
-function getBadgeType(
-  modelKey: string,
-  activeModel: string | null,
-  cachedModels: Set<string>
-): 'active' | 'downloaded' | null {
-  if (activeModel === modelKey) return 'active';
-  if (cachedModels.has(modelKey)) return 'downloaded';
-  return null;
-}
-
 export function ModelSelector({
   selectedModel,
-  activeModel,
   cachedModels,
   onModelChange,
 }: ModelSelectorProps) {
@@ -70,8 +55,8 @@ export function ModelSelector({
       {isOpen && (
         <div className="model-selector-dropdown">
           {MODELS.map(model => {
-            const badge = getBadgeType(model.key, activeModel, cachedModels);
             const isSelected = model.key === selectedModel;
+            const isDownloaded = cachedModels.has(model.key) && !isSelected;
 
             return (
               <button
@@ -89,10 +74,7 @@ export function ModelSelector({
                     {model.size ? `${model.size} — ${model.desc}` : model.desc}
                   </span>
                 </div>
-                {badge === 'active' && (
-                  <span className="model-selector-badge badge-active">Active</span>
-                )}
-                {badge === 'downloaded' && (
+                {isDownloaded && (
                   <span className="model-selector-badge badge-downloaded">Downloaded</span>
                 )}
               </button>

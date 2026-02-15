@@ -51,9 +51,6 @@ export function Header({
     }
   };
 
-  // Active model is the one currently loaded and ready
-  const activeModel = status === 'ready' ? modelName : null;
-
   return (
     <>
       <header className="header">
@@ -62,7 +59,6 @@ export function Header({
           <div style={{ position: 'relative' }}>
             <ModelSelector
               selectedModel={selectedModel}
-              activeModel={activeModel}
               cachedModels={cachedModels}
               onModelChange={onModelChange}
             />
