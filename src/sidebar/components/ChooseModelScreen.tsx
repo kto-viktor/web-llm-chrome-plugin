@@ -59,16 +59,18 @@ export function ChooseModelScreen({
               ) : null}
               <p className="model-option-desc">
                 {model.desc}
-                {model.warning ? (
-                  <>
-                    <br />
-                    Super heavy. Requires 30Gb GPU - runs on latest Macbooks or gaming PC's.
-                    <br />Size: <b className="model-option-red">{model.size}</b> to download
-                  </>
-                ) : (
-                  <>
-                    <br />Size: <b>{model.size}</b> to download
-                  </>
+                {!cachedModels.has(model.key) && (
+                  model.warning ? (
+                    <>
+                      <br />
+                      Super heavy. Requires 30Gb GPU - runs on latest Macbooks or gaming PC's.
+                      <br />Size: <b className="model-option-red">{model.size}</b> to download
+                    </>
+                  ) : (
+                    <>
+                      <br />Size: <b>{model.size}</b> to download
+                    </>
+                  )
                 )}
               </p>
             </div>
