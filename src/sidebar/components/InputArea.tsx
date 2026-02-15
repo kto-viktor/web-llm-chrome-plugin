@@ -87,17 +87,18 @@ export function InputArea({
             </button>
           ) : null}
           <button
-            className="action-btn secondary"
+            className="action-btn clear-history"
             onClick={onClear}
             disabled={disabled}
-            title="Start new chat"
+            title="Clear history"
             style={{ marginLeft: 'auto' }}
           >
-            <svg width="1.8em" height="1.8em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '0.4em', verticalAlign: 'middle' }}>
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <path d="M14.5 3.5l3 3L11 13l-4 1 1-4 6.5-6.5z"/>
-            </svg>
-            New Chat
+            <img
+              src={chrome.runtime.getURL('graphics/bin.png')}
+              alt="Clear"
+              style={{ width: '1.4em', height: '1.4em', marginRight: '0.4em', verticalAlign: 'middle' }}
+            />
+            Clear history
           </button>
         </div>
 

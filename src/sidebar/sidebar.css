@@ -783,6 +783,18 @@ body {
   background: var(--bg-secondary);
 }
 
+.action-btn.clear-history {
+  background: white;
+  color: #e53935;
+  border-color: #e53935;
+}
+
+.action-btn.clear-history:hover {
+  background: #fbe9e7;
+  border-color: #c62828;
+  color: #c62828;
+}
+
 .input-row {
   display: flex;
   gap: 8px;
