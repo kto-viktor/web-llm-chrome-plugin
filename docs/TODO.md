@@ -1,3 +1,16 @@
+## Todo
+- сделать понятнее эти галочки в дропдауне
+- когда контекст зааттачен, добавить кнопку "Page summary"
+- потестить фидбек Игоря по части скачивания
+- потестить, что больше не нужно: "Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)"
+
+## Long-term backlog
+- add sentry and analytics
+- add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
+- refactor gemini setup - add screenshots, refactor step 4
+- add loading indicator, when page is loading and can't be attached
+- add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
+
 ## Completed
 - fix page context injection into prompt - now fetches fresh page content on each message
 - attach current tab content to history explicitly for user - it should look like file attachment with page title; should be attached by default; agent also see it as part of user query
@@ -30,17 +43,7 @@
 - **streaming UX improvements**: Implemented smart auto-scroll with user intent detection (scrolls only when user is near bottom, respects manual scrolling). Added performance tip tooltip that appears after 10s of streaming, suggesting faster models like Llama 1B. Tip dismisses permanently via localStorage. Creates a non-blocking, user-friendly streaming experience.
 - Переехать с Amplify
 - решить, хочу ли я оставить лламу 700мб
-
-## Todo
 - убрать tip о том, что LLama 1B тормозит, для LLama 1B :)
 - добавить tips для LLama 1B, что I'm lightweight model and will appreciate if you can speak english with me :)
-- сделать понятнее эти галочки в дропдауне
-- поправить фидбек Игоря по части скачивания
-- Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)
 
-phase 2:
-- add sentry and analytics
-- add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
-- refactor gemini setup - add screenshots, refactor step 4
-- add loading indicator, when page is loading and can't be attached
-- add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
+
