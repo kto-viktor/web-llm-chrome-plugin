@@ -12,9 +12,9 @@ interface LanguageTipProps {
 export function LanguageTip({ onClose }: LanguageTipProps) {
   return (
     <div className="performance-tip">
-      <span className="performance-tip-icon">🌐</span>
+      <span className="performance-tip-icon">🦙</span>
       <span className="performance-tip-text">
-        I'm a lightweight model, so could you please speak English with me? 🙂 Or you can try another model - they're multilingual.
+        <b>LLama</b>: I'm a lightweight model, so could you please speak English with me? 🙂 Or you can try another model - they're multilingual.
       </span>
       <button
         className="performance-tip-close"

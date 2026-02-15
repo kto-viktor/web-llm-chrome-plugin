@@ -75,6 +75,15 @@ body {
 /* Custom Model Selector Dropdown */
 .model-selector-container {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.model-selector-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .model-selector-trigger {

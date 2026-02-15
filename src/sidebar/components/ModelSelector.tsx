@@ -45,9 +45,10 @@ export function ModelSelector({
 
   return (
     <div className="model-selector-container" ref={containerRef}>
+      <span className="model-selector-label">Switch model:</span>
       <button className="model-selector-trigger" onClick={handleToggle}>
         <span className="model-selector-trigger-text">
-          {selectedDef ? `Switch model: ${selectedDef.icon} ${selectedDef.name}` : 'Switch model...'}
+          {selectedDef ? `${selectedDef.icon} ${selectedDef.name}` : 'Select a model...'}
         </span>
         <span className={`model-selector-chevron ${isOpen ? 'open' : ''}`}>&#9662;</span>
       </button>
