@@ -29,14 +29,14 @@
 - **generation cancellation**: Added stop button to cancel LLM generation mid-stream. Button appears in place of send button during generation. Uses AbortController for clean cancellation. Partial responses are saved to history with "[Generation stopped]" marker. Works with both WebLLM and Gemini Nano adapters.
 - **streaming UX improvements**: Implemented smart auto-scroll with user intent detection (scrolls only when user is near bottom, respects manual scrolling). Added performance tip tooltip that appears after 10s of streaming, suggesting faster models like Llama 1B. Tip dismisses permanently via localStorage. Creates a non-blocking, user-friendly streaming experience.
 - Переехать с Amplify
+- решить, хочу ли я оставить лламу 700мб
 
 ## Todo
-
-- решить, хочу ли я оставить лламу 700мб
-- поправить фидбек Игоря по части скачивания
-- добавить tips для LLama 1B, что I'm lightweight model and will appreciate if you can speak english with me :)
-- Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)
 - убрать tip о том, что LLama 1B тормозит, для LLama 1B :)
+- добавить tips для LLama 1B, что I'm lightweight model and will appreciate if you can speak english with me :)
+- сделать понятнее эти галочки в дропдауне
+- поправить фидбек Игоря по части скачивания
+- Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)
 
 phase 2:
 - add sentry and analytics

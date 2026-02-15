@@ -8,15 +8,15 @@ import { useEffect, useState } from 'react';
 const STORAGE_KEY = 'llm-performance-tip-dismissed';
 const SHOW_DELAY_MS = 10000; // 10 seconds
 
-export function usePerformanceTip(isGenerating: boolean) {
+export function usePerformanceTip(isGenerating: boolean, modelName: string | null) {
   const [showTip, setShowTip] = useState(false);
   const [isDismissed, setIsDismissed] = useState(() => {
     return localStorage.getItem(STORAGE_KEY) === 'true';
   });
 
   useEffect(() => {
-    // Don't show if already dismissed or not generating
-    if (isDismissed || !isGenerating) {
+    // Don't show if already dismissed, not generating, or already using Llama 1B
+    if (isDismissed || !isGenerating || modelName === 'webllm-llama') {
       setShowTip(false);
       return;
     }
@@ -31,7 +31,7 @@ export function usePerformanceTip(isGenerating: boolean) {
       clearTimeout(timer);
       setShowTip(false);
     };
-  }, [isGenerating, isDismissed]);
+  }, [isGenerating, isDismissed, modelName]);
 
   const dismissTip = () => {
     setShowTip(false);

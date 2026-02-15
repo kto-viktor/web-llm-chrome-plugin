@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useLanguageTip } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
@@ -11,6 +11,7 @@ import { InputArea } from './components/InputArea';
 import { DownloadConfirmScreen } from './components/DownloadConfirmScreen';
 import { GeminiSetup } from './components/GeminiSetup';
 import { PerformanceTip } from './components/PerformanceTip';
+import { LanguageTip } from './components/LanguageTip';
 import { computeViewState } from './utils/viewState';
 import { getModelState } from './utils/modelState';
 
@@ -26,10 +27,17 @@ function AppContent() {
   const chat = useChat();
   const { cachedModels, isChecking, markDownloaded } = useCachedModels();
   const { showDropdownTooltip, markModelSelected, dismissDropdownTooltip } = useOnboarding();
-  const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating);
 
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
+  const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating, selectedModel);
+
+  // Get last user message for language detection
+  const lastUserMessage = chat.messages.length > 0
+    ? [...chat.messages].reverse().find(m => m.role === 'user')?.content ?? null
+    : null;
+  const { showLanguageTip, dismissLanguageTip } = useLanguageTip(selectedModel, lastUserMessage);
 
   const isReady = llm.status === 'ready';
 
@@ -214,6 +222,11 @@ function AppContent() {
           onClose={dismissTip}
           onModelClick={handlePerformanceTipModelSwitch}
         />
+      )}
+
+      {/* Language tip (shown for non-Latin input on Llama 1B) */}
+      {showLanguageTip && (
+        <LanguageTip onClose={dismissLanguageTip} />
       )}
 
       {viewState.screen === 'download-confirm' ? (
