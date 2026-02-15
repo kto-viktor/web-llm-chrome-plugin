@@ -2,10 +2,11 @@
  * Header component with title, model selector, and status.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { StatusIndicator } from './StatusIndicator';
 import { DownloadProgress } from './DownloadProgress';
 import { BackgroundDownloads } from './BackgroundDownloads';
+import { ModelSelector } from './ModelSelector';
 import type { LLMState } from '../types';
 
 interface HeaderProps {
@@ -31,10 +32,6 @@ export function Header({
 }: HeaderProps) {
   const { status, displayName, modelName, downloadProgress, downloadText, backgroundDownloads } = llmState;
 
-  const handleModelChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    onModelChange(e.target.value);
-  }, [onModelChange]);
-
   const getStatusText = () => {
     switch (status) {
       case 'detecting':
@@ -54,9 +51,8 @@ export function Header({
     }
   };
 
-  // Determine which value to show in selector
-  // Use selectedModel (the model user has chosen)
-  const selectorValue = selectedModel || '';
+  // Active model is the one currently loaded and ready
+  const activeModel = status === 'ready' ? modelName : null;
 
   return (
     <>
@@ -64,29 +60,12 @@ export function Header({
         <div className="header-row">
           <h1 className="title">Local LLM</h1>
           <div style={{ position: 'relative' }}>
-            <select
-              className="model-selector"
-              value={selectorValue}
-              onChange={handleModelChange}
-            >
-              {!modelName && <option value="">Select a model...</option>}
-              <option value="webllm-llama">
-                {cachedModels.has('webllm-llama') ? '✓ ' : ''}Llama - 700 Mb - Lightweight
-              </option>
-              <option value="webllm-gemma">
-                {cachedModels.has('webllm-gemma') ? '✓ ' : ''}Gemma 2 - 2.5 Gb - Balanced
-              </option>
-              <option value="webllm-hermes">
-                {cachedModels.has('webllm-hermes') ? '✓ ' : ''}Hermes 3 - 2.9 Gb - Following instructions
-              </option>
-              <option value="webllm-deepseek">
-                {cachedModels.has('webllm-deepseek') ? '✓ ' : ''}DeepSeek-R1 - 4.5 Gb - Reasoning model
-              </option>
-              <option value="webllm-llama70b">
-                {cachedModels.has('webllm-llama70b') ? '✓ ' : ''}Llama 3.1 70B - 31 GB - Most Powerful
-              </option>
-              <option value="gemini-nano">Gemini Nano - Chrome embedded model</option>
-            </select>
+            <ModelSelector
+              selectedModel={selectedModel}
+              activeModel={activeModel}
+              cachedModels={cachedModels}
+              onModelChange={onModelChange}
+            />
             {showDropdownTooltip && (
               <div className="dropdown-tooltip">
                 <span className="dropdown-tooltip-arrow">↑</span>
