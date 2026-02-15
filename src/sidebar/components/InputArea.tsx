@@ -14,6 +14,7 @@ interface InputAreaProps {
   onRemoveAttachment: () => void;
   onSend: (message: string) => void;
   onAttachPage: () => void;
+  onSummarizePage: () => void;
   onCancel: () => void;
   onClear: () => void;
   disabled: boolean;
@@ -26,6 +27,7 @@ export function InputArea({
   onRemoveAttachment,
   onSend,
   onAttachPage,
+  onSummarizePage,
   onCancel,
   onClear,
   disabled,
@@ -84,6 +86,15 @@ export function InputArea({
               title={`Attach ${attachment.title}`}
             >
               📎 Attach current page
+            </button>
+          ) : isAttached && attachment ? (
+            <button
+              className="action-btn"
+              onClick={onSummarizePage}
+              disabled={disabled}
+              title="Summarize attached page"
+            >
+                ✨ Page summary
             </button>
           ) : null}
           <button

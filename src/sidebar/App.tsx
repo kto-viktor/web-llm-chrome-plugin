@@ -105,6 +105,12 @@ function AppContent() {
     chat.cancelGeneration();
   }, [chat]);
 
+  // Handle summarize attached page
+  const handleSummarizePage = useCallback(() => {
+    if (!isReady) return;
+    chat.sendMessage('Summarize this page');
+  }, [isReady, chat]);
+
   // Handle clear history
   const handleClear = useCallback(() => {
     chat.clearHistory();
@@ -258,6 +264,7 @@ function AppContent() {
         onRemoveAttachment={handleDetachPage}
         onSend={handleSend}
         onAttachPage={handleAttachPage}
+        onSummarizePage={handleSummarizePage}
         onCancel={handleCancel}
         onClear={handleClear}
         disabled={!isReady || chat.isGenerating}
