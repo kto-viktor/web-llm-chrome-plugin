@@ -36,6 +36,7 @@
 - поправить фидбек Игоря по части скачивания
 - добавить tips для LLama 1B, что I'm lightweight model and will appreciate if you can speak english with me :)
 - Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)
+- убрать tip о том, что LLama 1B тормозит, для LLama 1B :)
 
 phase 2:
 - add sentry and analytics

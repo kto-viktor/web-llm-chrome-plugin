@@ -83,10 +83,16 @@ export class ChatService {
     // Get contiguous tail of messages matching current context
     const historyMessages = historyManager.getRecentContextMessages(pageUrl);
 
+    // Small models (1B-3B) often ignore the system role entirely.
+    // Reinforce page context in the user message so the model actually uses it.
+    const enhancedUserMessage = isAttached && pageContent
+      ? `${userMessage}\n\n(Remember: answer using the page content provided in the system message above. Do not say you cannot access the page.)`
+      : userMessage;
+
     const messages = [
       { role: 'system', content: systemContent },
       ...historyMessages.map(m => ({ role: m.role, content: m.content })),
-      { role: 'user', content: userMessage }
+      { role: 'user', content: enhancedUserMessage }
     ];
 
     console.log(`[Chat Service] Built messages array: ${messages.length} messages (1 system + ${historyMessages.length} history + 1 user)`);
