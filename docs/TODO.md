@@ -1,15 +1,18 @@
 ## Todo
+- made gemini clickable
 - выпилить LLama
-- LLama - multilingual - set banner to hard red color
+- add Rate App widget
+- add spotlight for attach page
+- when error with cancellation ("previous generation still in progress") - restart LLM. FIRST NEED TO REPRODUCE
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
-- потестить фидбек Игоря по части скачивания
-- потестить, что больше не нужно: "Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)"
+- autodetect of user language on normal prompt - try to play with prompt
+- autodetect of user language on page summary prompt - try to add language in prompt 
+- подумать над еще одной моделью на 8-9В
 
 ## Long-term backlog
 - add sentry and analytics
 - add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
 - refactor gemini setup - add screenshots, refactor step 4
-- add loading indicator, when page is loading and can't be attached
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
