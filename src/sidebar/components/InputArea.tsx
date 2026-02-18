@@ -5,6 +5,7 @@
 import React, { useState, useCallback, KeyboardEvent } from 'react';
 import { useAutoResize } from '../hooks';
 import { AttachmentChip } from './AttachmentChip';
+import { RateAppWidget } from './RateAppWidget';
 import type { PageAttachment } from '../types';
 
 interface InputAreaProps {
@@ -147,6 +148,8 @@ export function InputArea({
             </button>
           )}
         </div>
+
+        <RateAppWidget />
 
         <div className="contact-row">
           <span className="contact-text">I'd be happy to get in touch: </span>

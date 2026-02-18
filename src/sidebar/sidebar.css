@@ -856,6 +856,48 @@ body {
   cursor: not-allowed;
 }
 
+/* Rate Widget */
+.rate-widget {
+  text-align: center;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.rate-widget-label {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.full-stars {
+  text-align: center;
+}
+
+.full-stars .rating-group {
+  display: inline-flex;
+  flex-direction: row-reverse;
+}
+
+.full-stars label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.full-stars label a svg {
+  margin: 2px;
+  height: 24px;
+  width: 24px;
+  fill: #ccc;
+  transition: fill 0.3s;
+}
+
+.full-stars label:hover a svg,
+.full-stars label:hover ~ label a svg {
+  fill: #ffc711;
+}
+
 /* Contact Link */
 .contact-row {
   text-align: center;

@@ -1,5 +1,4 @@
 ## Todo
-- add Rate App widget
 - add spotlight for attach page
 - when error with cancellation ("previous generation still in progress") - restart LLM. FIRST NEED TO REPRODUCE
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
@@ -51,5 +50,7 @@
 - решить, хочу ли я оставить лламу 700мб
 - убрать tip о том, что LLama 1B тормозит, для LLama 1B :)
 - добавить tips для LLama 1B, что I'm lightweight model and will appreciate if you can speak english with me :)
+- add Rate App widget
+- fix Rate App widget CSS hover animation
 
 
