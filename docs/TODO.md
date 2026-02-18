@@ -1,7 +1,8 @@
 ## Todo
-- when error with cancellation ("previous generation still in progress") - restart LLM. FIRST NEED TO REPRODUCE
+- Add tip for case when not able to load LLM (not enough hardware)
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
 - подумать над еще одной моделью на 8-9В
+- Improve cancellation - reload in case of hunging state when "Thinking..." forever
 
 ## Long-term backlog
 - add sentry and analytics
@@ -52,5 +53,6 @@
 - add Rate App widget
 - fix Rate App widget CSS hover animation
 - add spotlight for attach page
+- auto-recover LLM on "previous generation still in progress" cancellation race condition
 
 

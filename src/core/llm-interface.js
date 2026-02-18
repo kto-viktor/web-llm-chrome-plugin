@@ -146,7 +146,28 @@ export class LLMInterface {
       throw new Error('LLM not ready. Call initialize() first.');
     }
 
-    return this.adapter.generate(messages, options);
+    try {
+      return await this.adapter.generate(messages, options);
+    } catch (error) {
+      if (error.message === 'ENGINE_STUCK') {
+        console.log('[LLM Interface] Engine stuck, reloading from cache...');
+
+        this.updateState({
+          status: 'downloading',
+          downloadText: 'Reloading model...'
+        });
+
+        const progressCallback = this.createProgressCallback(this.state.modelName);
+        await this.adapter.destroy();
+        await this.adapter.initialize(progressCallback);
+
+        this.updateState({ status: 'ready', downloadProgress: 1 });
+        console.log('[LLM Interface] Engine reloaded, retrying generation');
+
+        return await this.adapter.generate(messages, options);
+      }
+      throw error;
+    }
   }
 
   /**

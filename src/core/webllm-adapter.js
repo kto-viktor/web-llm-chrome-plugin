@@ -187,11 +187,9 @@ export class WebLLMAdapter {
     }
 
     if (this.generating) {
-      console.warn('[WebLLM] Already generating, waiting for completion...');
-      await new Promise(resolve => setTimeout(resolve, 100));
-      if (this.generating) {
-        throw new Error('Previous generation still in progress');
-      }
+      console.warn('[WebLLM] Generation stuck, needs engine reload');
+      this.generating = false;
+      throw new Error('ENGINE_STUCK');
     }
 
     const { onToken, signal } = options;
