@@ -102,7 +102,7 @@ function AppContent() {
   // Handle summarize attached page
   const handleSummarizePage = useCallback(() => {
     if (!isReady) return;
-    chat.sendMessage('Summarize this page');
+    chat.sendMessage('Summarize this page. Use same language as page language to respond.');
   }, [isReady, chat]);
 
   // Handle clear history

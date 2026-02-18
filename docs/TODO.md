@@ -1,8 +1,6 @@
 ## Todo
 - when error with cancellation ("previous generation still in progress") - restart LLM. FIRST NEED TO REPRODUCE
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
-- autodetect of user language on normal prompt - try to play with prompt
-- autodetect of user language on page summary prompt - try to add language in prompt 
 - подумать над еще одной моделью на 8-9В
 
 ## Long-term backlog
@@ -12,6 +10,8 @@
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- autodetect of user language on normal prompt - try to play with prompt
+- autodetect of user language on page summary prompt - try to add language in prompt
 - выпилить LLama
 - made gemini clickable
 - когда контекст зааттачен, добавить кнопку "Page summary"

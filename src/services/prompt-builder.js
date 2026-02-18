@@ -43,7 +43,8 @@ export function buildSystemMessage(pageContent) {
       'Guidelines:',
       '- Be helpful, accurate, and concise',
       '- If you don\'t know something, say so',
-      '- Provide clear explanations when needed'
+      '- Provide clear explanations when needed',
+      '- Answer the user in the same language they asked the question in'
     ].join('\n');
   }
 
@@ -64,8 +65,6 @@ export function buildSystemMessage(pageContent) {
     '- Be concise and helpful in your responses',
     '- Reference specific parts of the page content when relevant',
     '- If it\'s a general question, try to answer based on your general knowledge',
-    '- If the history is related to a different page, don\'t refer to it',
-    '- Keep responses focused and to the point',
     '- When summarizing, highlight the most important information first'
   ].join('\n');
 }
