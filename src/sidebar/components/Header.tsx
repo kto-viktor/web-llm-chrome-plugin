@@ -93,9 +93,19 @@ export function Header({
       />
 
       {llmState.error && (
-        <div className="error-section">
-          <div className="error-message">{llmState.error}</div>
-        </div>
+        llmState.errorType === 'INSUFFICIENT_GPU' ? (
+          <div className="hardware-error-section">
+            <div className="hardware-error-icon">&#9888;</div>
+            <div className="hardware-error-content">
+              <div className="hardware-error-title">Not enough GPU :(</div>
+              <div className="hardware-error-hint">Looks like your device can't run this model. Please, try some smaller model.</div>
+            </div>
+          </div>
+        ) : (
+          <div className="error-section">
+            <div className="error-message">{llmState.error}</div>
+          </div>
+        )
       )}
 
       <BackgroundDownloads

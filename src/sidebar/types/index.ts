@@ -34,6 +34,7 @@ export interface LLMState {
   modelName: string | null;
   displayName: string | null;
   error: string | null;
+  errorType?: string;
   downloadProgress: number;
   downloadText: string;
   summarizerAvailable: boolean;

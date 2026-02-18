@@ -464,7 +464,8 @@ export class LLMInterface {
       if (!wasCancelled) {
         this.updateState({
           status: 'error',
-          error: error.message
+          error: error.message,
+          errorType: error.type || 'UNKNOWN'
         });
       } else {
         console.log('[LLM Interface] Error ignored - model was cancelled:', modelName);

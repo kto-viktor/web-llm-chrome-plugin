@@ -1,5 +1,4 @@
 ## Todo
-- Add tip for case when not able to load LLM (not enough hardware)
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
 - подумать над еще одной моделью на 8-9В
 - Improve cancellation - reload in case of hunging state when "Thinking..." forever
@@ -11,6 +10,7 @@
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- Add tip for case when not able to load LLM (not enough hardware) - shows friendly GPU error with suggestion to try smaller model
 - autodetect of user language on normal prompt - try to play with prompt
 - autodetect of user language on page summary prompt - try to add language in prompt
 - выпилить LLama

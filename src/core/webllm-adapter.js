@@ -169,7 +169,14 @@ export class WebLLMAdapter {
       this.downloading = false;
     } catch (error) {
       this.downloading = false;
-      throw new Error(`Failed to initialize WebLLM: ${error.message}`);
+      const isGpuError = /maxStorageBuffers|exceeds limit|WebGPU|out of memory|GPU buffer/i.test(error.message);
+      const wrappedError = new Error(
+        isGpuError
+          ? 'Your device doesn\'t have enough GPU power to run this model.'
+          : `Failed to initialize WebLLM: ${error.message}`
+      );
+      wrappedError.type = isGpuError ? 'INSUFFICIENT_GPU' : 'INITIALIZATION_ERROR';
+      throw wrappedError;
     }
   }
 
