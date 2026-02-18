@@ -14,13 +14,6 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     icon: '✨',
     benefits: ['Instant startup', 'No download needed', 'Privacy-first']
   },
-  'webllm-llama': {
-    name: 'Llama 3.2 1B',
-    tagline: 'Lightweight & Fast',
-    description: "Meta's compact 1 billion parameter model. Quick to download and runs smoothly on modest hardware.",
-    icon: '🦙',
-    benefits: ['Fast download', 'Low memory', 'Great for basics']
-  },
   'webllm-gemma': {
     name: 'Gemma 2 2B',
     tagline: 'Compact & Capable',

@@ -20,7 +20,7 @@ export type ModelState =
  * Gets the current state of a specific model.
  * This allows us to know what screen to show when user selects that model.
  *
- * @param modelKey - The model key to check (e.g., 'webllm-llama')
+ * @param modelKey - The model key to check (e.g., 'webllm-hermes')
  * @param llmState - Current LLM state
  * @param cachedModels - Set of models that are cached on disk
  * @returns ModelState object indicating the model's current state

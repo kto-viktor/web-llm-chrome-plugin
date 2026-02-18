@@ -42,9 +42,8 @@ export function useCachedModels() {
 
       console.log('[useCachedModels] Running one-time cache migration...');
       try {
-        const [llamaCached, gemmaCached, hermesCached, deepseekCached, llama70bCached] =
+        const [gemmaCached, hermesCached, deepseekCached, llama70bCached] =
           await Promise.all([
-            hasModelInCache(WEBLLM_MODELS.llama.id, prebuiltAppConfig),
             hasModelInCache(WEBLLM_MODELS.gemma.id, prebuiltAppConfig),
             hasModelInCache(WEBLLM_MODELS.hermes.id, prebuiltAppConfig),
             hasModelInCache(WEBLLM_MODELS.deepseek.id, prebuiltAppConfig),
@@ -52,7 +51,6 @@ export function useCachedModels() {
           ]);
 
         console.log('[useCachedModels] Migration cache results:', {
-          llama: llamaCached,
           gemma: gemmaCached,
           hermes: hermesCached,
           deepseek: deepseekCached,
@@ -60,7 +58,6 @@ export function useCachedModels() {
         });
 
         const models: string[] = [];
-        if (llamaCached) models.push('webllm-llama');
         if (gemmaCached) models.push('webllm-gemma');
         if (hermesCached) models.push('webllm-hermes');
         if (deepseekCached) models.push('webllm-deepseek');

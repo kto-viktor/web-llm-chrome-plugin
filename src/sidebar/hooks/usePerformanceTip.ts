@@ -15,8 +15,8 @@ export function usePerformanceTip(isGenerating: boolean, modelName: string | nul
   });
 
   useEffect(() => {
-    // Don't show if already dismissed, not generating, or already using Llama 1B
-    if (isDismissed || !isGenerating || modelName === 'webllm-llama') {
+    // Don't show if already dismissed or not generating
+    if (isDismissed || !isGenerating) {
       setShowTip(false);
       return;
     }

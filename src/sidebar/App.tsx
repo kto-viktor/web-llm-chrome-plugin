@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useLanguageTip } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
@@ -11,7 +11,6 @@ import { InputArea } from './components/InputArea';
 import { DownloadConfirmScreen } from './components/DownloadConfirmScreen';
 import { GeminiSetup } from './components/GeminiSetup';
 import { PerformanceTip } from './components/PerformanceTip';
-import { LanguageTip } from './components/LanguageTip';
 import { computeViewState } from './utils/viewState';
 import { getModelState } from './utils/modelState';
 
@@ -32,12 +31,6 @@ function AppContent() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating, selectedModel);
-
-  // Get last user message for language detection
-  const lastUserMessage = chat.messages.length > 0
-    ? [...chat.messages].reverse().find(m => m.role === 'user')?.content ?? null
-    : null;
-  const { showLanguageTip, dismissLanguageTip } = useLanguageTip(selectedModel, lastUserMessage);
 
   const isReady = llm.status === 'ready';
 
@@ -203,12 +196,6 @@ function AppContent() {
     }
   }, [chat.isGenerating, chat.messages.length, reloadAttachment]);
 
-  // Handle performance tip model switch
-  const handlePerformanceTipModelSwitch = useCallback(() => {
-    handleModelChange('webllm-llama');
-    dismissTip();
-  }, [handleModelChange, dismissTip]);
-
   return (
     <div className="container">
       <Header
@@ -222,17 +209,9 @@ function AppContent() {
         onDismissDropdownTooltip={dismissDropdownTooltip}
       />
 
-      {/* Performance tip (shown after 10s of generation) */}
+      {/* Performance tip (shown after long generation) */}
       {showTip && (
-        <PerformanceTip
-          onClose={dismissTip}
-          onModelClick={handlePerformanceTipModelSwitch}
-        />
-      )}
-
-      {/* Language tip (shown for non-Latin input on Llama 1B) */}
-      {showLanguageTip && (
-        <LanguageTip onClose={dismissLanguageTip} />
+        <PerformanceTip onClose={dismissTip} />
       )}
 
       {viewState.screen === 'download-confirm' ? (

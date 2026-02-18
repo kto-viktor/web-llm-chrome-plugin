@@ -1,5 +1,4 @@
 ## Todo
-- выпилить LLama
 - add Rate App widget
 - add spotlight for attach page
 - when error with cancellation ("previous generation still in progress") - restart LLM. FIRST NEED TO REPRODUCE
@@ -15,6 +14,7 @@
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- выпилить LLama
 - made gemini clickable
 - когда контекст зааттачен, добавить кнопку "Page summary"
 - сделать понятнее эти галочки в дропдауне

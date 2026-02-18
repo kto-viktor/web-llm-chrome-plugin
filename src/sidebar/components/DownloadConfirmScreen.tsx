@@ -14,13 +14,6 @@ interface ModelInfo {
 }
 
 const MODEL_INFO: Record<string, ModelInfo> = {
-  'webllm-llama': {
-    name: 'Llama 3.2',
-    icon: '🦙',
-    description: 'Lightweight and fast',
-    size: '700 MB',
-    params: '1B parameters'
-  },
   'webllm-gemma': {
     name: 'Gemma 2',
     icon: '💎',

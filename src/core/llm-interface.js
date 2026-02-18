@@ -214,7 +214,7 @@ export class LLMInterface {
 
   /**
    * Switches to a different model.
-   * @param {'gemini-nano'|'webllm-llama'|'webllm-gemma'|'webllm-hermes'|'webllm-deepseek'|'webllm-llama70b'} modelName - The model to switch to
+   * @param {'gemini-nano'|'webllm-gemma'|'webllm-hermes'|'webllm-deepseek'|'webllm-llama70b'} modelName - The model to switch to
    * @returns {Promise<void>}
    */
   async switchModel(modelName) {
@@ -299,39 +299,6 @@ export class LLMInterface {
 
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
-
-      } else if (modelName === 'webllm-llama') {
-        console.log('[LLM Interface] Loading WebLLM Llama...');
-        this.adapter = new WebLLMAdapter('llama');
-        const currentModelName = this.adapter.getName();
-        this.updateState({
-          status: 'downloading',
-          modelName: currentModelName,
-          displayName: this.adapter.getDisplayName(),
-          downloadText: 'Getting LLM for you...'
-        });
-
-        const progressCallback = this.createProgressCallback(currentModelName);
-        await this.adapter.initialize(progressCallback);
-
-        // Check if moved to background or cancelled
-        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
-        const wasCancelled = this.cancelledModels.has(currentModelName);
-
-        if (wasMovedToBackground) {
-          console.log('[LLM Interface] WebLLM Llama completed in background');
-          this.removeBackgroundDownload(currentModelName);
-          this.notifyBackgroundComplete(currentModelName);
-          return;
-        }
-
-        if (wasCancelled) {
-          console.log('[LLM Interface] WebLLM Llama was cancelled');
-          return;
-        }
-
-        this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM Llama ready');
 
       } else if (modelName === 'webllm-gemma') {
         console.log('[LLM Interface] Loading WebLLM Gemma...');

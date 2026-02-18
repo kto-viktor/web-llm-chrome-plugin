@@ -1,6 +1,6 @@
 /**
  * WebLLM adapter for running LLM models locally via WebGPU.
- * Supports 5 models: Llama 1B, Gemma 2B, Hermes 3B (default), DeepSeek 8B, Llama 70B.
+ * Supports 4 models: Gemma 2B, Hermes 3B (default), DeepSeek 8B, Llama 70B.
  * @module core/webllm-adapter
  */
 
@@ -11,19 +11,12 @@ import * as webllm from '@mlc-ai/web-llm';
  * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
  *
  * Models (ordered by size):
- * - Llama 3.2 1B: Lightweight, fast (700 MB)
  * - Gemma 2 2B: Compact, capable (2.5 GB)
  * - Hermes 3 3B: Balanced, smart - default (2.9 GB)
  * - DeepSeek-R1 8B: Deep thinking (4.5 GB)
  * - Llama 3.1 70B: Most powerful (31 GB)
  */
 export const WEBLLM_MODELS = {
-  llama: {
-    id: 'Llama-3.2-1B-Instruct-q4f16_1-MLC',
-    name: 'webllm-llama',
-    displayName: 'Llama 3.2 1B (WebLLM)',
-    modelUrl: 'https://local-llms.s3-accelerate.amazonaws.com/Llama-3.2-1B-Instruct-q4f16_1-MLC/'
-  },
   gemma: {
     id: 'gemma-2-2b-it-q4f32_1-MLC',
     name: 'webllm-gemma',
@@ -56,7 +49,7 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'llama'|'gemma'|'hermes'|'deepseek'|'llama70b'} [modelKey='hermes'] - The model key to use
+   * @param {'gemma'|'hermes'|'deepseek'|'llama70b'} [modelKey='hermes'] - The model key to use
    */
   constructor(modelKey = 'hermes') {
     const config = WEBLLM_MODELS[modelKey];
