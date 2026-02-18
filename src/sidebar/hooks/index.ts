@@ -10,3 +10,4 @@ export { useCachedModels } from './useCachedModels';
 export { useOnboarding } from './useOnboarding';
 export { useScrollAnchor } from './useScrollAnchor';
 export { usePerformanceTip } from './usePerformanceTip';
+export { useAttachPageTips } from './useAttachPageTips';

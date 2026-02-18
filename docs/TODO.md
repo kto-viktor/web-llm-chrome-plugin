@@ -1,5 +1,4 @@
 ## Todo
-- add spotlight for attach page
 - when error with cancellation ("previous generation still in progress") - restart LLM. FIRST NEED TO REPRODUCE
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
 - autodetect of user language on normal prompt - try to play with prompt
@@ -52,5 +51,6 @@
 - добавить tips для LLama 1B, что I'm lightweight model and will appreciate if you can speak english with me :)
 - add Rate App widget
 - fix Rate App widget CSS hover animation
+- add spotlight for attach page
 
 

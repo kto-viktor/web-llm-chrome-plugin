@@ -1315,6 +1315,68 @@ body {
   }
 }
 
+/* Attach page tooltip */
+.attach-btn-wrapper {
+  position: relative;
+}
+
+.attach-page-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--accent-color);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  animation: tooltipFadeIn 0.3s ease-out;
+}
+
+.attach-page-tooltip-text {
+  font-weight: 500;
+}
+
+.attach-page-tooltip-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  margin-left: 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.attach-page-tooltip-close:hover {
+  opacity: 1;
+}
+
+.attach-page-tooltip-arrow {
+  position: absolute;
+  bottom: -14px;
+  left: 16px;
+  font-size: 16px;
+  color: var(--accent-color);
+  animation: arrowBounceDown 1s ease-in-out infinite;
+}
+
+@keyframes arrowBounceDown {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
 /* Download Confirmation Screen */
 .download-confirm-screen {
   display: flex;

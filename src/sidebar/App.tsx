@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useAttachPageTips } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
@@ -31,6 +31,7 @@ function AppContent() {
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
 
   const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating, selectedModel);
+  const { showAttachTip1, showAttachTip2, dismissAttachTip1, dismissAttachTip2 } = useAttachPageTips(attachment, chat.isAttached);
 
   const isReady = llm.status === 'ready';
 
@@ -247,6 +248,10 @@ function AppContent() {
         onCancel={handleCancel}
         onClear={handleClear}
         disabled={!isReady || chat.isGenerating}
+        showAttachTip1={showAttachTip1}
+        showAttachTip2={showAttachTip2}
+        onDismissAttachTip1={dismissAttachTip1}
+        onDismissAttachTip2={dismissAttachTip2}
       />
     </div>
   );

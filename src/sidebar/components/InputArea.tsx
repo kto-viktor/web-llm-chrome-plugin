@@ -19,6 +19,10 @@ interface InputAreaProps {
   onCancel: () => void;
   onClear: () => void;
   disabled: boolean;
+  showAttachTip1?: boolean;
+  showAttachTip2?: boolean;
+  onDismissAttachTip1?: () => void;
+  onDismissAttachTip2?: () => void;
 }
 
 export function InputArea({
@@ -32,6 +36,10 @@ export function InputArea({
   onCancel,
   onClear,
   disabled,
+  showAttachTip1,
+  showAttachTip2,
+  onDismissAttachTip1,
+  onDismissAttachTip2,
 }: InputAreaProps) {
   const [message, setMessage] = useState('');
   const [emailCopied, setEmailCopied] = useState(false);
@@ -80,14 +88,33 @@ export function InputArea({
       <div className="input-area">
         <div className="quick-actions">
           {!isAttached && attachment ? (
-            <button
-              className="action-btn secondary"
-              onClick={onAttachPage}
-              disabled={disabled}
-              title={`Attach ${attachment.title}`}
-            >
-              📎 Attach current page
-            </button>
+            <div className="attach-btn-wrapper">
+              <button
+                className="action-btn secondary"
+                onClick={onAttachPage}
+                disabled={disabled}
+                title={`Attach ${attachment.title}`}
+              >
+                📎 Attach current page
+              </button>
+              {!disabled && (showAttachTip1 || showAttachTip2) && (
+                <div className="attach-page-tooltip">
+                  <span className="attach-page-tooltip-text">
+                    {showAttachTip1
+                      ? 'Click here if you want to ask about current page'
+                      : 'You can always attach any current page to context'}
+                  </span>
+                  <button
+                    className="attach-page-tooltip-close"
+                    onClick={showAttachTip1 ? onDismissAttachTip1 : onDismissAttachTip2}
+                    aria-label="Close tooltip"
+                  >
+                    ×
+                  </button>
+                  <span className="attach-page-tooltip-arrow">↓</span>
+                </div>
+              )}
+            </div>
           ) : isAttached && attachment ? (
             <button
               className="action-btn"
