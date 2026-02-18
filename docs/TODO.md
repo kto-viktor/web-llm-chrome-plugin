@@ -1,4 +1,7 @@
 ## Todo
+- выпилить LLama
+- LLama - multilingual - set banner to hard red color
+- If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
 - потестить фидбек Игоря по части скачивания
 - потестить, что больше не нужно: "Удалить галюц. респонсы (где нет контекста страницы) из истории (не провайдить это как контекст)"
 
