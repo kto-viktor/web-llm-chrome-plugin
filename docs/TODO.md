@@ -1,5 +1,4 @@
 ## Todo
-- made gemini clickable
 - выпилить LLama
 - add Rate App widget
 - add spotlight for attach page
@@ -16,6 +15,7 @@
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- made gemini clickable
 - когда контекст зааттачен, добавить кнопку "Page summary"
 - сделать понятнее эти галочки в дропдауне
 - fix page context injection into prompt - now fetches fresh page content on each message

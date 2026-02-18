@@ -79,10 +79,10 @@ function AppContent() {
     }
   }, [llm, cachedModels, isChecking, showDropdownTooltip, dismissDropdownTooltip]);
 
-  // Handle Gemini setup dismiss
+  // Handle Gemini setup dismiss — return to welcome screen
   const handleGeminiDismiss = useCallback(() => {
-    llm.switchModel('webllm-hermes');
-  }, [llm]);
+    setSelectedModel(null);
+  }, []);
 
   // Handle send message
   const handleSend = useCallback((message: string) => {

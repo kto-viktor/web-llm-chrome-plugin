@@ -33,11 +33,16 @@ export function ChooseModelScreen({
         {MODELS.map(model => {
           if (model.muted) {
             return (
-              <div key={model.key} className="model-option model-option-muted">
-                <span className="model-option-icon">{model.icon}</span>
-                <strong className="model-option-name">{model.name}</strong>
-                <p className="model-option-desc">Embedded in Chrome, but requires manual activation in settings.</p>
-              </div>
+                <div
+                    key={model.key}
+                    className="model-option model-option-muted"
+                    onClick={() => onModelSelect?.(model.key)}
+                    style={{cursor: onModelSelect ? 'pointer' : 'default'}}
+                >
+                    <span className="model-option-icon">{model.icon}</span>
+                    <strong className="model-option-name">{model.name}</strong>
+                    <p className="model-option-desc">Embedded in Chrome, but requires manual activation in settings.</p>
+                </div>
             );
           }
 
