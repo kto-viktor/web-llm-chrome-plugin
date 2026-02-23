@@ -46,7 +46,7 @@ export function InputArea({
   const { textareaRef, handleInput, reset } = useAutoResize();
 
   const handleCopyEmail = useCallback(() => {
-    navigator.clipboard.writeText('kto.viktor.kto@gmail.com');
+    navigator.clipboard.writeText('love.programmin@gmail.com');
     setEmailCopied(true);
     setTimeout(() => setEmailCopied(false), 2000);
   }, []);
@@ -185,7 +185,7 @@ export function InputArea({
             title="Click to copy email"
             onClick={handleCopyEmail}
           >
-            {emailCopied ? 'Copied!' : 'kto.viktor.kto@gmail.com'}
+            {emailCopied ? 'Copied!' : 'love.programmin@gmail.com'}
           </span>
         </div>
       </div>
