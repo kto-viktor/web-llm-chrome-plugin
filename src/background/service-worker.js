@@ -52,8 +52,13 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 /**
  * Opens the side panel when the extension icon is clicked.
+ * In browsers without Side Panel support (e.g. Yandex), opens as a full extension page in a new tab.
  */
 chrome.action.onClicked.addListener(async (tab) => {
+  if (!chrome.sidePanel) {
+    chrome.tabs.create({ url: chrome.runtime.getURL('src/sidebar/sidebar.html') });
+    return;
+  }
   try {
     await chrome.sidePanel.open({ tabId: tab.id });
   } catch (error) {
@@ -63,10 +68,13 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 /**
  * Sets up the side panel behavior.
+ * Guarded so browsers without Side Panel API (e.g. Yandex) don't crash the service worker.
  */
-chrome.sidePanel
-  .setPanelBehavior({ openPanelOnActionClick: true })
-  .catch((error) => console.error('Failed to set panel behavior:', error));
+if (chrome.sidePanel) {
+  chrome.sidePanel
+    .setPanelBehavior({ openPanelOnActionClick: true })
+    .catch((error) => console.error('Failed to set panel behavior:', error));
+}
 
 /**
  * Handles messages from content scripts and sidebar.
