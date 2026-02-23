@@ -4,12 +4,13 @@
 - Improve cancellation - reload in case of hunging state when "Thinking..." forever
 
 ## Long-term backlog
-- add sentry and analytics
+- add sentry
 - add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
 - refactor gemini setup - add screenshots, refactor step 4
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- **add GA4 analytics**: Implemented Google Analytics 4 via Measurement Protocol (no external scripts, MV3-compatible). Tracks: sidebar opened, model selected, message sent, page attached, generation stopped, new chat, download started/success/failed/abandoned.
 - Add tip for case when not able to load LLM (not enough hardware) - shows friendly GPU error with suggestion to try smaller model
 - autodetect of user language on normal prompt - try to play with prompt
 - autodetect of user language on page summary prompt - try to add language in prompt

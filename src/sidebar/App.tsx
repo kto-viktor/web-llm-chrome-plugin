@@ -2,7 +2,7 @@
  * Main App component for the sidebar.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useAttachPageTips } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { Header } from './components/Header';
@@ -16,6 +16,7 @@ import { getModelState } from './utils/modelState';
 
 // @ts-ignore - JS module
 import { chatService } from '../services/chat-service.js';
+import { analytics } from '../services/analytics';
 
 /**
  * Inner app component that uses chat context.
@@ -29,6 +30,14 @@ function AppContent() {
 
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+
+  // Tracks download start times keyed by modelName — used for download analytics
+  const downloadTrackingRef = useRef<Map<string, number>>(new Map());
+
+  // Track sidebar opened once on mount
+  useEffect(() => {
+    analytics.sidebarOpened();
+  }, []);
 
   const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating, selectedModel);
   const { showAttachTip1, showAttachTip2, dismissAttachTip1, dismissAttachTip2 } = useAttachPageTips(attachment, chat.isAttached);
@@ -59,6 +68,8 @@ function AppContent() {
       return;
     }
 
+    analytics.modelSelected(modelName);
+
     if (modelState.type === 'cached') {
       // Load cached model
       await llm.switchModel(modelName);
@@ -81,11 +92,13 @@ function AppContent() {
   // Handle send message
   const handleSend = useCallback((message: string) => {
     if (!isReady) return;
+    analytics.messageSent(selectedModel || 'unknown');
     chat.sendMessage(message);
-  }, [isReady, chat]);
+  }, [isReady, chat, selectedModel]);
 
   // Handle attach page
   const handleAttachPage = useCallback(() => {
+    analytics.pageAttached();
     chat.attachPage();
   }, [chat]);
 
@@ -96,6 +109,7 @@ function AppContent() {
 
   // Handle cancel generation
   const handleCancel = useCallback(() => {
+    analytics.generationStopped();
     chat.cancelGeneration();
   }, [chat]);
 
@@ -107,11 +121,16 @@ function AppContent() {
 
   // Handle clear history
   const handleClear = useCallback(() => {
+    analytics.newChat();
     chat.clearHistory();
   }, [chat]);
 
   // Handle cancel download
   const handleCancelDownload = useCallback(() => {
+    if (llm.modelName && downloadTrackingRef.current.has(llm.modelName)) {
+      analytics.downloadAbandoned(llm.modelName, Math.round(llm.downloadProgress * 100));
+      downloadTrackingRef.current.delete(llm.modelName);
+    }
     llm.cancelDownload();
     setPendingDownload(null);
     setSelectedModel(null);  // Back to welcome
@@ -120,6 +139,11 @@ function AppContent() {
   // Handle cancel background download
   const handleCancelBackgroundDownload = useCallback((modelName: string) => {
     console.log('[App] Cancelling background download:', modelName);
+    if (downloadTrackingRef.current.has(modelName)) {
+      const bgDownload = llm.backgroundDownloads?.find((d: { modelName: string }) => d.modelName === modelName);
+      analytics.downloadAbandoned(modelName, Math.round((bgDownload?.progress || 0) * 100));
+      downloadTrackingRef.current.delete(modelName);
+    }
     llm.cancelBackgroundDownload(modelName);
   }, [llm]);
 
@@ -136,6 +160,8 @@ function AppContent() {
       // Already active
       return;
     }
+
+    analytics.modelSelected(modelName);
 
     if (modelState.type === 'cached') {
       // Load cached model, show tooltip
@@ -158,10 +184,30 @@ function AppContent() {
     }
   }, [llm.status, llm.modelName, markDownloaded]);
 
+  // Track download success and failure for confirmed downloads
+  useEffect(() => {
+    if (llm.status === 'ready' && llm.modelName && downloadTrackingRef.current.has(llm.modelName)) {
+      const startTime = downloadTrackingRef.current.get(llm.modelName)!;
+      analytics.downloadSuccess(llm.modelName, Date.now() - startTime);
+      downloadTrackingRef.current.delete(llm.modelName);
+    }
+    if (llm.status === 'error' && llm.modelName && downloadTrackingRef.current.has(llm.modelName)) {
+      analytics.downloadFailed(llm.modelName, llm.error || 'unknown');
+      downloadTrackingRef.current.delete(llm.modelName);
+    }
+  }, [llm.status, llm.modelName, llm.error]);
+
   // Mark background-completed models as downloaded
   useEffect(() => {
     if (llm.completedBackgroundModels?.length) {
-      llm.completedBackgroundModels.forEach(m => markDownloaded(m));
+      llm.completedBackgroundModels.forEach(m => {
+        markDownloaded(m);
+        if (downloadTrackingRef.current.has(m)) {
+          const startTime = downloadTrackingRef.current.get(m)!;
+          analytics.downloadSuccess(m, Date.now() - startTime);
+          downloadTrackingRef.current.delete(m);
+        }
+      });
     }
   }, [llm.completedBackgroundModels, markDownloaded]);
 
@@ -178,6 +224,8 @@ function AppContent() {
   // Handle download confirmation
   const handleConfirmDownload = useCallback(async () => {
     if (pendingDownload) {
+      analytics.downloadStarted(pendingDownload);
+      downloadTrackingRef.current.set(pendingDownload, Date.now());
       markModelSelected();
       await llm.switchModel(pendingDownload);
       setPendingDownload(null);
