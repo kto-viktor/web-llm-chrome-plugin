@@ -238,7 +238,7 @@ function AppContent() {
         />
       )}
 
-      {viewState.screen !== 'welcome' && viewState.screen !== 'download-confirm' && (
+      {viewState.screen !== 'welcome' && viewState.screen !== 'download-confirm' && viewState.screen !== 'gemini-setup' && (
         <InputArea
           attachment={attachment}
           isAttached={chat.isAttached}
