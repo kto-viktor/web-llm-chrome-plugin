@@ -33,12 +33,12 @@ function AppContent() {
   const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating, selectedModel);
   const { showAttachTip1, showAttachTip2, dismissAttachTip1, dismissAttachTip2 } = useAttachPageTips(attachment, chat.isAttached);
 
-  const isReady = llm.status === 'ready';
-
   // Compute view state from selected model
   const modelState = selectedModel
     ? getModelState(selectedModel, llm, cachedModels)
     : null;
+
+  const isReady = modelState?.type === 'ready';
   const viewState = computeViewState(selectedModel, pendingDownload, modelState);
 
   // Handle model change from selector
