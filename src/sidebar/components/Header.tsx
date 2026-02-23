@@ -7,10 +7,11 @@ import { StatusIndicator } from './StatusIndicator';
 import { DownloadProgress } from './DownloadProgress';
 import { BackgroundDownloads } from './BackgroundDownloads';
 import { ModelSelector } from './ModelSelector';
-import type { LLMState } from '../types';
+import type { LLMState, ViewState } from '../types';
 
 interface HeaderProps {
   llmState: LLMState;
+  viewState: ViewState;
   selectedModel: string | null;
   cachedModels: Set<string>;
   onModelChange: (modelName: string) => void;
@@ -22,6 +23,7 @@ interface HeaderProps {
 
 export function Header({
   llmState,
+  viewState,
   selectedModel,
   cachedModels,
   onModelChange,
@@ -33,6 +35,14 @@ export function Header({
   const { status, displayName, modelName, downloadProgress, downloadText, backgroundDownloads } = llmState;
 
   const getStatusText = () => {
+    // Override status when UI shows welcome or download-confirm screen
+    if (viewState.screen === 'welcome' || viewState.screen === 'download-confirm') {
+      return 'Choose a model to start';
+    }
+    if (viewState.screen === 'gemini-setup') {
+      return 'Need manual setup';
+    }
+
     switch (status) {
       case 'detecting':
         return 'Detecting available models...';

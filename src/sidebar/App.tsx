@@ -201,6 +201,7 @@ function AppContent() {
     <div className="container">
       <Header
         llmState={llm}
+        viewState={viewState}
         selectedModel={selectedModel}
         cachedModels={cachedModels}
         onModelChange={handleModelChange}
@@ -237,22 +238,24 @@ function AppContent() {
         />
       )}
 
-      <InputArea
-        attachment={attachment}
-        isAttached={chat.isAttached}
-        isGenerating={chat.isGenerating}
-        onRemoveAttachment={handleDetachPage}
-        onSend={handleSend}
-        onAttachPage={handleAttachPage}
-        onSummarizePage={handleSummarizePage}
-        onCancel={handleCancel}
-        onClear={handleClear}
-        disabled={!isReady || chat.isGenerating}
-        showAttachTip1={showAttachTip1}
-        showAttachTip2={showAttachTip2}
-        onDismissAttachTip1={dismissAttachTip1}
-        onDismissAttachTip2={dismissAttachTip2}
-      />
+      {viewState.screen !== 'welcome' && viewState.screen !== 'download-confirm' && (
+        <InputArea
+          attachment={attachment}
+          isAttached={chat.isAttached}
+          isGenerating={chat.isGenerating}
+          onRemoveAttachment={handleDetachPage}
+          onSend={handleSend}
+          onAttachPage={handleAttachPage}
+          onSummarizePage={handleSummarizePage}
+          onCancel={handleCancel}
+          onClear={handleClear}
+          disabled={!isReady || chat.isGenerating}
+          showAttachTip1={showAttachTip1}
+          showAttachTip2={showAttachTip2}
+          onDismissAttachTip1={dismissAttachTip1}
+          onDismissAttachTip2={dismissAttachTip2}
+        />
+      )}
     </div>
   );
 }
