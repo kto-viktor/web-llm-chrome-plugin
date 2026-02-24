@@ -7,7 +7,7 @@
 import * as webllm from '@mlc-ai/web-llm';
 
 /**
- * Available WebLLM models configuration.
+ * Available WebLLM models configuration. Here you can add/change model list.
  * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
  *
  * Models (ordered by size):
@@ -20,26 +20,22 @@ export const WEBLLM_MODELS = {
   gemma: {
     id: 'gemma-2-2b-it-q4f32_1-MLC',
     name: 'webllm-gemma',
-    displayName: 'Gemma 2 2B (WebLLM)',
-    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/gemma-2-2b-it-q4f32_1-MLC/'
+    displayName: 'Gemma 2 2B (WebLLM)'
   },
   hermes: {
     id: 'Hermes-3-Llama-3.2-3B-q4f32_1-MLC',
     name: 'webllm-hermes',
-    displayName: 'Hermes 3 3B (WebLLM)',
-    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Hermes-3-Llama-3.2-3B-q4f32_1-MLC/'
+    displayName: 'Hermes 3 3B (WebLLM)'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
-    displayName: 'DeepSeek-R1 (WebLLM)',
-    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
+    displayName: 'DeepSeek-R1 (WebLLM)'
   },
   llama70b: {
     id: 'Llama-3.1-70B-Instruct-q3f16_1-MLC',
     name: 'webllm-llama70b',
-    displayName: 'Llama 3.1 70B (WebLLM)',
-    //modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Llama-3.1-70B-Instruct-q3f16_1-MLC/'
+    displayName: 'Llama 3.1 70B (WebLLM)'
   }
 };
 
