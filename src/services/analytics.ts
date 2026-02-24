@@ -5,8 +5,8 @@
  * @module services/analytics
  */
 
-const GA4_MEASUREMENT_ID = 'G-6FJ8TF78PN';
-const GA4_API_SECRET = 'cjJ6JKyCRGqHnXGTyghXpQ';
+const GA4_MEASUREMENT_ID = 'YOUR_MEASUREMENT_ID';
+const GA4_API_SECRET = 'YOUR_API_SECRET';
 
 const ENDPOINT =
   `https://www.google-analytics.com/mp/collect` +
