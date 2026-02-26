@@ -1,6 +1,6 @@
-# Web LLM Chrome Extension
+# Local LLM Chrome Extension
 
-> Chat with local AI models directly in your browser - with help of WebLLM
+> Chat with local AI models directly in your browser — no API keys, no servers, no data leaves your device.
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-blue?logo=google-chrome)](YOUR_CHROME_STORE_URL_HERE)
 ![Version](https://img.shields.io/badge/version-1.8.0-green)
@@ -10,7 +10,13 @@
 
 ## Overview
 
-This Chrome extension adds a sidebar to your browser where you can chat with large language models running entirely on your GPU — no internet connection required for inference.
+This Chrome extension adds a sidebar to your browser where you can chat with large language models running entirely on your GPU — no internet connection required for inference, no API keys, no subscriptions.
+
+**Key features:**
+- Runs 100% locally in the browser using WebGPU
+- No data ever leaves your device
+- Attach the current web page as context for your conversation
+- Supports multiple open-source models
 
 ---
 
