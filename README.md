@@ -28,9 +28,6 @@ This repo is a real-world example of WebLLM integrated into a Chrome extension â
 
 ## Install
 
-### Chrome Web Store
-
-[![Install from Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install%20Extension-blue?logo=google-chrome&style=for-the-badge)](YOUR_CHROME_STORE_URL_HERE)
 
 ### Manual install (unpacked)
 
