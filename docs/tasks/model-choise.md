@@ -1,0 +1,4 @@
+1. There is 4 screens: Welcome screen, Download (not started) screen, Download in progress screen, and Chat screen (when model is ready).
+2. When app just open, welcome screen is always open. Each bubble (including gemini) is clickable.
+3. When model chosen (not matter from dropdown or bubble), there is 3 possible states: 1. model already available - chat screen is opened. 2. download in progress - progress showed. 3. download not started - download button and model info showed.
+4. Once download started, it reflected in progress. If user switched different model, current download showed as background; then all rules from point 2 is applied
