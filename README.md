@@ -2,7 +2,7 @@
 
 > Chat with local AI models directly in your browser - with help of WebLLM
 
-[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-blue?logo=google-chrome)](YOUR_CHROME_STORE_URL_HERE)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-blue?logo=google-chrome)](https://chromewebstore.google.com/detail/local-llm/ihnkenmjaghoplblibibgpllganhoenc)
 ![Version](https://img.shields.io/badge/version-1.8.0-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -31,7 +31,7 @@ This repo is a real-world example of WebLLM integrated into a Chrome extension â
 
 ### Chrome Web Store
 
-[![Install from Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install%20Extension-blue?logo=google-chrome&style=for-the-badge)](YOUR_CHROME_STORE_URL_HERE)
+[![Install from Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install%20Extension-blue?logo=google-chrome&style=for-the-badge)](https://chromewebstore.google.com/detail/local-llm/ihnkenmjaghoplblibibgpllganhoenc)
 
 ### Manual install (unpacked)
 
