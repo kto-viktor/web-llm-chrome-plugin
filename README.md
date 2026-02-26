@@ -2,6 +2,7 @@
 
 > Chat with local AI models directly in your browser - with help of WebLLM
 
+[![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-blue?logo=google-chrome)](YOUR_CHROME_STORE_URL_HERE)
 ![Version](https://img.shields.io/badge/version-1.8.0-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
