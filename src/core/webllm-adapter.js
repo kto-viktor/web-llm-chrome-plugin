@@ -169,13 +169,19 @@ export class WebLLMAdapter {
       this.downloading = false;
     } catch (error) {
       this.downloading = false;
-      const isGpuError = /maxStorageBuffers|exceeds limit|WebGPU|out of memory|GPU buffer/i.test(error.message);
+      const isGpuDeviceLost = /external Instance|device.*lost/i.test(error.message);
+      const isGpuError = /maxStorageBuffers|exceeds limit|WebGPU|out of memory|GPU buffer|ShaderModule|shader.?f16/i.test(error.message);
+      const isNetworkCacheError = /Cache\.add\(\)|cache.*network/i.test(error.message);
       const wrappedError = new Error(
-        isGpuError
-          ? 'Your device doesn\'t have enough GPU power to run this model.'
-          : `Failed to initialize WebLLM: ${error.message}`
+        isGpuDeviceLost
+          ? 'Your GPU became unavailable (possibly out of memory). Please reload the page and try a smaller model.'
+          : isGpuError
+            ? 'Your device doesn\'t have enough GPU power to run this model.'
+            : isNetworkCacheError
+              ? 'Model download failed — check your internet connection and ensure you have enough disk space (need ~5 GB free).'
+              : `Failed to initialize WebLLM: ${error.message}`
       );
-      wrappedError.type = isGpuError ? 'INSUFFICIENT_GPU' : 'INITIALIZATION_ERROR';
+      wrappedError.type = isGpuDeviceLost ? 'GPU_DEVICE_LOST' : isGpuError ? 'INSUFFICIENT_GPU' : isNetworkCacheError ? 'NETWORK_CACHE_ERROR' : 'INITIALIZATION_ERROR';
       throw wrappedError;
     }
   }
