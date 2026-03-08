@@ -174,9 +174,9 @@ export class WebLLMAdapter {
       const isNetworkCacheError = /Cache\.add\(\)|cache.*network/i.test(error.message);
       const wrappedError = new Error(
         isGpuDeviceLost
-          ? 'Your GPU became unavailable (possibly out of memory). Please reload the page and try a smaller model.'
+          ? 'Your GPU became unavailable (possibly out of memory). Please close and open extension again and try a smaller model (like gemma).'
           : isGpuError
-            ? 'Your device doesn\'t have enough GPU power to run this model.'
+            ? 'Your device doesn\'t have enough GPU power to run this model :( let start from a smaller model, like gemma?'
             : isNetworkCacheError
               ? 'Model download failed — check your internet connection and ensure you have enough disk space (need ~5 GB free).'
               : `Failed to initialize WebLLM: ${error.message}`
