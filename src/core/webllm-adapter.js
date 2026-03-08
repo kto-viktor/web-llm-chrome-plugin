@@ -169,19 +169,51 @@ export class WebLLMAdapter {
       this.downloading = false;
     } catch (error) {
       this.downloading = false;
+
+      // Intentional cancellation — not an error
+      if (error.message === 'Download cancelled') {
+        return;
+      }
+
       const isGpuDeviceLost = /external Instance|device.*lost/i.test(error.message);
-      const isGpuError = /maxStorageBuffers|exceeds limit|WebGPU|out of memory|GPU buffer|ShaderModule|shader.?f16/i.test(error.message);
+      const isShaderError = /ShaderModule|shader.?f16/i.test(error.message);
+      const isGpuError = /maxStorageBuffers|exceeds limit|WebGPU|out of memory|GPU buffer/i.test(error.message);
+      const isQuotaError = /quota exceeded/i.test(error.message);
+      const isFetchError = /failed to fetch/i.test(error.message);
       const isNetworkCacheError = /Cache\.add\(\)|cache.*network/i.test(error.message);
-      const wrappedError = new Error(
-        isGpuDeviceLost
-          ? 'Your GPU became unavailable (possibly out of memory). Please close and open extension again and try a smaller model (like gemma).'
-          : isGpuError
-            ? 'Your device doesn\'t have enough GPU power to run this model :( let start from a smaller model, like gemma?'
-            : isNetworkCacheError
-              ? 'Model download failed — check your internet connection and ensure you have enough disk space (need ~5 GB free).'
-              : `Failed to initialize WebLLM: ${error.message}`
-      );
-      wrappedError.type = isGpuDeviceLost ? 'GPU_DEVICE_LOST' : isGpuError ? 'INSUFFICIENT_GPU' : isNetworkCacheError ? 'NETWORK_CACHE_ERROR' : 'INITIALIZATION_ERROR';
+      const isDisposedError = /already been disposed/i.test(error.message);
+
+      let message;
+      let type;
+
+      if (isGpuDeviceLost) {
+        message = 'Your GPU became unavailable (possibly out of memory). Please close and open extension again and try a smaller model (like gemma).';
+        type = 'GPU_DEVICE_LOST';
+      } else if (isShaderError) {
+        message = "Your GPU doesn't support the required WebGPU features for this model. Try Gemma or Hermes instead, or update your GPU drivers.";
+        type = 'INSUFFICIENT_GPU_SHADER';
+      } else if (isGpuError) {
+        message = "Your device doesn't have enough GPU power to run this model :( let start from a smaller model, like gemma?";
+        type = 'INSUFFICIENT_GPU';
+      } else if (isQuotaError) {
+        message = "Not enough browser storage to save this model. In Chrome settings, disable 'Clear cookies and site data when you close all windows', or free up disk space.";
+        type = 'NETWORK_CACHE_ERROR';
+      } else if (isFetchError) {
+        message = 'Could not reach the model server. Please check your internet connection and try again.';
+        type = 'NETWORK_CACHE_ERROR';
+      } else if (isNetworkCacheError) {
+        message = 'Model download failed — check your internet connection and ensure you have enough disk space (need ~5 GB free).';
+        type = 'NETWORK_CACHE_ERROR';
+      } else if (isDisposedError) {
+        message = 'The model ran into an internal state error. Please try again or close/open extension.';
+        type = 'INITIALIZATION_ERROR';
+      } else {
+        message = `Failed to initialize WebLLM: ${error.message}`;
+        type = 'INITIALIZATION_ERROR';
+      }
+
+      const wrappedError = new Error(message);
+      wrappedError.type = type;
       throw wrappedError;
     }
   }
