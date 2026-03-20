@@ -42,26 +42,19 @@ export function useCachedModels() {
 
       console.log('[useCachedModels] Running one-time cache migration...');
       try {
-        const [gemmaCached, hermesCached, deepseekCached, llama70bCached] =
-          await Promise.all([
-            hasModelInCache(WEBLLM_MODELS.gemma.id, prebuiltAppConfig),
-            hasModelInCache(WEBLLM_MODELS.hermes.id, prebuiltAppConfig),
-            hasModelInCache(WEBLLM_MODELS.deepseek.id, prebuiltAppConfig),
-            hasModelInCache(WEBLLM_MODELS.llama70b.id, prebuiltAppConfig),
-          ]);
+        const cacheResults = await Promise.all(
+          Object.values(WEBLLM_MODELS).map(m => hasModelInCache(m.id, prebuiltAppConfig))
+        );
+        const modelKeys = Object.values(WEBLLM_MODELS).map(m => m.name);
 
-        console.log('[useCachedModels] Migration cache results:', {
-          gemma: gemmaCached,
-          hermes: hermesCached,
-          deepseek: deepseekCached,
-          llama70b: llama70bCached
-        });
+        console.log('[useCachedModels] Migration cache results:', Object.fromEntries(
+          modelKeys.map((key, i) => [key, cacheResults[i]])
+        ));
 
         const models: string[] = [];
-        if (gemmaCached) models.push('webllm-gemma');
-        if (hermesCached) models.push('webllm-hermes');
-        if (deepseekCached) models.push('webllm-deepseek');
-        if (llama70bCached) models.push('webllm-llama70b');
+        modelKeys.forEach((key, i) => {
+          if (cacheResults[i]) models.push(key);
+        });
 
         if (models.length > 0) {
           localStorage.setItem(DOWNLOADED_MODELS_KEY, JSON.stringify(models));

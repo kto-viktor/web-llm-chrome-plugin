@@ -235,7 +235,7 @@ export class LLMInterface {
 
   /**
    * Switches to a different model.
-   * @param {'gemini-nano'|'webllm-gemma'|'webllm-hermes'|'webllm-deepseek'|'webllm-llama70b'} modelName - The model to switch to
+   * @param {'gemini-nano'|'webllm-qwen3-0.6b'|'webllm-ministral3b'|'webllm-qwen3-4b'|'webllm-qwen3-8b'|'webllm-deepseek'|'webllm-llama70b'} modelName - The model to switch to
    * @returns {Promise<void>}
    */
   async switchModel(modelName) {
@@ -321,9 +321,12 @@ export class LLMInterface {
         this.updateState({ status: 'ready' });
         console.log('[LLM Interface] Gemini Nano ready');
 
-      } else if (modelName === 'webllm-gemma') {
-        console.log('[LLM Interface] Loading WebLLM Gemma...');
-        this.adapter = new WebLLMAdapter('gemma');
+      } else if (modelName.startsWith('webllm-')) {
+        const adapterKey = Object.keys(WEBLLM_MODELS).find(k => WEBLLM_MODELS[k].name === modelName);
+        if (!adapterKey) throw new Error(`Unknown WebLLM model: ${modelName}`);
+
+        console.log(`[LLM Interface] Loading ${modelName}...`);
+        this.adapter = new WebLLMAdapter(adapterKey);
         const currentModelName = this.adapter.getName();
         this.updateState({
           status: 'downloading',
@@ -340,118 +343,19 @@ export class LLMInterface {
         const wasCancelled = this.cancelledModels.has(currentModelName);
 
         if (wasMovedToBackground) {
-          console.log('[LLM Interface] WebLLM Gemma completed in background');
+          console.log(`[LLM Interface] ${modelName} completed in background`);
           this.removeBackgroundDownload(currentModelName);
           this.notifyBackgroundComplete(currentModelName);
           return;
         }
 
         if (wasCancelled) {
-          console.log('[LLM Interface] WebLLM Gemma was cancelled');
+          console.log(`[LLM Interface] ${modelName} was cancelled`);
           return;
         }
 
         this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM Gemma ready');
-
-      } else if (modelName === 'webllm-hermes') {
-        console.log('[LLM Interface] Loading WebLLM Hermes...');
-        this.adapter = new WebLLMAdapter('hermes');
-        const currentModelName = this.adapter.getName();
-        this.updateState({
-          status: 'downloading',
-          modelName: currentModelName,
-          displayName: this.adapter.getDisplayName(),
-          downloadText: 'Getting LLM for you...'
-        });
-
-        const progressCallback = this.createProgressCallback(currentModelName);
-        await this.adapter.initialize(progressCallback);
-
-        // Check if moved to background or cancelled
-        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
-        const wasCancelled = this.cancelledModels.has(currentModelName);
-
-        if (wasMovedToBackground) {
-          console.log('[LLM Interface] WebLLM Hermes completed in background');
-          this.removeBackgroundDownload(currentModelName);
-          this.notifyBackgroundComplete(currentModelName);
-          return;
-        }
-
-        if (wasCancelled) {
-          console.log('[LLM Interface] WebLLM Hermes was cancelled');
-          return;
-        }
-
-        this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM Hermes ready');
-
-      } else if (modelName === 'webllm-deepseek') {
-        console.log('[LLM Interface] Loading WebLLM DeepSeek...');
-        this.adapter = new WebLLMAdapter('deepseek');
-        const currentModelName = this.adapter.getName();
-        this.updateState({
-          status: 'downloading',
-          modelName: currentModelName,
-          displayName: this.adapter.getDisplayName(),
-          downloadText: 'Getting LLM for you...'
-        });
-
-        const progressCallback = this.createProgressCallback(currentModelName);
-        await this.adapter.initialize(progressCallback);
-
-        // Check if moved to background or cancelled
-        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
-        const wasCancelled = this.cancelledModels.has(currentModelName);
-
-        if (wasMovedToBackground) {
-          console.log('[LLM Interface] WebLLM DeepSeek completed in background');
-          this.removeBackgroundDownload(currentModelName);
-          this.notifyBackgroundComplete(currentModelName);
-          return;
-        }
-
-        if (wasCancelled) {
-          console.log('[LLM Interface] WebLLM DeepSeek was cancelled');
-          return;
-        }
-
-        this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM DeepSeek ready');
-
-      } else if (modelName === 'webllm-llama70b') {
-        console.log('[LLM Interface] Loading WebLLM Llama 70B...');
-        this.adapter = new WebLLMAdapter('llama70b');
-        const currentModelName = this.adapter.getName();
-        this.updateState({
-          status: 'downloading',
-          modelName: currentModelName,
-          displayName: this.adapter.getDisplayName(),
-          downloadText: 'Getting LLM for you...'
-        });
-
-        const progressCallback = this.createProgressCallback(currentModelName);
-        await this.adapter.initialize(progressCallback);
-
-        // Check if moved to background or cancelled
-        const wasMovedToBackground = this.backgroundDownloadsMap.has(currentModelName);
-        const wasCancelled = this.cancelledModels.has(currentModelName);
-
-        if (wasMovedToBackground) {
-          console.log('[LLM Interface] WebLLM Llama 70B completed in background');
-          this.removeBackgroundDownload(currentModelName);
-          this.notifyBackgroundComplete(currentModelName);
-          return;
-        }
-
-        if (wasCancelled) {
-          console.log('[LLM Interface] WebLLM Llama 70B was cancelled');
-          return;
-        }
-
-        this.updateState({ status: 'ready', downloadProgress: 1 });
-        console.log('[LLM Interface] WebLLM Llama 70B ready');
+        console.log(`[LLM Interface] ${modelName} ready`);
 
       } else {
         throw new Error(`Unknown model: ${modelName}`);

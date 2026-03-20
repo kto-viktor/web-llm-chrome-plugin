@@ -1,45 +1,62 @@
 /**
  * WebLLM adapter for running LLM models locally via WebGPU.
- * Supports 4 models: Gemma 2B, Hermes 3B (default), DeepSeek 8B, Llama 70B.
+ * Supports 6 models: Qwen3 0.6B, Ministral 3B (default), Qwen3 4B, Qwen3 8B, DeepSeek-R1 8B, Llama 70B.
  * @module core/webllm-adapter
  */
 
 import * as webllm from '@mlc-ai/web-llm';
 
 /**
+ * Removes <think>…</think> blocks from a completed response string.
+ * @param {string} text
+ * @returns {string}
+ */
+function stripThinkBlocks(text) {
+  return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+}
+
+/**
  * Available WebLLM models configuration.
  * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
  *
  * Models (ordered by size):
- * - Gemma 2 2B: Compact, capable (2.5 GB)
- * - Hermes 3 3B: Balanced, smart - default (2.9 GB)
+ * - Qwen3 0.6B: Ultra-compact (0.6 GB)
+ * - Ministral 3B: Balanced, smart - default (1.9 GB)
+ * - Qwen3 4B: Capable mid-size (2.5 GB)
+ * - Qwen3 8B: Strong reasoning (4.5 GB)
  * - DeepSeek-R1 8B: Deep thinking (4.5 GB)
  * - Llama 3.1 70B: Most powerful (31 GB)
  */
 export const WEBLLM_MODELS = {
-  gemma: {
-    id: 'gemma-2-2b-it-q4f32_1-MLC',
-    name: 'webllm-gemma',
-    displayName: 'Gemma 2 2B (WebLLM)',
-    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/gemma-2-2b-it-q4f32_1-MLC/'
+  qwen3_0_6b: {
+    id: 'Qwen3-0.6B-q4f32_1-MLC',
+    name: 'webllm-qwen3-0.6b',
+    displayName: 'Qwen3 0.6B (WebLLM)',
   },
-  hermes: {
-    id: 'Hermes-3-Llama-3.2-3B-q4f32_1-MLC',
-    name: 'webllm-hermes',
-    displayName: 'Hermes 3 3B (WebLLM)',
-    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Hermes-3-Llama-3.2-3B-q4f32_1-MLC/'
+  ministral3b: {
+    id: 'Ministral-3-3B-Instruct-2512-BF16-q4f16_1-MLC',
+    name: 'webllm-ministral3b',
+    displayName: 'Ministral 3B (WebLLM)',
+  },
+  qwen3_4b: {
+    id: 'Qwen3-4B-q4f16_1-MLC',
+    name: 'webllm-qwen3-4b',
+    displayName: 'Qwen3 4B (WebLLM)',
+  },
+  qwen3_8b: {
+    id: 'Qwen3-8B-q4f16_1-MLC',
+    name: 'webllm-qwen3-8b',
+    displayName: 'Qwen3 8B (WebLLM)',
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
-    displayName: 'DeepSeek-R1 (WebLLM)',
-    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
+    displayName: 'DeepSeek-R1 8B (WebLLM)',
   },
   llama70b: {
     id: 'Llama-3.1-70B-Instruct-q3f16_1-MLC',
     name: 'webllm-llama70b',
     displayName: 'Llama 3.1 70B (WebLLM)',
-    //modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Llama-3.1-70B-Instruct-q3f16_1-MLC/'
   }
 };
 
@@ -49,9 +66,9 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'gemma'|'hermes'|'deepseek'|'llama70b'} [modelKey='hermes'] - The model key to use
+   * @param {'qwen3_0_6b'|'ministral3b'|'qwen3_4b'|'qwen3_8b'|'deepseek'|'llama70b'} [modelKey='ministral3b'] - The model key to use
    */
-  constructor(modelKey = 'hermes') {
+  constructor(modelKey = 'ministral3b') {
     const config = WEBLLM_MODELS[modelKey];
     if (!config) {
       throw new Error(`Unknown WebLLM model: ${modelKey}`);
@@ -65,6 +82,8 @@ export class WebLLMAdapter {
     this.displayModelName = config.displayName;
     /** @type {string|undefined} */
     this.modelUrl = config.modelUrl;
+    /** @type {boolean} */
+    this.isQwen3 = this.modelId.startsWith('Qwen3-');
     /** @type {Object|null} */
     this.engine = null;
     /** @type {boolean} */
@@ -253,7 +272,9 @@ export class WebLLMAdapter {
       });
 
       console.log('[WebLLM] Non-streaming generation completed');
-      return response.choices[0]?.message?.content || '';
+      let content = response.choices[0]?.message?.content || '';
+      if (this.isQwen3) content = stripThinkBlocks(content);
+      return content;
     } catch (error) {
       console.log('[WebLLM] Non-streaming generation error:', error.message);
       throw new Error(`Generation failed: ${error.message}`);
@@ -301,6 +322,8 @@ export class WebLLMAdapter {
 
       let fullResponse = '';
       let chunkCount = 0;
+      let thinkBuffer = '';   // pending partial <think> tag, flushed once complete tag confirmed absent
+      let inThinkBlock = false;
 
       for await (const chunk of stream) {
         // Check if generation was cancelled
@@ -310,11 +333,57 @@ export class WebLLMAdapter {
         }
 
         const delta = chunk.choices[0]?.delta?.content || '';
-        if (delta) {
+        if (!delta) continue;
+
+        if (this.isQwen3) {
+          // Strip <think>…</think> blocks inline so they never reach the UI
+          thinkBuffer += delta;
+          let out = '';
+          while (thinkBuffer.length > 0) {
+            if (inThinkBlock) {
+              const end = thinkBuffer.indexOf('</think>');
+              if (end !== -1) {
+                inThinkBlock = false;
+                thinkBuffer = thinkBuffer.slice(end + '</think>'.length);
+              } else {
+                thinkBuffer = '';
+              }
+            } else {
+              const start = thinkBuffer.indexOf('<think>');
+              if (start !== -1) {
+                out += thinkBuffer.slice(0, start);
+                inThinkBlock = true;
+                thinkBuffer = thinkBuffer.slice(start + '<think>'.length);
+              } else {
+                // Hold back chars that could be a partial opening tag
+                const partial = thinkBuffer.lastIndexOf('<');
+                if (partial !== -1 && '<think>'.startsWith(thinkBuffer.slice(partial))) {
+                  out += thinkBuffer.slice(0, partial);
+                  thinkBuffer = thinkBuffer.slice(partial);
+                } else {
+                  out += thinkBuffer;
+                  thinkBuffer = '';
+                }
+                break;
+              }
+            }
+          }
+          if (out) {
+            fullResponse += out;
+            chunkCount++;
+            onToken(out);
+          }
+        } else {
           fullResponse += delta;
           chunkCount++;
           onToken(delta);
         }
+      }
+
+      // Flush any buffered content that turned out not to be a think tag
+      if (thinkBuffer && !inThinkBlock) {
+        fullResponse += thinkBuffer;
+        onToken(thinkBuffer);
       }
 
       console.log('[WebLLM] Streaming completed (' + chunkCount + ' chunks, ' + fullResponse.length + ' chars)');

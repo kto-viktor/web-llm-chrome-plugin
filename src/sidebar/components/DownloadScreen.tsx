@@ -14,19 +14,33 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     icon: '✨',
     benefits: ['Instant startup', 'No download needed', 'Privacy-first']
   },
-  'webllm-gemma': {
-    name: 'Gemma 2 2B',
-    tagline: 'Compact & Capable',
-    description: "Google's efficient 2 billion parameter model. Excellent balance of size and capability for everyday tasks.",
-    icon: '💎',
-    benefits: ['Fast responses', 'Low resource usage', 'Great quality']
+  'webllm-qwen3-0.6b': {
+    name: 'Qwen3 0.6B',
+    tagline: 'Ultra-Compact & Fast',
+    description: "Alibaba's tiny 0.6 billion parameter model. Blazing fast responses with minimal resource usage.",
+    icon: '⚡',
+    benefits: ['Instant responses', 'Very low resource usage', 'Great for simple tasks']
   },
-  'webllm-hermes': {
-    name: 'Hermes 3 3B',
+  'webllm-ministral3b': {
+    name: 'Ministral 3B',
     tagline: 'Balanced & Smart',
-    description: "NousResearch's instruction-following 3 billion parameter model. Excellent all-rounder for most tasks.",
+    description: "Mistral's compact 3 billion parameter instruction model. Excellent all-rounder for most everyday tasks.",
     icon: '🎯',
     benefits: ['Great all-rounder', 'Strong reasoning', 'Versatile']
+  },
+  'webllm-qwen3-4b': {
+    name: 'Qwen3 4B',
+    tagline: 'Capable Mid-Size',
+    description: "Alibaba's 4 billion parameter model. A strong balance between speed and capability.",
+    icon: '🧠',
+    benefits: ['Fast responses', 'Good reasoning', 'Efficient']
+  },
+  'webllm-qwen3-8b': {
+    name: 'Qwen3 8B',
+    tagline: 'Strong Reasoning',
+    description: "Alibaba's 8 billion parameter model. Excellent reasoning and instruction-following for demanding tasks.",
+    icon: '🔥',
+    benefits: ['Strong reasoning', 'High quality output', 'Complex tasks']
   },
   'webllm-deepseek': {
     name: 'DeepSeek-R1',
@@ -49,7 +63,7 @@ interface DownloadScreenProps {
 }
 
 export function DownloadScreen({ modelKey }: DownloadScreenProps) {
-  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-hermes'];
+  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-ministral3b'];
 
   return (
     <div className="download-screen">

@@ -14,19 +14,33 @@ interface ModelInfo {
 }
 
 const MODEL_INFO: Record<string, ModelInfo> = {
-  'webllm-gemma': {
-    name: 'Gemma 2',
-    icon: '💎',
-    description: 'Balanced and smart',
-    size: '2.5 GB',
-    params: '2B parameters'
+  'webllm-qwen3-0.6b': {
+    name: 'Qwen3 0.6B',
+    icon: '⚡',
+    description: 'Ultra-compact, fast',
+    size: '0.6 GB',
+    params: '0.6B parameters'
   },
-  'webllm-hermes': {
-    name: 'Hermes 3',
+  'webllm-ministral3b': {
+    name: 'Ministral 3B',
     icon: '🎯',
-    description: 'Excellent instruction-following',
-    size: '2.9 GB',
+    description: 'Balanced and smart',
+    size: '1.9 GB',
     params: '3B parameters'
+  },
+  'webllm-qwen3-4b': {
+    name: 'Qwen3 4B',
+    icon: '🧠',
+    description: 'Capable mid-size',
+    size: '2.5 GB',
+    params: '4B parameters'
+  },
+  'webllm-qwen3-8b': {
+    name: 'Qwen3 8B',
+    icon: '🔥',
+    description: 'Strong reasoning',
+    size: '4.5 GB',
+    params: '8B parameters'
   },
   'webllm-deepseek': {
     name: 'DeepSeek-R1',
@@ -58,7 +72,7 @@ interface DownloadConfirmScreenProps {
 }
 
 export function DownloadConfirmScreen({ modelKey, onConfirm, onCancel }: DownloadConfirmScreenProps) {
-  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-hermes'];
+  const info = MODEL_INFO[modelKey] || MODEL_INFO['webllm-ministral3b'];
   const isLargeModel = modelKey === 'webllm-llama70b';
 
   return (
