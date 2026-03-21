@@ -17,41 +17,37 @@ function stripThinkBlocks(text) {
 
 /**
  * Available WebLLM models configuration.
- * Set modelUrl to use a custom CDN, or leave undefined for default HuggingFace.
- *
- * Models (ordered by size):
- * - Qwen3 0.6B: Ultra-compact (0.6 GB)
- * - Ministral 3B: Balanced, smart - default (1.9 GB)
- * - Qwen3 4B: Capable mid-size (2.5 GB)
- * - Qwen3 8B: Strong reasoning (4.5 GB)
- * - DeepSeek-R1 8B: Deep thinking (4.5 GB)
- * - Llama 3.1 70B: Most powerful (31 GB)
  */
 export const WEBLLM_MODELS = {
   qwen3_0_6b: {
     id: 'Qwen3-0.6B-q4f32_1-MLC',
     name: 'webllm-qwen3-0.6b',
-    displayName: 'Qwen3 0.6B (WebLLM)',
+    displayName: 'Qwen3 Light 0.6B (WebLLM)',
+    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Qwen3-0.6B-q4f32_1-MLC/'
   },
   ministral3b: {
     id: 'Ministral-3-3B-Instruct-2512-BF16-q4f16_1-MLC',
     name: 'webllm-ministral3b',
     displayName: 'Ministral 3B (WebLLM)',
+    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Ministral-3-3B-Instruct-2512-BF16-q4f16_1-MLC/'
   },
   qwen3_4b: {
     id: 'Qwen3-4B-q4f16_1-MLC',
     name: 'webllm-qwen3-4b',
-    displayName: 'Qwen3 4B (WebLLM)',
+    displayName: 'Qwen3 Middle 4B (WebLLM)',
+    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Qwen3-4B-q4f16_1-MLC/'
   },
   qwen3_8b: {
     id: 'Qwen3-8B-q4f16_1-MLC',
     name: 'webllm-qwen3-8b',
-    displayName: 'Qwen3 8B (WebLLM)',
+    displayName: 'Qwen3 Strong 8B (WebLLM)',
+    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/Qwen3-8B-q4f16_1-MLC/'
   },
   deepseek: {
     id: 'DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC',
     name: 'webllm-deepseek',
     displayName: 'DeepSeek-R1 8B (WebLLM)',
+    modelUrl: 'https://dt2y43r3g9w82.cloudfront.net/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/'
   },
   llama70b: {
     id: 'Llama-3.1-70B-Instruct-q3f16_1-MLC',
@@ -66,9 +62,9 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'qwen3_0_6b'|'ministral3b'|'qwen3_4b'|'qwen3_8b'|'deepseek'|'llama70b'} [modelKey='ministral3b'] - The model key to use
+   * @param {'qwen3_0_6b'|'ministral3b'|'qwen3_4b'|'qwen3_8b'|'deepseek'|'llama70b'} [modelKey='qwen3_4b'] - The model key to use
    */
-  constructor(modelKey = 'ministral3b') {
+  constructor(modelKey = 'qwen3_4b') {
     const config = WEBLLM_MODELS[modelKey];
     if (!config) {
       throw new Error(`Unknown WebLLM model: ${modelKey}`);
@@ -206,13 +202,13 @@ export class WebLLMAdapter {
       let type;
 
       if (isGpuDeviceLost) {
-        message = 'Your GPU became unavailable (possibly out of memory). Please close and open extension again and try a smaller model (like gemma).';
+        message = 'Your GPU became unavailable (possibly out of memory). Please close and open extension again and try a smaller model (like qwen3-Light).';
         type = 'GPU_DEVICE_LOST';
       } else if (isShaderError) {
-        message = "Your GPU doesn't support the required WebGPU features for this model. Try Gemma or Hermes instead, or update your GPU drivers.";
+        message = "Your GPU doesn't support the required WebGPU features for this model. Try Qwen-3 Light?";
         type = 'INSUFFICIENT_GPU_SHADER';
       } else if (isGpuError) {
-        message = "Your device doesn't have enough GPU power to run this model :( let start from a smaller model, like gemma?";
+        message = "Your device doesn't have enough GPU power to run this model :( Try Qwen-3 Light?";
         type = 'INSUFFICIENT_GPU';
       } else if (isQuotaError) {
         message = "Not enough browser storage to save this model. In Chrome settings, disable 'Clear cookies and site data when you close all windows', or free up disk space.";

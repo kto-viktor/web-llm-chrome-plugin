@@ -14,7 +14,7 @@ export function PerformanceTip({ onClose }: PerformanceTipProps) {
     <div className="performance-tip">
       <span className="performance-tip-icon">💡</span>
       <span className="performance-tip-text">
-        This model is taking a while. Try a smaller model for faster responses!
+        This model is taking a while. Try Qwen3 Light? It fast!
       </span>
       <button
         className="performance-tip-close"

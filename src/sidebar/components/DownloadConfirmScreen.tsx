@@ -17,29 +17,29 @@ const MODEL_INFO: Record<string, ModelInfo> = {
   'webllm-qwen3-0.6b': {
     name: 'Qwen3 0.6B',
     icon: '⚡',
-    description: 'Ultra-compact, fast',
+    description: 'BEST for simple laptops',
     size: '0.6 GB',
     params: '0.6B parameters'
   },
   'webllm-ministral3b': {
     name: 'Ministral 3B',
     icon: '🎯',
-    description: 'Balanced and smart',
-    size: '1.9 GB',
+    description: 'Fast, but speaks only english',
+    size: '1.8 GB',
     params: '3B parameters'
   },
   'webllm-qwen3-4b': {
     name: 'Qwen3 4B',
     icon: '🧠',
-    description: 'Capable mid-size',
-    size: '2.5 GB',
+    description: 'Best balance if you have some GPU',
+    size: '2 GB',
     params: '4B parameters'
   },
   'webllm-qwen3-8b': {
     name: 'Qwen3 8B',
     icon: '🔥',
     description: 'Strong reasoning',
-    size: '4.5 GB',
+    size: '4.3 GB',
     params: '8B parameters'
   },
   'webllm-deepseek': {

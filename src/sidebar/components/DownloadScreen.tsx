@@ -16,21 +16,21 @@ const MODEL_INFO: Record<string, ModelInfo> = {
   },
   'webllm-qwen3-0.6b': {
     name: 'Qwen3 0.6B',
-    tagline: 'Ultra-Compact & Fast',
+    tagline: 'BEST for simple laptops',
     description: "Alibaba's tiny 0.6 billion parameter model. Blazing fast responses with minimal resource usage.",
     icon: '⚡',
     benefits: ['Instant responses', 'Very low resource usage', 'Great for simple tasks']
   },
   'webllm-ministral3b': {
-    name: 'Ministral 3B',
-    tagline: 'Balanced & Smart',
-    description: "Mistral's compact 3 billion parameter instruction model. Excellent all-rounder for most everyday tasks.",
+    name: 'Ministral 3B - English only',
+    tagline: 'Fast, but speaks only english',
+    description: "Mistral's compact 3 billion parameter instruction model. Good, but speaks only english.",
     icon: '🎯',
     benefits: ['Great all-rounder', 'Strong reasoning', 'Versatile']
   },
   'webllm-qwen3-4b': {
     name: 'Qwen3 4B',
-    tagline: 'Capable Mid-Size',
+    tagline: 'Balanced Mid-Size model',
     description: "Alibaba's 4 billion parameter model. A strong balance between speed and capability.",
     icon: '🧠',
     benefits: ['Fast responses', 'Good reasoning', 'Efficient']
@@ -45,7 +45,7 @@ const MODEL_INFO: Record<string, ModelInfo> = {
   'webllm-deepseek': {
     name: 'DeepSeek-R1',
     tagline: 'Deep Thinking Model',
-    description: 'Advanced reasoning model that thinks step-by-step. Best for complex problems and advanced users who need to see the LLM thinking process.',
+    description: 'Thinking model. Can work on complex tasks, but sometimes unstable.',
     icon: '🔬',
     benefits: ['Chain-of-thought', 'Complex reasoning', 'Problem solving']
   },
@@ -55,7 +55,7 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     description: "Meta's flagship 70 billion parameter model. Industry-leading performance for the most demanding tasks. Requires high-end GPU with 31GB+ VRAM.",
     icon: '🚀',
     benefits: ['Best quality', 'Advanced reasoning', 'Professional-grade']
-  }
+  },
 };
 
 interface DownloadScreenProps {

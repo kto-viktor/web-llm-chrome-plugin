@@ -1,7 +1,8 @@
 ## Todo
+- **улучшить инструкцию по gemini?**
+- добавить аналитику на отмену
 - If user asking about current page - ask him to attach the page. (system prompt for no-attachment)
-- подумать над еще одной моделью на 8-9В
-- Improve cancellation - reload in case of hunging state when "Thinking..." forever
+- Improve cancellation - reload in case of hunging state when "Thinking..." forever - вроде сделал же?
 
 ## Long-term backlog
 - add sentry

@@ -16,10 +16,10 @@ export interface ModelDefinition {
 }
 
 export const MODELS: ModelDefinition[] = [
-  { key: 'webllm-qwen3-0.6b', name: 'Qwen3', params: '0.6B', size: '0.6 Gb', icon: '⚡', desc: 'Ultra-compact, fast' },
-  { key: 'webllm-ministral3b', name: 'Ministral 3B', params: '3B', size: '1.9 Gb', icon: '🎯', desc: 'Balanced and smart', recommended: true },
-  { key: 'webllm-qwen3-4b', name: 'Qwen3', params: '4B', size: '2.5 Gb', icon: '🧠', desc: 'Capable mid-size' },
-  { key: 'webllm-qwen3-8b', name: 'Qwen3', params: '8B', size: '4.5 Gb', icon: '🔥', desc: 'Strong reasoning' },
+  { key: 'webllm-qwen3-0.6b', name: 'Qwen3 Light', params: '0.6B', size: '300 MB 👍', icon: '⚡', desc: 'BEST for simple laptops' },
+  { key: 'webllm-ministral3b', name: 'Ministral 3B', params: '3B', size: '1.8 Gb', icon: '🎯', desc: 'Fast, but speaks only english' },
+  { key: 'webllm-qwen3-4b', name: 'Qwen3 Middle', params: '4B', size: '2 Gb', icon: '🧠', desc: 'Best balance if you have some GPU', recommended: true },
+  { key: 'webllm-qwen3-8b', name: 'Qwen3 Strong', params: '8B', size: '4.3 Gb', icon: '🔥', desc: 'Strong reasoning' },
   { key: 'webllm-deepseek', name: 'DeepSeek-R1', params: '8B', size: '4.5 Gb', icon: '🔬', desc: 'Reasoning model' },
   { key: 'webllm-llama70b', name: 'Llama 3.1', params: '70B', size: '31 Gb', icon: '🦕', desc: 'Most powerful', warning: true },
   { key: 'gemini-nano', name: 'Gemini Nano', params: null, size: null, icon: '✨', desc: 'Chrome embedded model', muted: true },

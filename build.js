@@ -17,6 +17,7 @@ const buildOptions = {
   sourcemap: true,
   minify: !isWatch,
   logLevel: 'info',
+  external: ['url'],
   loader: {
     '.txt': 'text',
     '.ts': 'ts',
