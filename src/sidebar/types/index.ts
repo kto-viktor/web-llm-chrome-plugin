@@ -73,6 +73,7 @@ export interface ChatActions {
   cancelGeneration: () => void;
   clearHistory: () => void;
   setAttachment: (attachment: PageAttachment | null) => void;
+  setModelId: (modelId: string | null) => void;
 }
 
 /** Combined chat context */

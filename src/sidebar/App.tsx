@@ -39,6 +39,11 @@ function AppContent() {
     analytics.sidebarOpened();
   }, []);
 
+  // Keep chat context model ID in sync for analytics
+  useEffect(() => {
+    chat.setModelId(selectedModel);
+  }, [selectedModel, chat.setModelId]);
+
   const { showTip, dismissTip } = usePerformanceTip(chat.isGenerating, selectedModel);
   const { showAttachTip1, showAttachTip2, dismissAttachTip1, dismissAttachTip2 } = useAttachPageTips(attachment, chat.isAttached);
 

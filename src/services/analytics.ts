@@ -90,4 +90,7 @@ export const analytics = {
   /** User cancelled a download before it completed. */
   downloadAbandoned: (modelId: string, progressPct: number) =>
     trackEvent('model_download_abandoned', { model_id: modelId, progress_pct: progressPct }),
+
+  /** LLM finished generating a response (streaming complete). */
+  gotResponse: (modelId: string) => trackEvent('got_response', { model_id: modelId }),
 };

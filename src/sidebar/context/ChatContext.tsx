@@ -3,13 +3,14 @@
  * Provides streaming responses via React state updates.
  */
 
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 import type { Message, PageAttachment, ChatContextValue } from '../types';
 
 // @ts-ignore - JS module
 import { chatService } from '../../services/chat-service.js';
 // @ts-ignore - JS module
 import { historyManager } from '../../services/history-manager.js';
+import { analytics } from '../../services/analytics';
 
 const ChatContext = createContext<ChatContextValue | null>(null);
 
@@ -28,6 +29,7 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentResponse, setCurrentResponse] = useState('');
   const [isAttached, setIsAttached] = useState<boolean>(propsIsAttached);
+  const modelIdRef = useRef<string | null>(null);
 
   // Subscribe to history changes
   useEffect(() => {
@@ -70,6 +72,7 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
 
       // Clear currentResponse after successful completion
       setCurrentResponse('');
+      analytics.gotResponse(modelIdRef.current || 'unknown');
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[ChatContext] Error sending message:', errorMsg);
@@ -124,6 +127,13 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
     // Attachment is managed by parent via usePageAttachment hook
   }, []);
 
+  /**
+   * Update the current model ID (used for analytics).
+   */
+  const setModelId = useCallback((id: string | null) => {
+    modelIdRef.current = id;
+  }, []);
+
   const value: ChatContextValue = {
     messages,
     isGenerating,
@@ -136,6 +146,7 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
     cancelGeneration,
     clearHistory,
     setAttachment,
+    setModelId,
   };
 
   return (
