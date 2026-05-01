@@ -235,7 +235,7 @@ export class LLMInterface {
 
   /**
    * Switches to a different model.
-   * @param {'gemini-nano'|'webllm-qwen3-0.6b'|'webllm-ministral3b'|'webllm-qwen3-4b'|'webllm-qwen3-8b'|'webllm-deepseek'|'webllm-llama70b'} modelName - The model to switch to
+   * @param {string} modelName - 'gemini-nano' or any `webllm-*` name from WEBLLM_MODELS
    * @returns {Promise<void>}
    */
   async switchModel(modelName) {

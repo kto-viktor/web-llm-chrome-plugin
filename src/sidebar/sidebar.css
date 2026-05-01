@@ -237,6 +237,29 @@ body {
   color: var(--text-secondary);
 }
 
+.thinking-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  cursor: pointer;
+  user-select: none;
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.thinking-toggle:hover {
+  background: var(--bg-secondary);
+}
+
+.thinking-toggle input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
 .status-indicator {
   width: 8px;
   height: 8px;

@@ -13,6 +13,7 @@ import { GeminiSetup } from './components/GeminiSetup';
 import { PerformanceTip } from './components/PerformanceTip';
 import { computeViewState } from './utils/viewState';
 import { getModelState } from './utils/modelState';
+import { getModel } from './constants/models';
 
 // @ts-ignore - JS module
 import { chatService } from '../services/chat-service.js';
@@ -30,6 +31,11 @@ function AppContent() {
 
   const [pendingDownload, setPendingDownload] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [thinkingEnabled, setThinkingEnabled] = useState(false);
+
+  const currentModelDef = getModel(selectedModel);
+  const supportsThinking = !!currentModelDef?.supportsThinking;
+  const disableThinking = supportsThinking && !thinkingEnabled;
 
   // Tracks download start times keyed by modelName — used for download analytics
   const downloadTrackingRef = useRef<Map<string, number>>(new Map());
@@ -98,8 +104,8 @@ function AppContent() {
   const handleSend = useCallback((message: string) => {
     if (!isReady) return;
     analytics.messageSent(selectedModel || 'unknown');
-    chat.sendMessage(message);
-  }, [isReady, chat, selectedModel]);
+    chat.sendMessage(message, { disableThinking });
+  }, [isReady, chat, selectedModel, disableThinking]);
 
   // Handle attach page
   const handleAttachPage = useCallback(() => {
@@ -121,8 +127,8 @@ function AppContent() {
   // Handle summarize attached page
   const handleSummarizePage = useCallback(() => {
     if (!isReady) return;
-    chat.sendMessage('Summarize this page. Use same language as page language to respond.');
-  }, [isReady, chat]);
+    chat.sendMessage('Summarize this page. Use same language as page language to respond.', { disableThinking });
+  }, [isReady, chat, disableThinking]);
 
   // Handle clear history
   const handleClear = useCallback(() => {
@@ -262,6 +268,9 @@ function AppContent() {
         onCancelBackgroundDownload={handleCancelBackgroundDownload}
         showDropdownTooltip={showDropdownTooltip && isReady}
         onDismissDropdownTooltip={dismissDropdownTooltip}
+        showThinkingToggle={supportsThinking && isReady}
+        thinkingEnabled={thinkingEnabled}
+        onToggleThinking={setThinkingEnabled}
       />
 
       {/* Performance tip (shown after long generation) */}

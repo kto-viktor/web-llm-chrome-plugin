@@ -16,7 +16,7 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.82",
+    "@mlc-ai/web-llm": "^0.2.83",
     "gpt-tokenizer": "^3.4.0",
     "marked": "^17.0.1",
     "react": "^18.2.0",

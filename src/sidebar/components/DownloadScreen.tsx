@@ -49,6 +49,13 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     icon: '🔬',
     benefits: ['Chain-of-thought', 'Complex reasoning', 'Problem solving']
   },
+  'webllm-qwen35-9b': {
+    name: 'Qwen3.5 Large 9B',
+    tagline: 'Latest & Strongest Qwen',
+    description: "Alibaba's newest 9 billion parameter model. The latest generation, with the strongest reasoning and instruction-following in this family. Toggle thinking mode in the header for deeper reasoning on complex tasks.",
+    icon: '🌟',
+    benefits: ['Latest generation', 'Toggleable thinking mode', 'Strongest open-source quality']
+  },
   'webllm-llama70b': {
     name: 'Llama 3.1 70B',
     tagline: 'Most Powerful',

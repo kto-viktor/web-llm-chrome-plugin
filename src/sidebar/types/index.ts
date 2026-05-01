@@ -65,9 +65,15 @@ export interface ChatState {
   isAttached: boolean;
 }
 
+/** Options accepted by `sendMessage` */
+export interface SendMessageOptions {
+  /** Disable Qwen thinking by appending `/no_think` to the user turn */
+  disableThinking?: boolean;
+}
+
 /** Chat context actions */
 export interface ChatActions {
-  sendMessage: (message: string) => Promise<void>;
+  sendMessage: (message: string, options?: SendMessageOptions) => Promise<void>;
   attachPage: () => void;
   detachPage: () => void;
   cancelGeneration: () => void;

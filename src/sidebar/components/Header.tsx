@@ -19,6 +19,9 @@ interface HeaderProps {
   onCancelBackgroundDownload: (modelName: string) => void;
   showDropdownTooltip?: boolean;
   onDismissDropdownTooltip?: () => void;
+  showThinkingToggle?: boolean;
+  thinkingEnabled?: boolean;
+  onToggleThinking?: (enabled: boolean) => void;
 }
 
 export function Header({
@@ -31,6 +34,9 @@ export function Header({
   onCancelBackgroundDownload,
   showDropdownTooltip = false,
   onDismissDropdownTooltip,
+  showThinkingToggle = false,
+  thinkingEnabled = false,
+  onToggleThinking,
 }: HeaderProps) {
   const { status, displayName, modelName, downloadProgress, downloadText, backgroundDownloads } = llmState;
 
@@ -90,6 +96,19 @@ export function Header({
         <div className="model-status">
           <StatusIndicator status={status} />
           <span className="status-text">{getStatusText()}</span>
+          {showThinkingToggle && (
+            <label
+              className="thinking-toggle"
+              title="Enable Qwen thinking mode (slower, but produces reasoning chain)"
+            >
+              <input
+                type="checkbox"
+                checked={thinkingEnabled}
+                onChange={(e) => onToggleThinking?.(e.target.checked)}
+              />
+              <span>Thinking</span>
+            </label>
+          )}
         </div>
       </header>
 

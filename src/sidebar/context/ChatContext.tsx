@@ -4,7 +4,7 @@
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
-import type { Message, PageAttachment, ChatContextValue } from '../types';
+import type { Message, PageAttachment, ChatContextValue, SendMessageOptions } from '../types';
 
 // @ts-ignore - JS module
 import { chatService } from '../../services/chat-service.js';
@@ -52,7 +52,7 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
   /**
    * Send a message and stream the response.
    */
-  const sendMessage = useCallback(async (message: string) => {
+  const sendMessage = useCallback(async (message: string, options?: SendMessageOptions) => {
     if (isGenerating) return;
 
     setIsGenerating(true);
@@ -64,6 +64,7 @@ export function ChatProvider({ children, attachment, isAttached: propsIsAttached
 
       await chatService.sendMessage(message, {
         attachment: effectiveAttachment,
+        disableThinking: options?.disableThinking,
         onToken: (token: string) => {
           // React state update triggers repaint - this is the key to streaming!
           setCurrentResponse(prev => prev + token);

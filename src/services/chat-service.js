@@ -70,9 +70,12 @@ export class ChatService {
    * @param {string} userMessage - The user's message
    * @param {Object|null} pageContent - The page content (attachment)
    * @param {boolean} isAttached - Whether page is attached
+   * @param {Object} [options]
+   * @param {boolean} [options.disableThinking] - Append Qwen `/no_think` directive to user message
    * @returns {Array<{role: string, content: string}>} Messages array
    */
-  buildMessages(userMessage, pageContent, isAttached) {
+  buildMessages(userMessage, pageContent, isAttached, options = {}) {
+    const { disableThinking } = options;
     const pageUrl = isAttached && pageContent ? pageContent.url : null;
 
     // Build system message with page context and guidelines
@@ -85,9 +88,14 @@ export class ChatService {
 
     // Small models (1B-3B) often ignore the system role entirely.
     // Reinforce page context in the user message so the model actually uses it.
-    const enhancedUserMessage = isAttached && pageContent
+    let enhancedUserMessage = isAttached && pageContent
       ? `${userMessage}\n\n(Remember: answer using the page content provided in the system message above. Do not say you cannot access the page.)`
       : userMessage;
+
+    // Qwen3/3.5 soft switch — directive must sit at the end of the latest user turn
+    if (disableThinking) {
+      enhancedUserMessage += ' /no_think';
+    }
 
     const messages = [
       { role: 'system', content: systemContent },
@@ -95,7 +103,7 @@ export class ChatService {
       { role: 'user', content: enhancedUserMessage }
     ];
 
-    console.log(`[Chat Service] Built messages array: ${messages.length} messages (1 system + ${historyMessages.length} history + 1 user)`);
+    console.log(`[Chat Service] Built messages array: ${messages.length} messages (1 system + ${historyMessages.length} history + 1 user)${disableThinking ? ' [thinking off]' : ''}`);
     return messages;
   }
 
@@ -105,10 +113,11 @@ export class ChatService {
    * @param {Object} [options] - Options
    * @param {Object} [options.attachment] - Page attachment
    * @param {Function} [options.onToken] - Streaming token callback
+   * @param {boolean} [options.disableThinking] - Disable thinking via `/no_think` (Qwen3-family only)
    * @returns {Promise<string>} The assistant's response
    */
   async sendMessage(message, options = {}) {
-    const { attachment, onToken } = options;
+    const { attachment, onToken, disableThinking } = options;
 
     // If attachment is null, treat as not attached
     const isAttached = attachment !== null;
@@ -150,7 +159,7 @@ export class ChatService {
         await historyManager.trimToLimit();
       }
 
-      const messages = this.buildMessages(message, attachment, isAttached);
+      const messages = this.buildMessages(message, attachment, isAttached, { disableThinking });
 
       console.log('[Chat Service] Generating response...');
       const response = await llm.generate(messages, {

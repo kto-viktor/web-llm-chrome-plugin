@@ -1,6 +1,6 @@
 /**
  * WebLLM adapter for running LLM models locally via WebGPU.
- * Supports 6 models: Qwen3 0.6B, Ministral 3B (default), Qwen3 4B, Qwen3 8B, DeepSeek-R1 8B, Llama 70B.
+ * Models with `modelUrl` use a custom CDN mirror; others use the WebLLM default config.
  * @module core/webllm-adapter
  */
 
@@ -53,6 +53,12 @@ export const WEBLLM_MODELS = {
     id: 'Llama-3.1-70B-Instruct-q3f16_1-MLC',
     name: 'webllm-llama70b',
     displayName: 'Llama 3.1 70B (WebLLM)',
+  },
+  // Added in web-llm 0.2.83 — uses default CDN (no modelUrl override)
+  qwen35_9b: {
+    id: 'Qwen3.5-9B-q4f16_1-MLC',
+    name: 'webllm-qwen35-9b',
+    displayName: 'Qwen3.5 Large 9B (WebLLM)'
   }
 };
 
@@ -62,7 +68,7 @@ export const WEBLLM_MODELS = {
 export class WebLLMAdapter {
   /**
    * Creates a WebLLM adapter.
-   * @param {'qwen3_0_6b'|'ministral3b'|'qwen3_4b'|'qwen3_8b'|'deepseek'|'llama70b'} [modelKey='qwen3_4b'] - The model key to use
+   * @param {keyof typeof WEBLLM_MODELS} [modelKey='qwen3_4b'] - The model key to use
    */
   constructor(modelKey = 'qwen3_4b') {
     const config = WEBLLM_MODELS[modelKey];
@@ -78,8 +84,8 @@ export class WebLLMAdapter {
     this.displayModelName = config.displayName;
     /** @type {string|undefined} */
     this.modelUrl = config.modelUrl;
-    /** @type {boolean} */
-    this.isQwen3 = this.modelId.startsWith('Qwen3-');
+    /** @type {boolean} Matches Qwen3-* and Qwen3.5-* (both emit `<think>` blocks) */
+    this.isQwen3 = /^Qwen3(\.\d+)?-/.test(this.modelId);
     /** @type {Object|null} */
     this.engine = null;
     /** @type {boolean} */

@@ -49,6 +49,13 @@ const MODEL_INFO: Record<string, ModelInfo> = {
     size: '4.5 GB',
     params: '8B parameters'
   },
+  'webllm-qwen35-9b': {
+    name: 'Qwen3.5 Large 9B',
+    icon: '🌟',
+    description: 'Latest Qwen — strongest open-source reasoning',
+    size: '5.5 GB',
+    params: '9B parameters'
+  },
   'webllm-llama70b': {
     name: 'Llama 3.1 70B',
     icon: '🦕',
