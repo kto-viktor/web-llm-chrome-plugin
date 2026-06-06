@@ -22,6 +22,7 @@ import { ModeToggle } from './components/ModeToggle';
 import { OnlineAttachPageButton } from './components/OnlineAttachPageButton';
 import { OnlineAttachmentChips } from './components/OnlineAttachmentChips';
 import { useOnlineRuntime } from './runtime/online-runtime';
+import { useActiveTabSync } from './hooks/useActiveTabSync';
 import { useOnlineModels } from './hooks/useOnlineModels';
 import { pickInitialOnlineModel } from './constants/online-models';
 import {
@@ -122,11 +123,27 @@ function OnlineAppReadyInner({
   userId,
   onSelect,
 }: OnlineAppReadyProps) {
-  const { attachments, clear: clearAttachments } = useOnlineAttachments();
+  const {
+    attachments,
+    clear: clearAttachments,
+    syncActivePage,
+  } = useOnlineAttachments();
   const [attachError, setAttachError] = useState<string | null>(null);
   const fileIds = React.useMemo(() => attachments.map((a) => a.id), [attachments]);
 
   const runtime = useOnlineRuntime({ model: selectedId, userId, fileIds });
+
+  // Attach the active page by default and keep it in sync with the tab the
+  // user is looking at: syncs on open, on tab switch, and on navigation.
+  // Best-effort — browser-internal pages simply leave nothing attached; the
+  // 📎 button stays available for an explicit re-attach (and surfaces errors).
+  useActiveTabSync(syncActivePage, true);
+
+  // New chat: drop attachments, then re-attach the current page.
+  const handleNewChat = React.useCallback(() => {
+    clearAttachments();
+    void syncActivePage();
+  }, [clearAttachments, syncActivePage]);
 
   // Header lives inside the runtime provider so the new-chat button can
   // access the thread runtime via useAssistantRuntime().
@@ -140,7 +157,7 @@ function OnlineAppReadyInner({
           status={status}
           error={error}
           toggleSlot={<ModeToggle />}
-          onNewChat={clearAttachments}
+          onNewChat={handleNewChat}
         />
         <AssistantThread
           aboveComposer={

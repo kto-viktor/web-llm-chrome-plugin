@@ -38,7 +38,7 @@ export async function extractActivePage() {
     throw new Error('No active tab');
   }
   if (/^chrome(-extension)?:\/\//.test(tab.url) || /^about:/.test(tab.url)) {
-    throw new Error('Cannot read browser-internal pages');
+    throw new Error(`Cannot read browser-internal pages (${tab.url})`);
   }
 
   const [{ result: html } = {}] = await chrome.scripting.executeScript({
