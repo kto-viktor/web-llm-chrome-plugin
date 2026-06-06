@@ -29,18 +29,35 @@ async function getClientId(): Promise<string> {
 }
 
 /**
+ * Best-effort read of the current app mode for event tagging. Returns
+ * undefined if preferences haven't loaded yet (event still fires, just untagged).
+ */
+async function getCurrentMode(): Promise<'online' | 'offline' | undefined> {
+  try {
+    const result = await chrome.storage.local.get('preferences');
+    const prefs = (result.preferences ?? {}) as { appMode?: 'online' | 'offline' };
+    return prefs.appMode;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Sends an event to GA4 via Measurement Protocol.
- * Silently ignores all errors — analytics must never break the extension.
+ * Every event is tagged with the current mode so we can compare online vs
+ * offline funnels. Silently ignores all errors — analytics must never break
+ * the extension.
  */
 async function trackEvent(name: string, params: Record<string, unknown> = {}): Promise<void> {
   try {
-    const clientId = await getClientId();
+    const [clientId, mode] = await Promise.all([getClientId(), getCurrentMode()]);
+    const tagged = mode ? { ...params, mode } : params;
     await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         client_id: clientId,
-        events: [{ name, params }],
+        events: [{ name, params: tagged }],
       }),
     });
   } catch {
@@ -93,4 +110,7 @@ export const analytics = {
 
   /** LLM finished generating a response (streaming complete). */
   gotResponse: (modelId: string) => trackEvent('got_response', { model_id: modelId }),
+
+  /** User toggled between online and offline modes. */
+  modeChanged: (mode: 'online' | 'offline') => trackEvent('mode_changed', { mode }),
 };

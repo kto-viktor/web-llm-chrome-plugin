@@ -7,6 +7,7 @@ import { StatusIndicator } from './StatusIndicator';
 import { DownloadProgress } from './DownloadProgress';
 import { BackgroundDownloads } from './BackgroundDownloads';
 import { ModelSelector } from './ModelSelector';
+import { ModeToggle } from './ModeToggle';
 import type { LLMState, ViewState } from '../types';
 
 interface HeaderProps {
@@ -72,6 +73,7 @@ export function Header({
       <header className="header">
         <div className="header-row">
           <h1 className="title">Local LLM</h1>
+          <ModeToggle />
           <div style={{ position: 'relative' }}>
             <ModelSelector
               selectedModel={selectedModel}

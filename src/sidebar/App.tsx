@@ -3,8 +3,9 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useAttachPageTips } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useAttachPageTips, useAppMode, useBackendHealth } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
+import { OnlineApp } from './OnlineApp';
 import { Header } from './components/Header';
 import { MessagesContainer } from './components/MessagesContainer';
 import { InputArea } from './components/InputArea';
@@ -22,7 +23,7 @@ import { analytics } from '../services/analytics';
 /**
  * Inner app component that uses chat context.
  */
-function AppContent() {
+function AppContent({ banner }: { banner?: React.ReactNode }) {
   const llm = useLLM();
   const { attachment, clear: clearAttachment, reload: reloadAttachment } = usePageAttachment();
   const chat = useChat();
@@ -258,6 +259,7 @@ function AppContent() {
 
   return (
     <div className="container">
+      {banner}
       <Header
         llmState={llm}
         viewState={viewState}
@@ -323,13 +325,91 @@ function AppContent() {
 }
 
 /**
- * Main App component with providers.
+ * Main App component — routes between online and offline modes.
+ *
+ * Online: stateless component tree built around assistant-ui runtime. No
+ * download / cached-model / Gemini-setup state.
+ *
+ * Offline: legacy flow using ChatProvider + useLLM (unchanged for now;
+ * migration to useLocalRuntime happens in a later step).
  */
 export function App() {
+  const { mode, ready: modeReady } = useAppMode();
+
+  if (!modeReady) {
+    return (
+      <div className="container">
+        <div className="cache-loading-screen">
+          <div className="cache-loading-text">Initializing…</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (mode === 'online') {
+    return <OnlineRoute />;
+  }
+
+  return <OfflineApp />;
+}
+
+/**
+ * Online entry point that degrades to offline when the backend is unreachable.
+ *
+ * We probe the backend before mounting the online UI so the user never sees a
+ * broken online experience. On failure we render the offline app (so local
+ * models still work) with a banner offering a retry. The persisted mode stays
+ * "online" — this is a runtime fallback, not a preference change, so the next
+ * launch tries online again.
+ */
+function OnlineRoute() {
+  const { status, retry } = useBackendHealth();
+
+  if (status === 'checking') {
+    return (
+      <div className="container">
+        <div className="cache-loading-screen">
+          <div className="cache-loading-text">Connecting to assistant…</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'offline') {
+    return (
+      <OfflineApp
+        banner={
+          <div className="backend-fallback-banner" role="status">
+            <span className="backend-fallback-text">
+              Online assistant unavailable — using offline mode.
+            </span>
+            <button
+              type="button"
+              className="backend-fallback-retry"
+              onClick={retry}
+            >
+              Retry
+            </button>
+          </div>
+        }
+      />
+    );
+  }
+
+  return <OnlineApp />;
+}
+
+/**
+ * Offline mode — preserved as-is. Wraps the legacy AppContent in its providers
+ * and the chatService bootstrap.
+ *
+ * `banner` lets callers (e.g. the online→offline fallback) render a notice
+ * above the chat without touching AppContent.
+ */
+function OfflineApp({ banner }: { banner?: React.ReactNode }) {
   const { attachment } = usePageAttachment();
   const [initialized, setInitialized] = useState(false);
 
-  // Initialize services on mount
   useEffect(() => {
     const init = async () => {
       console.log('[App] Initializing...');
@@ -342,6 +422,7 @@ export function App() {
   if (!initialized) {
     return (
       <div className="container">
+        {banner}
         <div className="cache-loading-screen">
           <div className="cache-loading-text">Initializing...</div>
         </div>
@@ -351,7 +432,7 @@ export function App() {
 
   return (
     <ChatProvider attachment={attachment} isAttached={false}>
-      <AppContent />
+      <AppContent banner={banner} />
     </ChatProvider>
   );
 }

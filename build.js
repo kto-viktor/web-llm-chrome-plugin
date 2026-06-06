@@ -23,6 +23,11 @@ const buildOptions = {
     '.ts': 'ts',
     '.tsx': 'tsx',
   },
+  define: {
+    'process.env.BACKEND_URL': JSON.stringify(process.env.BACKEND_URL ?? 'http://localhost:3000'),
+    'process.env.BACKEND_API_KEY': JSON.stringify(process.env.BACKEND_API_KEY ?? ''),
+    'process.env.NODE_ENV': JSON.stringify(isWatch ? 'development' : 'production'),
+  },
 };
 
 async function build() {
