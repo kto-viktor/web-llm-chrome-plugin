@@ -51,11 +51,13 @@ cp .env.example .env
 ```bash
 docker compose up -d openwebui
 # Open https://<DOMAIN>, create the first admin account, then:
-#   Settings → Account → enable "API Keys" (off by default), then create one.
+#   Settings → Account → API Keys → create one.
 ```
 
-Put that key in `.env` as `OPENWEBUI_API_KEY`. (If you can't enable API keys,
-the admin login JWT works too but expires in ~28 days — an API key doesn't.)
+API-key minting is already enabled via `ENABLE_API_KEYS=true` in compose (the
+var is plural; OpenWebUI rejects key creation otherwise). Put the key in `.env`
+as `OPENWEBUI_API_KEY`. A real API key (`sk-…`) doesn't expire; the admin login
+JWT works too but lapses in ~28 days, so prefer the key.
 
 **3. Connect OpenRouter** (in the OpenWebUI admin UI):
 Settings → Connections → OpenAI API → Base URL `https://openrouter.ai/api/v1`,

@@ -76,9 +76,28 @@ function AssistantMessage() {
   return (
     <MessagePrimitive.Root className="message assistant">
       <div className="message-content">
+        {/* While the assistant message has no parts yet we're waiting for the
+            first token — show the animated thinking dots. They vanish as soon
+            as content streams in (hasContent becomes true). */}
+        <MessagePrimitive.If hasContent={false}>
+          <ThinkingDots />
+        </MessagePrimitive.If>
         <MessagePrimitive.Parts components={{ Text: AssistantText }} />
       </div>
     </MessagePrimitive.Root>
+  );
+}
+
+/** Animated "waiting for response" dots, reusing the offline indicator styles. */
+function ThinkingDots() {
+  return (
+    <div className="thinking-indicator" aria-label="Waiting for response">
+      <div className="thinking-dots">
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
   );
 }
 

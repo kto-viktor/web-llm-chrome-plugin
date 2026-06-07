@@ -11,14 +11,11 @@
 import React from 'react';
 import { NewChatButton } from './NewChatButton';
 import type { OnlineModel } from '../constants/online-models';
-import type { OnlineModelsStatus } from '../hooks/useOnlineModels';
 
 interface OnlineHeaderProps {
   models: OnlineModel[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  status: OnlineModelsStatus;
-  error: string | null;
   toggleSlot?: React.ReactNode;
   /** Side-effect to run after the new-chat button switches threads. */
   onNewChat?: () => void;
@@ -34,8 +31,6 @@ export function OnlineHeader({
   models,
   selectedId,
   onSelect,
-  status,
-  error,
   toggleSlot,
   onNewChat,
   showNewChat = true,
@@ -68,16 +63,6 @@ export function OnlineHeader({
         <span className="status-text">
           {selected?.description ?? selected?.name ?? 'Loading models…'}
         </span>
-        {status === 'fallback' && (
-          <span className="status-warn" title={error ?? ''}>
-            (offline list)
-          </span>
-        )}
-        {status === 'cached' && error && (
-          <span className="status-warn" title={error}>
-            (cached)
-          </span>
-        )}
       </div>
     </header>
   );

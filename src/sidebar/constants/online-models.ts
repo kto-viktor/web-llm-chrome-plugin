@@ -1,9 +1,9 @@
 /**
- * Online model catalog — types, fallback list, and selection helpers.
+ * Online model catalog — types and selection helpers.
  *
- * The canonical list lives on the backend at /api/models (see
- * docs/backend-api.md). The fallback below is shown only when the backend is
- * unreachable on first launch, so the UI never blocks.
+ * The list lives entirely on the backend at /api/models (see
+ * docs/backend-api.md). There is no client-side fallback list: if the backend
+ * is unreachable the app switches to offline mode instead.
  */
 
 export interface OnlineModel {
@@ -18,26 +18,6 @@ export interface OnlineModel {
   /** Pre-selected on first launch when no saved choice exists. */
   default?: boolean;
 }
-
-/**
- * Fallback used only when /api/models is unreachable. Intentionally minimal —
- * the real list comes from the server. Keep generic so it works against any
- * OpenAI-compatible backend.
- */
-export const FALLBACK_ONLINE_MODELS: OnlineModel[] = [
-  {
-    id: 'gpt-4o-mini',
-    name: 'GPT-4o mini',
-    description: 'Fast, capable',
-    featured: true,
-    default: true,
-  },
-  {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    description: 'Most capable',
-  },
-];
 
 /**
  * Picks the model to use on first launch:

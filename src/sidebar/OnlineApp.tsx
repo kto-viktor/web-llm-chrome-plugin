@@ -2,9 +2,11 @@
  * Online-mode app root.
  *
  * Owns:
- *   - the online model list (cached + live from /api/models)
  *   - the selected model (persisted in preferences)
  *   - the assistant-ui runtime that streams from the backend
+ *
+ * The model list is provided by OnlineRoute (fetched once, no cache); this
+ * component is only mounted when a live list exists.
  *
  * Mounts AssistantThread under an AssistantRuntimeProvider so the chat UI is
  * driven entirely by the runtime; no custom message state lives here.
@@ -21,18 +23,24 @@ import { OnlineHeader } from './components/OnlineHeader';
 import { ModeToggle } from './components/ModeToggle';
 import { OnlineAttachPageButton } from './components/OnlineAttachPageButton';
 import { OnlineAttachmentChips } from './components/OnlineAttachmentChips';
+import { OnlineModeNotice } from './components/OnlineModeNotice';
 import { useOnlineRuntime } from './runtime/online-runtime';
 import { useActiveTabSync } from './hooks/useActiveTabSync';
-import { useOnlineModels } from './hooks/useOnlineModels';
-import { pickInitialOnlineModel } from './constants/online-models';
+import type { UseOnlineModels } from './hooks/useOnlineModels';
+import { pickInitialOnlineModel, type OnlineModel } from './constants/online-models';
 import {
   OnlineAttachmentProvider,
   useOnlineAttachments,
 } from './runtime/online-attachment-context';
 import { preferencesManager } from '../services/preferences-manager.js';
 
-export function OnlineApp() {
-  const { models, status, error } = useOnlineModels();
+/**
+ * Rendered only once a live model list is available (OnlineRoute gates this).
+ * The list is passed in rather than fetched here, so there's a single source
+ * of truth and no client-side fallback — backend down ⇒ offline mode.
+ */
+export function OnlineApp({ online }: { online: UseOnlineModels }) {
+  const { models } = online;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -68,12 +76,11 @@ export function OnlineApp() {
   if (!selectedId || !userId) {
     return (
       <div className="container">
+        <OnlineModeNotice />
         <OnlineHeader
           models={models}
           selectedId={selectedId}
           onSelect={handleSelect}
-          status={status}
-          error={error}
           toggleSlot={<ModeToggle />}
           showNewChat={false}
         />
@@ -87,8 +94,6 @@ export function OnlineApp() {
   return (
     <OnlineAppReady
       models={models}
-      status={status}
-      error={error}
       selectedId={selectedId}
       userId={userId}
       onSelect={handleSelect}
@@ -97,9 +102,7 @@ export function OnlineApp() {
 }
 
 interface OnlineAppReadyProps {
-  models: ReturnType<typeof useOnlineModels>['models'];
-  status: ReturnType<typeof useOnlineModels>['status'];
-  error: ReturnType<typeof useOnlineModels>['error'];
+  models: OnlineModel[];
   selectedId: string;
   userId: string;
   onSelect: (id: string) => void;
@@ -117,8 +120,6 @@ function OnlineAppReady(props: OnlineAppReadyProps) {
 
 function OnlineAppReadyInner({
   models,
-  status,
-  error,
   selectedId,
   userId,
   onSelect,
@@ -149,13 +150,12 @@ function OnlineAppReadyInner({
   // access the thread runtime via useAssistantRuntime().
   return (
     <div className="container">
+      <OnlineModeNotice />
       <AssistantRuntimeProvider runtime={runtime}>
         <OnlineHeader
           models={models}
           selectedId={selectedId}
           onSelect={onSelect}
-          status={status}
-          error={error}
           toggleSlot={<ModeToggle />}
           onNewChat={handleNewChat}
         />

@@ -1,15 +1,13 @@
 /**
- * Loads the online model list from the backend and keeps it cached.
+ * Loads the online model list from the backend on every mount.
  *
- * Strategy:
- *   - On mount, read cached list from chrome.storage.local (instant render).
- *   - In parallel, refetch /api/models in the background.
- *   - On success, update state + cache.
- *   - On failure, keep cached list; if no cache, fall back to FALLBACK_ONLINE_MODELS.
+ * Deliberately NOT cached: the list is fetched fresh each time (and with
+ * `cache: 'no-store'`) so changing the backend's model catalog is reflected
+ * immediately on reload.
  *
- * Status reflects whether the live list is reachable, used by the model
- * selector / mode toggle to surface "backend unavailable" UI without ever
- * leaving the user without a list to pick from.
+ * There is NO fallback list. If the backend is unreachable the status becomes
+ * 'error' and the caller (OnlineRoute) drops the whole app into offline mode —
+ * online mode is only entered when a live list is available.
  */
 
 import { useEffect, useState } from 'react';
@@ -17,23 +15,9 @@ import {
   BACKEND_MODELS_URL,
   backendHeaders,
 } from '../constants/backend-config';
-import {
-  FALLBACK_ONLINE_MODELS,
-  type OnlineModel,
-} from '../constants/online-models';
+import type { OnlineModel } from '../constants/online-models';
 
-declare const chrome: {
-  storage: {
-    local: {
-      get(keys: string | string[] | null): Promise<Record<string, unknown>>;
-      set(items: Record<string, unknown>): Promise<void>;
-    };
-  };
-};
-
-const CACHE_KEY = 'online_models_cache';
-
-export type OnlineModelsStatus = 'loading' | 'live' | 'cached' | 'fallback';
+export type OnlineModelsStatus = 'loading' | 'live' | 'error';
 
 export interface UseOnlineModels {
   models: OnlineModel[];
@@ -43,7 +27,7 @@ export interface UseOnlineModels {
 }
 
 export function useOnlineModels(): UseOnlineModels {
-  const [models, setModels] = useState<OnlineModel[]>(FALLBACK_ONLINE_MODELS);
+  const [models, setModels] = useState<OnlineModel[]>([]);
   const [status, setStatus] = useState<OnlineModelsStatus>('loading');
   const [error, setError] = useState<string | null>(null);
 
@@ -51,6 +35,7 @@ export function useOnlineModels(): UseOnlineModels {
     try {
       const response = await fetch(BACKEND_MODELS_URL, {
         headers: backendHeaders(),
+        cache: 'no-store',
       });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -63,28 +48,17 @@ export function useOnlineModels(): UseOnlineModels {
       setModels(list);
       setStatus('live');
       setError(null);
-      await chrome.storage.local.set({ [CACHE_KEY]: list });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       setError(message);
-      // Keep whatever was loaded from cache; only fall back if we have nothing.
-      setStatus((prev) => (prev === 'loading' ? 'fallback' : 'cached'));
+      setModels([]);
+      setStatus('error');
     }
   };
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      try {
-        const stored = await chrome.storage.local.get(CACHE_KEY);
-        const cached = stored[CACHE_KEY];
-        if (!cancelled && Array.isArray(cached) && cached.length > 0) {
-          setModels(cached as OnlineModel[]);
-          setStatus('cached');
-        }
-      } catch {
-        /* ignore — fall through to refresh */
-      }
       if (!cancelled) await refresh();
     })();
     return () => {

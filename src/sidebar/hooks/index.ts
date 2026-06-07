@@ -15,5 +15,3 @@ export { useAppMode } from './useAppMode';
 export type { AppMode } from './useAppMode';
 export { useOnlineModels } from './useOnlineModels';
 export type { OnlineModelsStatus, UseOnlineModels } from './useOnlineModels';
-export { useBackendHealth } from './useBackendHealth';
-export type { BackendHealthStatus, UseBackendHealth } from './useBackendHealth';

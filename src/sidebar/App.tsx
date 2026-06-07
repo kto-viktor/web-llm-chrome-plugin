@@ -3,7 +3,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useAttachPageTips, useAppMode, useBackendHealth } from './hooks';
+import { useLLM, usePageAttachment, useCachedModels, useOnboarding, usePerformanceTip, useAttachPageTips, useAppMode, useOnlineModels } from './hooks';
 import { ChatProvider, useChat } from './context/ChatContext';
 import { OnlineApp } from './OnlineApp';
 import { Header } from './components/Header';
@@ -356,16 +356,17 @@ export function App() {
 /**
  * Online entry point that degrades to offline when the backend is unreachable.
  *
- * We probe the backend before mounting the online UI so the user never sees a
- * broken online experience. On failure we render the offline app (so local
- * models still work) with a banner offering a retry. The persisted mode stays
- * "online" — this is a runtime fallback, not a preference change, so the next
- * launch tries online again.
+ * Fetching the model list IS the reachability probe: we only enter online mode
+ * once a live list is available, and pass it straight into OnlineApp (single
+ * fetch, no cache, no fallback list). On failure we render the offline app (so
+ * local models still work) with a retry. The persisted mode stays "online" —
+ * this is a runtime fallback, not a preference change, so the next launch (or a
+ * retry) tries online again.
  */
 function OnlineRoute() {
-  const { status, retry } = useBackendHealth();
+  const online = useOnlineModels();
 
-  if (status === 'checking') {
+  if (online.status === 'loading') {
     return (
       <div className="container">
         <div className="cache-loading-screen">
@@ -375,7 +376,7 @@ function OnlineRoute() {
     );
   }
 
-  if (status === 'offline') {
+  if (online.status !== 'live') {
     return (
       <OfflineApp
         banner={
@@ -386,7 +387,7 @@ function OnlineRoute() {
             <button
               type="button"
               className="backend-fallback-retry"
-              onClick={retry}
+              onClick={() => online.refresh()}
             >
               Retry
             </button>
@@ -396,7 +397,7 @@ function OnlineRoute() {
     );
   }
 
-  return <OnlineApp />;
+  return <OnlineApp online={online} />;
 }
 
 /**

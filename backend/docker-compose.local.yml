@@ -24,6 +24,11 @@ services:
       # when the login UI is disabled, and WEBUI_AUTH=false only works on a
       # truly fresh install. We mint an admin + API key via the API instead.
       WEBUI_AUTH: "true"
+      # Make env authoritative every boot (OpenWebUI otherwise caches config in
+      # its DB on first boot), so ENABLE_API_KEYS below actually takes effect.
+      ENABLE_PERSISTENT_CONFIG: "false"
+      # NB: the var is plural — ENABLE_API_KEYS — required for /api/v1/auths/api_key.
+      ENABLE_API_KEYS: "true"
       OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
       OPENAI_API_KEY: ${OPENROUTER_API_KEY}
       ENABLE_RAG_WEB_SEARCH: "true"

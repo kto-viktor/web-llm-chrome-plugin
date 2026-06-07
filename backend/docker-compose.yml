@@ -21,6 +21,10 @@ services:
       ENABLE_RAG_WEB_SEARCH: "true"
       RAG_WEB_SEARCH_ENGINE: duckduckgo
       WEBUI_AUTH: "true"
+      # Make env authoritative (OpenWebUI caches config in its DB otherwise) and
+      # allow minting the API key the adapter needs. NB: the var is plural.
+      ENABLE_PERSISTENT_CONFIG: "false"
+      ENABLE_API_KEYS: "true"
     volumes:
       - openwebui-data:/app/backend/data
     expose:

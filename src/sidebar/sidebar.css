@@ -1852,6 +1852,33 @@ body {
   padding: 0 4px;
 }
 
+/* Bold red "this is online mode" notice with a clickable switch-to-offline link. */
+.online-mode-notice {
+  padding: 6px 12px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--error-color, #d93025);
+}
+
+.online-mode-switch {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  font: inherit;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--error-color, #d93025);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.online-mode-switch:hover {
+  opacity: 0.8;
+}
+
 /* Banner shown when online mode degrades to offline (backend unreachable). */
 .backend-fallback-banner {
   display: flex;
