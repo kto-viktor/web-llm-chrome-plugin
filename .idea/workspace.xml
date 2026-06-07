@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="1b806872-a6db-44be-a0c5-eef9168f501b" name="Changes" comment="backend mode. Ready to release" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="207" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+        <entry key="$PROJECT_DIR$/models/Qwen2.5-7B-Instruct-q4f16_1-MLC" value="357d5aef60a0e513dc1cd2287e3a9caf2e6f6387" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;local-llm-run&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:kto-viktor/web-llm-chrome-plugin.git&quot;,
+    &quot;accountId&quot;: &quot;0f98eda2-9bd9-443c-bd5e-1cfe4d0bb821&quot;
+  }
+}</component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="37CnbGmvCMBAoDM4I0xEO1GitOM" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Node.js.sidebar.js.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Vitest.HistoryManager.getRecentContextMessages.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/viktor/work/my/local-llm-plugin/docs/tasks&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/viktor/work/my/local-llm-plugin/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File&quot;: [
+      &quot;TEXT&quot;,
+      &quot;ECMA Script Level 4&quot;,
+      &quot;Markdown&quot;,
+      &quot;JSON&quot;
+    ]
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/tasks" />
+      <recent name="$PROJECT_DIR$/docs" />
+      <recent name="$PROJECT_DIR$/graphics" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/welcome_page/Welcome Page_files" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/tasks" />
+      <recent name="$PROJECT_DIR$/internal-claude-prompts" />
+      <recent name="$PROJECT_DIR$/internal-claude-prompts/testing-models" />
+      <recent name="$PROJECT_DIR$/models/DeepSeek-R1-Distill-Llama-8B-q4f16_1-MLC/resolve/main" />
+      <recent name="$PROJECT_DIR$/models/TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC/resolve/main" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="HistoryManager.getRecentContextMessages" type="JavaScriptTestRunnerVitest" temporary="true" nameIsGenerated="true">
+      <node-interpreter value="project" />
+      <vitest-package value="$PROJECT_DIR$/node_modules/vitest" />
+      <working-dir value="$PROJECT_DIR$" />
+      <vitest-options value="--run" />
+      <envs />
+      <scope-kind value="SUITE" />
+      <test-file value="$PROJECT_DIR$/src/services/__tests__/history-manager.test.js" />
+      <test-names>
+        <test-name value="HistoryManager.getRecentContextMessages" />
+      </test-names>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Vitest.HistoryManager.getRecentContextMessages" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.29346.143" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="1b806872-a6db-44be-a0c5-eef9168f501b" name="Changes" comment="" />
+      <created>1766415990604</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1766415990604</updated>
+      <workItem from="1766453099159" duration="3692000" />
+      <workItem from="1766625296296" duration="31111000" />
+      <workItem from="1766835611147" duration="8031000" />
+      <workItem from="1768737700067" duration="3027000" />
+      <workItem from="1769173826703" duration="167000" />
+      <workItem from="1769173998797" duration="13225000" />
+      <workItem from="1769733707995" duration="50409000" />
+      <workItem from="1770166220867" duration="13060000" />
+      <workItem from="1770369808105" duration="8857000" />
+      <workItem from="1770457134036" duration="23264000" />
+      <workItem from="1770622076573" duration="26801000" />
+      <workItem from="1771042608613" duration="25724000" />
+      <workItem from="1771245995828" duration="24000" />
+      <workItem from="1771395924423" duration="32357000" />
+      <workItem from="1771824287068" duration="2513000" />
+      <workItem from="1771841817333" duration="22042000" />
+      <workItem from="1772186589763" duration="12911000" />
+      <workItem from="1772652333844" duration="14680000" />
+      <workItem from="1773459246292" duration="1646000" />
+      <workItem from="1773971904298" duration="13963000" />
+      <workItem from="1774440705754" duration="2329000" />
+      <workItem from="1775368083776" duration="2321000" />
+      <workItem from="1775384485515" duration="204000" />
+      <workItem from="1775971054570" duration="2591000" />
+      <workItem from="1776599181583" duration="621000" />
+      <workItem from="1776870719224" duration="1237000" />
+      <workItem from="1777108314851" duration="641000" />
+      <workItem from="1777561730534" duration="12244000" />
+      <workItem from="1779105765049" duration="10815000" />
+      <workItem from="1780111782122" duration="2914000" />
+      <workItem from="1780741527792" duration="8921000" />
+    </task>
+    <task id="LOCAL-00101" summary="add Page summary button">
+      <option name="closed" value="true" />
+      <created>1771137768547</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1771137768547</updated>
+    </task>
+    <task id="LOCAL-00102" summary="update todo and CLAUDE.md">
+      <option name="closed" value="true" />
+      <created>1771137909526</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1771137909526</updated>
+    </task>
+    <task id="LOCAL-00103" summary="small changes in dropdown; increase performance tip time to 20 seconds">
+      <option name="closed" value="true" />
+      <created>1771144205658</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1771144205658</updated>
+    </task>
+    <task id="LOCAL-00104" summary="add LLama prefix to multilingual tip; small changes in dropdown [2]; increase performance tip time to 23 seconds">
+      <option name="closed" value="true" />
+      <created>1771144910331</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1771144910331</updated>
+    </task>
+    <task id="LOCAL-00105" summary="Set hermes as recommended">
+      <option name="closed" value="true" />
+      <created>1771145169244</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1771145169244</updated>
+    </task>
+    <task id="LOCAL-00106" summary="Welcome screen: Show size only if not downloaded">
+      <option name="closed" value="true" />
+      <created>1771146247661</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1771146247661</updated>
+    </task>
+    <task id="LOCAL-00107" summary="update locales">
+      <option name="closed" value="true" />
+      <created>1771397956343</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1771397956343</updated>
+    </task>
+    <task id="LOCAL-00108" summary="update TODO with test users feedback">
+      <option name="closed" value="true" />
+      <created>1771398488013</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1771398488013</updated>
+    </task>
+    <task id="LOCAL-00109" summary="made gemini clickable and fix bug when load model on &quot;Got it&quot; button">
+      <option name="closed" value="true" />
+      <created>1771400716787</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1771400716787</updated>
+    </task>
+    <task id="LOCAL-00110" summary="remove LLama 1B completely">
+      <option name="closed" value="true" />
+      <created>1771403349645</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1771403349645</updated>
+    </task>
+    <task id="LOCAL-00111" summary="add rate app widget">
+      <option name="closed" value="true" />
+      <created>1771406569561</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1771406569561</updated>
+    </task>
+    <task id="LOCAL-00112" summary="add tip to attach page">
+      <option name="closed" value="true" />
+      <created>1771408143378</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1771408143378</updated>
+    </task>
+    <task id="LOCAL-00113" summary="put user language to prompts">
+      <option name="closed" value="true" />
+      <created>1771409638876</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1771409638876</updated>
+    </task>
+    <task id="LOCAL-00114" summary="add re-loading in case of cancellation">
+      <option name="closed" value="true" />
+      <created>1771411004877</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1771411004877</updated>
+    </task>
+    <task id="LOCAL-00115" summary="add re-loading in case of cancellation">
+      <option name="closed" value="true" />
+      <created>1771411065944</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL-00115" />
+      <option name="project" value="LOCAL" />
+      <updated>1771411065945</updated>
+    </task>
+    <task id="LOCAL-00116" summary="error handling when not enough GPU">
+      <option name="closed" value="true" />
+      <created>1771413753059</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1771413753059</updated>
+    </task>
+    <task id="LOCAL-00117" summary="Improve russian localisation">
+      <option name="closed" value="true" />
+      <created>1771554738815</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1771554738815</updated>
+    </task>
+    <task id="LOCAL-00118" summary="add pics">
+      <option name="closed" value="true" />
+      <created>1771753769557</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1771753769557</updated>
+    </task>
+    <task id="LOCAL-00119" summary="fix for status indicator, disabling chat for not-downloaded models, add final banners">
+      <option name="closed" value="true" />
+      <created>1771841935809</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1771841935809</updated>
+    </task>
+    <task id="LOCAL-00120" summary="new email love.programmin@gmail.com">
+      <option name="closed" value="true" />
+      <created>1771843694360</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1771843694360</updated>
+    </task>
+    <task id="LOCAL-00121" summary="turn off input for gemini-setup screen">
+      <option name="closed" value="true" />
+      <created>1771844785220</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1771844785220</updated>
+    </task>
+    <task id="LOCAL-00122" summary="correct banner 1280 by feedback">
+      <option name="closed" value="true" />
+      <created>1771845297767</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1771845297767</updated>
+    </task>
+    <task id="LOCAL-00123" summary="add hook for yandex browser">
+      <option name="closed" value="true" />
+      <created>1771847525012</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1771847525012</updated>
+    </task>
+    <task id="LOCAL-00124" summary="add GA4">
+      <option name="closed" value="true" />
+      <created>1771863628052</created>
+      <option name="number" value="00124" />
+      <option name="presentableId" value="LOCAL-00124" />
+      <option name="project" value="LOCAL" />
+      <updated>1771863628052</updated>
+    </task>
+    <task id="LOCAL-00125" summary="RELEASE 1.8.0">
+      <option name="closed" value="true" />
+      <created>1771898951007</created>
+      <option name="number" value="00125" />
+      <option name="presentableId" value="LOCAL-00125" />
+      <option name="project" value="LOCAL" />
+      <updated>1771898951007</updated>
+    </task>
+    <task id="LOCAL-00126" summary="release">
+      <option name="closed" value="true" />
+      <created>1771936494476</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1771936494476</updated>
+    </task>
+    <task id="LOCAL-00127" summary="release">
+      <option name="closed" value="true" />
+      <created>1771936559050</created>
+      <option name="number" value="00127" />
+      <option name="presentableId" value="LOCAL-00127" />
+      <option name="project" value="LOCAL" />
+      <updated>1771936559050</updated>
+    </task>
+    <task id="LOCAL-00128" summary="change model urls">
+      <option name="closed" value="true" />
+      <created>1771936876454</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1771936876454</updated>
+    </task>
+    <task id="LOCAL-00129" summary="add README">
+      <option name="closed" value="true" />
+      <created>1771943775826</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1771943775826</updated>
+    </task>
+    <task id="LOCAL-00130" summary="update README">
+      <option name="closed" value="true" />
+      <created>1771944499163</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1771944499163</updated>
+    </task>
+    <task id="LOCAL-00131" summary="remove CWS url">
+      <option name="closed" value="true" />
+      <created>1771944609794</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1771944609794</updated>
+    </task>
+    <task id="LOCAL-00132" summary="remove CWS url [2]">
+      <option name="closed" value="true" />
+      <created>1771944727326</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1771944727326</updated>
+    </task>
+    <task id="LOCAL-00133" summary="add proper CWS urls">
+      <option name="closed" value="true" />
+      <created>1772098764129</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1772098764129</updated>
+    </task>
+    <task id="LOCAL-00134" summary="add review CWS url">
+      <option name="closed" value="true" />
+      <created>1772100256977</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1772100256981</updated>
+    </task>
+    <task id="LOCAL-00135" summary="1.9.0">
+      <option name="closed" value="true" />
+      <created>1772100270861</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1772100270861</updated>
+    </task>
+    <task id="LOCAL-00136" summary="override error messages: dirty code">
+      <option name="closed" value="true" />
+      <created>1772653426717</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1772653426717</updated>
+    </task>
+    <task id="LOCAL-00137" summary="fix issue with page attach dismiss tip">
+      <option name="closed" value="true" />
+      <created>1772936981097</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1772936981097</updated>
+    </task>
+    <task id="LOCAL-00138" summary="fix error messages (about gpu)">
+      <option name="closed" value="true" />
+      <created>1772949437206</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1772949437206</updated>
+    </task>
+    <task id="LOCAL-00139" summary="handle more errors properly">
+      <option name="closed" value="true" />
+      <created>1772954060194</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1772954060195</updated>
+    </task>
+    <task id="LOCAL-00140" summary="release 1.12.0 - error handling">
+      <option name="closed" value="true" />
+      <created>1773459543911</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1773459543911</updated>
+    </task>
+    <task id="LOCAL-00141" summary="add new models">
+      <option name="closed" value="true" />
+      <created>1774022131869</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1774022131869</updated>
+    </task>
+    <task id="LOCAL-00142" summary="release 1.13.0 - replace models with new">
+      <option name="closed" value="true" />
+      <created>1774070197280</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1774070197280</updated>
+    </task>
+    <task id="LOCAL-00143" summary="add analytics to LLM response">
+      <option name="closed" value="true" />
+      <created>1775971483870</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1775971483871</updated>
+    </task>
+    <task id="LOCAL-00144" summary="add Qwen3.5">
+      <option name="closed" value="true" />
+      <created>1777624617865</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1777624617865</updated>
+    </task>
+    <task id="LOCAL-00145" summary="working prototype">
+      <option name="closed" value="true" />
+      <created>1780741762188</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1780741762188</updated>
+    </task>
+    <task id="LOCAL-00146" summary="auto-attach page in online mode">
+      <option name="closed" value="true" />
+      <created>1780743444937</created>
+      <option name="number" value="00146" />
+      <option name="presentableId" value="LOCAL-00146" />
+      <option name="project" value="LOCAL" />
+      <updated>1780743444937</updated>
+    </task>
+    <task id="LOCAL-00147" summary="auto-attach page in online mode">
+      <option name="closed" value="true" />
+      <created>1780743528265</created>
+      <option name="number" value="00147" />
+      <option name="presentableId" value="LOCAL-00147" />
+      <option name="project" value="LOCAL" />
+      <updated>1780743528265</updated>
+    </task>
+    <task id="LOCAL-00148" summary="implement backend">
+      <option name="closed" value="true" />
+      <created>1780824937293</created>
+      <option name="number" value="00148" />
+      <option name="presentableId" value="LOCAL-00148" />
+      <option name="project" value="LOCAL" />
+      <updated>1780824937293</updated>
+    </task>
+    <task id="LOCAL-00149" summary="backend mode. Ready to release">
+      <option name="closed" value="true" />
+      <created>1780827580900</created>
+      <option name="number" value="00149" />
+      <option name="presentableId" value="LOCAL-00149" />
+      <option name="project" value="LOCAL" />
+      <updated>1780827580901</updated>
+    </task>
+    <option name="localTasksCounter" value="150" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="HEAD" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add hook for yandex browser" />
+    <MESSAGE value="add GA4" />
+    <MESSAGE value="RELEASE 1.8.0" />
+    <MESSAGE value="release" />
+    <MESSAGE value="change model urls" />
+    <MESSAGE value="add README" />
+    <MESSAGE value="update README" />
+    <MESSAGE value="remove CWS url" />
+    <MESSAGE value="remove CWS url [2]" />
+    <MESSAGE value="add proper CWS urls" />
+    <MESSAGE value="add review CWS url" />
+    <MESSAGE value="1.9.0" />
+    <MESSAGE value="override error messages: dirty code" />
+    <MESSAGE value="fix issue with page attach dismiss tip" />
+    <MESSAGE value="fix error messages (about gpu)" />
+    <MESSAGE value="handle more errors properly" />
+    <MESSAGE value="release 1.12.0 - error handling" />
+    <MESSAGE value="add new models" />
+    <MESSAGE value="release 1.13.0 - replace models with new" />
+    <MESSAGE value="add analytics to LLM response" />
+    <MESSAGE value="add Qwen3.5" />
+    <MESSAGE value="working prototype" />
+    <MESSAGE value="auto-attach page in online mode" />
+    <MESSAGE value="implement backend" />
+    <MESSAGE value="backend mode. Ready to release" />
+    <option name="LAST_COMMIT_MESSAGE" value="backend mode. Ready to release" />
+  </component>
+</project>
