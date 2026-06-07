@@ -1,0 +1,51 @@
+# Local full-stack test: OpenWebUI + adapter + OpenRouter. No TLS, no Caddy,
+# no login (WEBUI_AUTH=false) so the adapter needs no OpenWebUI key — the only
+# secret required is your OpenRouter key.
+#
+# Usage (from backend/):
+#   echo "OPENROUTER_API_KEY=sk-or-v1-..." > .env
+#   docker compose -f docker-compose.local.yml up --build
+#
+# Then build the extension against it (from repo root):
+#   BACKEND_URL=http://localhost:3000 npm run build
+#
+# Endpoints:
+#   http://localhost:3000  → adapter (what the extension talks to)
+#   http://localhost:8088  → OpenWebUI admin UI (verify OpenRouter, web search)
+#
+# NOTE: stop `npm run mock-backend` first — it also uses port 3000.
+
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    restart: unless-stopped
+    environment:
+      # Auth must be ON: OpenWebUI's OpenAI-compatible API requires a token even
+      # when the login UI is disabled, and WEBUI_AUTH=false only works on a
+      # truly fresh install. We mint an admin + API key via the API instead.
+      WEBUI_AUTH: "true"
+      OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
+      OPENAI_API_KEY: ${OPENROUTER_API_KEY}
+      ENABLE_RAG_WEB_SEARCH: "true"
+      RAG_WEB_SEARCH_ENGINE: duckduckgo
+    volumes:
+      - openwebui-data:/app/backend/data
+    ports:
+      - "8088:8080"
+
+  adapter:
+    build: ./adapter
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      OPENWEBUI_URL: http://openwebui:8080
+      OPENWEBUI_API_KEY: ${OPENWEBUI_API_KEY:-}
+      # BACKEND_API_KEY intentionally empty for local (no bearer required).
+      RATE_LIMIT_RPM: "120"
+    depends_on:
+      - openwebui
+    ports:
+      - "3000:8080"
+
+volumes:
+  openwebui-data:

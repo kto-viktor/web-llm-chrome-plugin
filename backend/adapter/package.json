@@ -1,0 +1,13 @@
+{
+  "name": "local-llm-backend-adapter",
+  "version": "1.0.0",
+  "description": "Thin OpenWebUI adapter implementing the extension's backend contract",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

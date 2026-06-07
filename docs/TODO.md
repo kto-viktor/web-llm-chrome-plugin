@@ -5,12 +5,14 @@
 - Improve cancellation - reload in case of hunging state when "Thinking..." forever - вроде сделал же?
 
 ## Long-term backlog
+- **online: per-user long-term memory** — adapter forwards `X-User-Id` but OpenWebUI scopes Memories per account. Map per-install id → OpenWebUI user (provision via admin API, or move memory into the adapter as a KV injected into the system prompt). See backend/README.md.
 - add sentry
 - add next best questions. One of it - "Give summary of this page", 2 others should be generated asynchoniously every time.
 - refactor gemini setup - add screenshots, refactor step 4
 - add waiting animation, similarly to claude - generate 1000 "thinking" words and keep animation
 
 ## Completed
+- **online backend (OpenWebUI + adapter)**: Thin zero-dependency Node adapter (`backend/adapter/`) implementing the extension contract in front of OpenWebUI (RAG / web search) with OpenRouter as the LLM upstream. Serves `/api/models` with featured/default flags, proxies `/api/chat/completions` (SSE) and `/api/v1/files/`, enforces build-time bearer secret + per-IP rate limit. Deploy via `backend/docker-compose.yml` (OpenWebUI + adapter + Caddy/TLS). Per-user Memories deferred (see backlog).
 - **add GA4 analytics**: Implemented Google Analytics 4 via Measurement Protocol (no external scripts, MV3-compatible). Tracks: sidebar opened, model selected, message sent, page attached, generation stopped, new chat, download started/success/failed/abandoned.
 - Add tip for case when not able to load LLM (not enough hardware) - shows friendly GPU error with suggestion to try smaller model
 - autodetect of user language on normal prompt - try to play with prompt

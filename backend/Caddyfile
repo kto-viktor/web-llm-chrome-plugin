@@ -1,0 +1,14 @@
+# Public entrypoint. Caddy obtains and renews a Let's Encrypt certificate for
+# {$DOMAIN} automatically, then reverse-proxies everything to the adapter.
+#
+# Caddy sets X-Forwarded-For on proxied requests, which the adapter reads to
+# rate-limit per real client IP.
+
+{$DOMAIN} {
+	encode gzip
+
+	# Keep SSE flowing: disable buffering so chat tokens stream in real time.
+	reverse_proxy adapter:8080 {
+		flush_interval -1
+	}
+}

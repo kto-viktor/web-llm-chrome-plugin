@@ -1,0 +1,61 @@
+# Full online backend: OpenWebUI (RAG / web search / inference via OpenRouter)
+# behind our thin adapter, fronted by Caddy for TLS + a single public entrypoint.
+#
+# Public traffic flow:
+#   browser → caddy (TLS, :443) → adapter (:8080) → openwebui (:8080) → OpenRouter
+#
+# Only Caddy is exposed publicly. The adapter and OpenWebUI talk over the
+# internal compose network and are never reachable from the internet directly.
+#
+# Copy .env.example → .env and fill it in before `docker compose up -d`.
+
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    restart: unless-stopped
+    environment:
+      # Use OpenRouter as the OpenAI-compatible upstream. See README → "Connect OpenRouter".
+      OPENAI_API_BASE_URL: https://openrouter.ai/api/v1
+      OPENAI_API_KEY: ${OPENROUTER_API_KEY}
+      # Enable web search (DuckDuckGo needs no key). Tune in the OpenWebUI admin UI.
+      ENABLE_RAG_WEB_SEARCH: "true"
+      RAG_WEB_SEARCH_ENGINE: duckduckgo
+      WEBUI_AUTH: "true"
+    volumes:
+      - openwebui-data:/app/backend/data
+    expose:
+      - "8080"
+
+  adapter:
+    build: ./adapter
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      OPENWEBUI_URL: http://openwebui:8080
+      OPENWEBUI_API_KEY: ${OPENWEBUI_API_KEY}
+      BACKEND_API_KEY: ${BACKEND_API_KEY}
+      RATE_LIMIT_RPM: ${RATE_LIMIT_RPM:-60}
+    depends_on:
+      - openwebui
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - adapter
+
+volumes:
+  openwebui-data:
+  caddy-data:
+  caddy-config:

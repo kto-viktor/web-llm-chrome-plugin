@@ -1,5 +1,9 @@
 # Backend setup (OpenWebUI)
 
+> **Deploying for real?** See [`../backend/README.md`](../backend/README.md) — it
+> ships a ready docker-compose (OpenWebUI + a thin adapter + Caddy/TLS) wired to
+> OpenRouter, which is the supported path. This file is the conceptual reference.
+
 The online mode of the extension talks to a self-hosted OpenAI-compatible backend.
 The reference implementation is **OpenWebUI** — it bundles RAG (Documents),
 long-term memory (Memories) and Tools (incl. Web Search) out of the box, and exposes
